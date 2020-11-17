@@ -3,12 +3,14 @@
 
 package service
 
-// This is used to receive messages from a service.
+// Observer design pattern. A service subject fires events from the service to
+// all observers registered.
 type Service_Subject interface {
 	Register(observer Service_Observer)
 }
 
 // Register a service observer to a service subject.
+// An observer acts upon events which happen by the server.
 type Service_Observer interface {
 	OnMessage(source User, msg string)
 }
