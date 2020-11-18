@@ -11,44 +11,16 @@ type DiscordSubject struct {
 	observers     []*service.ServiceObserver
 }
 
-func NewDiscordSubject() (*DiscordSubject, *DiscordSender, error) {
-	// Get token
-	config, err := GetConfig()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	discord, err := discordgo.New("Bot " + config.Token)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	err = discord.Open()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	discordSubject := DiscordSubject{
-		discord: discord,
-	}
-
-	// Register the messageCreate func as a callback for MessageCreate events.
-	discord.AddHandler(discordSubject.messageCreate)
-
-	return &discordSubject, &DiscordSender{discord: discord}, nil
-}
-
 func (self *DiscordSubject) Register(observer service.ServiceObserver) {
 	self.observers = append(self.observers, &observer)
 }
 
 func (self *DiscordSubject) Id() string {
-	return service_id
+	return SERVICE_ID
 }
 
-func (subject *DiscordSubject) Close() {
-	subject.discord.Close()
-	return
+func (self *DiscordSubject) Close() {
+	self.discord.Close()
 }
 
 // This function will be called (due to AddHandler above) every time a new

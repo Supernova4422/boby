@@ -14,5 +14,5 @@ func (self *DiscordSender) SendMessage(destination service.Conversation, msg str
 }
 
 func (self *DiscordSender) Id() string {
-	return service_id
+	return SERVICE_ID
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-const service_id = "DISCORD"
+const SERVICE_ID = "Discord"
 
 // Represents configuration required for discord to work (e.g. Token).
 type DiscordConfig struct {

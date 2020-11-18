@@ -7,15 +7,18 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/test"
 )
+
+// This is able to test
+// 1. AddSender
+// 2. AddCommand
 
 func TestParse(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
-	test_service_subject := test.CliService{}
+	test_service_subject := test_service.DemoService{ServiceId: test_service.SERVICE_ID}
 	test_service_subject.Register(&bot)
-	test_service_sender := test.CliServiceSender{}
+	test_service_sender := test_service.DemoServiceSender{ServiceId: test_service.SERVICE_ID}
 	bot.AddSender(&test_service_sender)
 
 	test_cmd := "!repeat"
@@ -42,12 +45,13 @@ func TestParse(t *testing.T) {
 	}
 }
 
+// Ensure that spaces are respected in the regex
 func TestEmpty(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
-	test_service_subject := test.CliService{}
+	test_service_subject := test_service.DemoService{ServiceId: test_service.SERVICE_ID}
 	test_service_subject.Register(&bot)
-	test_service_sender := test.CliServiceSender{}
+	test_service_sender := test_service.DemoServiceSender{ServiceId: test_service.SERVICE_ID}
 	bot.AddSender(&test_service_sender)
 
 	test_cmd := "!repeat"

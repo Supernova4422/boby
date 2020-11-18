@@ -32,18 +32,19 @@ func (self *Bot) AddCommand(pattern *regexp.Regexp, cmd command.Command) {
 
 // Given a message, check if any of the commands match, if so, run the command.
 func (self *Bot) OnMessage(conversation service.Conversation, sender service.User, msg string) {
-	route := func(conversation service.Conversation, msg string) {
-		for _, observer := range self.observers {
-			if observer.Id() == sender.Id {
-				observer.SendMessage(conversation, msg)
-			}
-		}
-	}
-
 	for pattern, command := range self.commands {
 		matches := pattern.FindAllStringSubmatch(msg, -1)
 		if matches != nil {
-			command(conversation, sender, matches, route)
+			command(conversation, sender, matches, self.RouteById)
+		}
+	}
+}
+
+// Route a message to a service sender owned by this Bot.
+func (self *Bot) RouteById(conversation service.Conversation, msg string) {
+	for _, observer := range self.observers {
+		if observer.Id() == conversation.ServiceId {
+			observer.SendMessage(conversation, msg)
 		}
 	}
 }

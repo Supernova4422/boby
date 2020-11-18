@@ -2,7 +2,8 @@ package test
 
 import "github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 
-type CliService struct {
+type DemoService struct {
+	ServiceId string
 	// messages and users are co-indexed
 	messages      []string
 	users         []service.User
@@ -11,21 +12,21 @@ type CliService struct {
 	observers []*service.ServiceObserver
 }
 
-func (self *CliService) Register(observer service.ServiceObserver) {
+func (self *DemoService) Register(observer service.ServiceObserver) {
 	self.observers = append(self.observers, &observer)
 }
 
-func (self *CliService) Id() string {
-	return service_id
+func (self *DemoService) Id() string {
+	return self.ServiceId
 }
 
-func (self *CliService) AddMessage(conversation service.Conversation, user service.User, message string) {
+func (self *DemoService) AddMessage(conversation service.Conversation, user service.User, message string) {
 	self.messages = append(self.messages, message)
 	self.users = append(self.users, user)
 	self.conversations = append(self.conversations, conversation)
 }
 
-func (self *CliService) Run() {
+func (self *DemoService) Run() {
 	if len(self.messages) != len(self.users) {
 		panic("users and messages should have the same length because the arrays are co-indexed (i.e. user[0] sends message [0]).")
 	}

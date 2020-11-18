@@ -2,20 +2,22 @@ package test
 
 import "github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 
-type CliServiceSender struct {
+type DemoServiceSender struct {
+	ServiceId string
+
 	messages      []string
 	conversations []service.Conversation
 }
 
-func (self *CliServiceSender) SendMessage(destination service.Conversation, message string) {
+func (self *DemoServiceSender) SendMessage(destination service.Conversation, message string) {
 	self.messages = append(self.messages, message)
 	self.conversations = append(self.conversations, destination)
 }
 
-func (self *CliServiceSender) IsEmpty() bool {
+func (self *DemoServiceSender) IsEmpty() bool {
 	return len(self.messages) == 0
 }
-func (self *CliServiceSender) PopMessage() (message string, conversation service.Conversation) {
+func (self *DemoServiceSender) PopMessage() (message string, conversation service.Conversation) {
 	message = self.messages[0]
 	conversation = self.conversations[0]
 	self.messages = self.messages[1:]
@@ -23,6 +25,6 @@ func (self *CliServiceSender) PopMessage() (message string, conversation service
 	return
 }
 
-func (self CliServiceSender) Id() string {
-	return service_id
+func (self *DemoServiceSender) Id() string {
+	return self.ServiceId
 }

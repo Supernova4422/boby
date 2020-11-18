@@ -14,15 +14,21 @@ import (
 func main() {
 	bot := bot.Bot{}
 	discordSubject, discordSender, err := discord_service.NewDiscords()
-	bot.AddCommand(regexp.MustCompile("^!repeat (.*)"), command.Repeater)
+
 	if err == nil {
+		defer discordSubject.Close() // Cleanly close down the Discord session.
+
 		discordSubject.Register(&bot)
 		bot.AddSender(discordSender)
+
+		// Add all bot comamnds.
+		bot.AddCommand(regexp.MustCompile("^!repeat (.*)"), command.Repeater)
+
+		// Start all routines, e.g.
+		// go routine()
 
 		sc := make(chan os.Signal, 1)
 		signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 		<-sc
-
-		discordSubject.Close() // Cleanly close down the Discord session.
 	}
 }
