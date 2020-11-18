@@ -68,3 +68,7 @@ func TestEmpty(t *testing.T) {
 		t.Errorf("Incorrect parsing!")
 	}
 }
+
+func TestExampleFail(t *testing.T) {
+	t.Errorf("Fail now!")
+}
