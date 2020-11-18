@@ -6,16 +6,19 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 const service_id = "DISCORD"
 
+// Represents configuration required for discord to work (e.g. Token).
 type DiscordConfig struct {
 	Token string
 }
 
-func GetConfig() (*DiscordConfig, error) {
-	// Todo Make the two variables const.
+// Get configuratino data for loading discord, from a file.
+func getConfig() (*DiscordConfig, error) {
 	const filepath = "config.json"
 	const token_default = "TOKEN"
 
@@ -57,4 +60,32 @@ func GetConfig() (*DiscordConfig, error) {
 	}
 
 	return &config, nil
+}
+
+// Create subject and sender service adapters for discord.
+func NewDiscords() (*DiscordSubject, *DiscordSender, error) {
+	// Get token
+	config, err := getConfig()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	discord, err := discordgo.New("Bot " + config.Token)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	err = discord.Open()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	discordSubject := DiscordSubject{
+		discord: discord,
+	}
+
+	// Register the messageCreate func as a callback for MessageCreate events.
+	discord.AddHandler(discordSubject.messageCreate)
+
+	return &discordSubject, &DiscordSender{discord: discord}, nil
 }

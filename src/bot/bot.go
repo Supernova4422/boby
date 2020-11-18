@@ -1,4 +1,4 @@
-package fld_bot
+package bot
 
 import (
 	"regexp"
@@ -8,13 +8,13 @@ import (
 )
 
 // Immediately routes all messages from a service.
-type Simple_Bot struct {
+type Bot struct {
 	observers []service.ServiceSender
 	commands  map[*regexp.Regexp]command.Command
 }
 
 // Append a sender that messages may be routed to.
-func (self *Simple_Bot) AddSender(sender service.ServiceSender) {
+func (self *Bot) AddSender(sender service.ServiceSender) {
 	self.observers = append(self.observers, sender)
 }
 
@@ -22,7 +22,7 @@ func (self *Simple_Bot) AddSender(sender service.ServiceSender) {
 //
 // pattern can contain subgroups, the output of pattern.FindAllStringSubmatch
 // becomes input for cmd.
-func (self *Simple_Bot) AddCommand(pattern *regexp.Regexp, cmd command.Command) {
+func (self *Bot) AddCommand(pattern *regexp.Regexp, cmd command.Command) {
 	if self.commands == nil {
 		self.commands = make(map[*regexp.Regexp]command.Command)
 	}
@@ -31,8 +31,8 @@ func (self *Simple_Bot) AddCommand(pattern *regexp.Regexp, cmd command.Command) 
 }
 
 // Given a message, check if any of the commands match, if so, run the command.
-func (self *Simple_Bot) OnMessage(conversation service.Conversation, sender service.User, msg string) {
-	route := func(sender service.User, msg string) {
+func (self *Bot) OnMessage(conversation service.Conversation, sender service.User, msg string) {
+	route := func(conversation service.Conversation, msg string) {
 		for _, observer := range self.observers {
 			if observer.Id() == sender.Id {
 				observer.SendMessage(conversation, msg)
@@ -43,9 +43,7 @@ func (self *Simple_Bot) OnMessage(conversation service.Conversation, sender serv
 	for pattern, command := range self.commands {
 		matches := pattern.FindAllStringSubmatch(msg, -1)
 		if matches != nil {
-			command(sender, matches, route)
+			command(conversation, sender, matches, route)
 		}
 	}
 }
-
-func RunBot() {}

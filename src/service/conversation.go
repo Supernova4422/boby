@@ -1,7 +1,7 @@
 package service
 
 // A conversation is a place where things talk to each other.
-// This can be used to identify the source of a message, or a desination.
+// This can be used to identify the source or destination of a message.
 //
 // Examples include:
 // 	   1. A conversation between a bot and a user.

@@ -4,22 +4,22 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/fld_bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/test"
 )
 
 func TestParse(t *testing.T) {
 	// Prepare context.
-	simple_bot := fld_bot.Simple_Bot{}
+	bot := bot.Bot{}
 	test_service_subject := test.CliService{}
-	test_service_subject.Register(&simple_bot)
+	test_service_subject.Register(&bot)
 	test_service_sender := test.CliServiceSender{}
-	simple_bot.AddSender(&test_service_sender)
+	bot.AddSender(&test_service_sender)
 
 	test_cmd := "!repeat"
-	simple_bot.AddCommand(regexp.MustCompile("^"+test_cmd+" (.*)"), command.Repeater) // Repeater command.
+	bot.AddCommand(regexp.MustCompile("^"+test_cmd+" (.*)"), command.Repeater) // Repeater command.
 
 	// Message to repeat.
 	test_conversation := service.Conversation{
@@ -44,14 +44,14 @@ func TestParse(t *testing.T) {
 
 func TestEmpty(t *testing.T) {
 	// Prepare context.
-	simple_bot := fld_bot.Simple_Bot{}
+	bot := bot.Bot{}
 	test_service_subject := test.CliService{}
-	test_service_subject.Register(&simple_bot)
+	test_service_subject.Register(&bot)
 	test_service_sender := test.CliServiceSender{}
-	simple_bot.AddSender(&test_service_sender)
+	bot.AddSender(&test_service_sender)
 
 	test_cmd := "!repeat"
-	simple_bot.AddCommand(regexp.MustCompile("^"+test_cmd+" (.*)"), command.Repeater) // Repeater command.
+	bot.AddCommand(regexp.MustCompile("^"+test_cmd+" (.*)"), command.Repeater) // Repeater command.
 
 	// Message to repeat.
 	test_conversation := service.Conversation{
