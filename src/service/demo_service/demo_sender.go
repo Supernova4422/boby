@@ -1,4 +1,4 @@
-package test_service
+package demo_service
 
 import "github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 

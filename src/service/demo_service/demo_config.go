@@ -1,3 +1,3 @@
-package test_service
+package demo_service
 
 const SERVICE_ID = "CLI"
