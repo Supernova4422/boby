@@ -13,7 +13,9 @@ import (
 const service_id = "DISCORD"
 
 type DiscordSubject struct {
-	discord *discordgo.Session
+	discord       *discordgo.Session
+	discordSender DiscordSender
+	observers     []*ServiceObserver
 }
 
 type DiscordConfig struct {
@@ -22,8 +24,9 @@ type DiscordConfig struct {
 
 func GetConfig() (*DiscordConfig, error) {
 	// Todo Make the two variables const.
-	filepath := "config.json"
-	token_default := "TOKEN"
+	const filepath = "config.json"
+	const token_default = "TOKEN"
+
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
 		example := &DiscordConfig{Token: token_default}
 		bytes, err := json.Marshal(example)
@@ -64,64 +67,67 @@ func GetConfig() (*DiscordConfig, error) {
 	return &config, nil
 }
 
-func NewDiscordSubject() (*DiscordSubject, error) {
+func NewDiscordSubject() (*DiscordSubject, *DiscordSender, error) {
 	// Get token
 	config, err := GetConfig()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	discord, err := discordgo.New("Bot " + config.Token)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	err = discord.Open()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &DiscordSubject{discord: discord}, nil
+	discordSubject := DiscordSubject{
+		discord: discord,
+	}
+
+	// Register the messageCreate func as a callback for MessageCreate events.
+	discord.AddHandler(discordSubject.messageCreate)
+
+	return &discordSubject, &DiscordSender{discord: discord}, nil
 }
 
-func (cli *DiscordSubject) Id() string {
+func (self *DiscordSubject) Register(observer ServiceObserver) {
+	self.observers = append(self.observers, &observer)
+}
+
+func (self *DiscordSubject) Id() string {
 	return service_id
 }
+
 func (subject *DiscordSubject) Close() {
 	subject.discord.Close()
-
 	return
 }
 
-func (cli *DiscordSubject) Register(observer Service_Observer) {
-	// cli.observers = append(cli.observers, observer)
+// This function will be called (due to AddHandler above) every time a new
+// message is created on any channel that the authenticated bot has access to.
+func (self *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.Author.ID == s.State.User.ID {
+		return
+	}
+
+	user := User{Name: m.ChannelID, Id: self.Id()}
+	for _, service := range self.observers {
+		(*service).OnMessage(user, m.Content)
+	}
 }
 
-/*
-TODO: Make discord version of the following
-
-type Cli_Service_Sender struct {
-	messages []string
-	senders  []service.User
+type DiscordSender struct {
+	discord *discordgo.Session
 }
 
-func (cli *Cli_Service_Sender) SendMessage(sender service.User, message string) {
-	cli.messages = append(cli.messages, message)
-	cli.senders = append(cli.senders, sender)
+func (self *DiscordSender) SendMessage(destination User, msg string) {
+	self.discord.ChannelMessageSend(destination.Name, msg)
 }
 
-func (cli *Cli_Service_Sender) IsEmpty() bool {
-	return len(cli.messages) == 0
-}
-func (cli *Cli_Service_Sender) PopMessage() (message string, sender service.User) {
-	message = cli.messages[0]
-	sender = cli.senders[0]
-	cli.messages = cli.messages[1:]
-	cli.senders = cli.senders[1:]
-	return
-}
-
-func (cli Cli_Service_Sender) Id() string {
+func (self *DiscordSender) Id() string {
 	return service_id
 }
-*/

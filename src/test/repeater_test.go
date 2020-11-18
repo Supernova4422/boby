@@ -12,9 +12,9 @@ import (
 func TestParse(t *testing.T) {
 	// Prepare context.
 	simple_bot := fld_bot.Simple_Bot{}
-	test_service_subject := Cli_Service_Subject{}
+	test_service_subject := CliService{}
 	test_service_subject.Register(&simple_bot)
-	test_service_sender := Cli_Service_Sender{}
+	test_service_sender := CliServiceSender{}
 	simple_bot.AddSender(&test_service_sender)
 
 	test_cmd := "!repeat"
@@ -40,9 +40,9 @@ func TestParse(t *testing.T) {
 func TestEmpty(t *testing.T) {
 	// Prepare context.
 	simple_bot := fld_bot.Simple_Bot{}
-	test_service_subject := Cli_Service_Subject{}
+	test_service_subject := CliService{}
 	test_service_subject.Register(&simple_bot)
-	test_service_sender := Cli_Service_Sender{}
+	test_service_sender := CliServiceSender{}
 	simple_bot.AddSender(&test_service_sender)
 
 	test_cmd := "!repeat"

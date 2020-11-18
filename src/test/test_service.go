@@ -6,62 +6,61 @@ import (
 
 const service_id = "CLI"
 
-type Cli_Service_Subject struct {
+type CliService struct {
 	// messages and users are co-indexed
-	messages []string
-	users    []service.User
-
-	observers []service.Service_Observer
+	messages  []string
+	users     []service.User
+	observers []*service.ServiceObserver
 }
 
-func (cli *Cli_Service_Subject) Id() string {
+func (self *CliService) Register(observer service.ServiceObserver) {
+	self.observers = append(self.observers, &observer)
+}
+
+func (self *CliService) Id() string {
 	return service_id
 }
 
-func (cli *Cli_Service_Subject) Register(observer service.Service_Observer) {
-	cli.observers = append(cli.observers, observer)
+func (self *CliService) AddMessage(user service.User, message string) {
+	self.messages = append(self.messages, message)
+	self.users = append(self.users, user)
 }
 
-func (cli *Cli_Service_Subject) AddMessage(user service.User, message string) {
-	cli.messages = append(cli.messages, message)
-	cli.users = append(cli.users, user)
-}
-
-func (cli *Cli_Service_Subject) Run() {
-	if len(cli.messages) != len(cli.users) {
+func (self *CliService) Run() {
+	if len(self.messages) != len(self.users) {
 		panic("users and messages should have the same length because the arrays are co-indexed (i.e. user[0] sends message [0]).")
 	}
 
-	for i := 0; i < len(cli.messages); i++ {
-		user := cli.users[i]
-		msg := cli.messages[i]
-		for _, observer := range cli.observers {
-			observer.OnMessage(user, msg)
+	for i := 0; i < len(self.messages); i++ {
+		user := self.users[i]
+		msg := self.messages[i]
+		for _, service := range self.observers {
+			(*service).OnMessage(user, msg)
 		}
 	}
 }
 
-type Cli_Service_Sender struct {
+type CliServiceSender struct {
 	messages []string
 	senders  []service.User
 }
 
-func (cli *Cli_Service_Sender) SendMessage(sender service.User, message string) {
-	cli.messages = append(cli.messages, message)
-	cli.senders = append(cli.senders, sender)
+func (self *CliServiceSender) SendMessage(sender service.User, message string) {
+	self.messages = append(self.messages, message)
+	self.senders = append(self.senders, sender)
 }
 
-func (cli *Cli_Service_Sender) IsEmpty() bool {
-	return len(cli.messages) == 0
+func (self *CliServiceSender) IsEmpty() bool {
+	return len(self.messages) == 0
 }
-func (cli *Cli_Service_Sender) PopMessage() (message string, sender service.User) {
-	message = cli.messages[0]
-	sender = cli.senders[0]
-	cli.messages = cli.messages[1:]
-	cli.senders = cli.senders[1:]
+func (self *CliServiceSender) PopMessage() (message string, sender service.User) {
+	message = self.messages[0]
+	sender = self.senders[0]
+	self.messages = self.messages[1:]
+	self.senders = self.senders[1:]
 	return
 }
 
-func (cli Cli_Service_Sender) Id() string {
+func (self CliServiceSender) Id() string {
 	return service_id
 }
