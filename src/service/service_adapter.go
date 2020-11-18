@@ -6,27 +6,11 @@ package service
 // Register a service observer to a service subject.
 // An observer acts upon events which happen by the server.
 type ServiceObserver interface {
-	OnMessage(source User, msg string)
-}
-
-// Observer design pattern. A service subject fires events from the service to
-// all observers registered.
-type ServiceSubject struct {
-	observers []ServiceObserver
-}
-
-func (self *ServiceSubject) Register(observer ServiceObserver) {
-	self.observers = append(self.observers, observer)
-}
-
-func (self *ServiceSubject) OnMessage(source User, msg string) {
-	for _, observer := range self.observers {
-		observer.OnMessage(source, msg)
-	}
+	OnMessage(conversation Conversation, source User, msg string)
 }
 
 // Send messages via a service
 type ServiceSender interface {
-	SendMessage(destination User, msg string)
+	SendMessage(destination Conversation, msg string)
 	Id() string // Identify what service this is.
 }

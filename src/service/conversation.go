@@ -1,0 +1,12 @@
+package service
+
+// A conversation is a place where things talk to each other.
+// This can be used to identify the source of a message, or a desination.
+//
+// Examples include:
+// 	   1. A conversation between a bot and a user.
+// 	   2. A chatroom with many human and bot users.
+type Conversation struct {
+	ServiceId      string
+	ConversationId string
+}

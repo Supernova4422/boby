@@ -31,11 +31,11 @@ func (self *Simple_Bot) AddCommand(pattern *regexp.Regexp, cmd command.Command) 
 }
 
 // Given a message, check if any of the commands match, if so, run the command.
-func (self *Simple_Bot) OnMessage(sender service.User, msg string) {
+func (self *Simple_Bot) OnMessage(conversation service.Conversation, sender service.User, msg string) {
 	route := func(sender service.User, msg string) {
 		for _, observer := range self.observers {
 			if observer.Id() == sender.Id {
-				observer.SendMessage(sender, msg)
+				observer.SendMessage(conversation, msg)
 			}
 		}
 	}
