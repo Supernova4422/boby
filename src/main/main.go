@@ -24,11 +24,19 @@ func main() {
 		// Add all bot comamnds.
 		bot.AddCommand(regexp.MustCompile("^!repeat (.*)"), command.Repeater)
 
+		scraper, scraper_command, err := command.GetScraper("scraper_config.json")
+		if err == nil {
+			bot.AddCommand(regexp.MustCompile(scraper_command), scraper)
+		} else {
+			panic(err)
+		}
+
 		// Start all routines, e.g.
 		// go routine()
 
 		sc := make(chan os.Signal, 1)
 		signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 		<-sc
+
 	}
 }
