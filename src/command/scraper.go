@@ -69,7 +69,17 @@ func GetScraper(config ScraperConfig) (func(service.Conversation, service.User, 
 
 // Return the received message
 func scraper(url_template string, re_s string, sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, string)) {
-	url := fmt.Sprintf(url_template, msg[0][1])
+	substitutions := strings.Count(url_template, "%s")
+	url := url_template
+	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
+		sink(sender, "An error when building the url.")
+		return
+	}
+
+	for _, capture := range msg[0][1:] {
+		url = fmt.Sprintf(url, capture)
+	}
+
 	re := regexp.MustCompile(re_s)
 	msg_template := "%s.\nRead more at: %s"
 
