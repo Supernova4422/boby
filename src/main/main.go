@@ -24,16 +24,18 @@ func main() {
 		// Add all bot comamnds.
 		bot.AddCommand(regexp.MustCompile("^!repeat (.*)"), command.Repeater)
 
-		scraper_config, err := command.GetScraperConfig("scraper_config.json")
+		scraper_configs, err := command.GetScraperConfigs("scraper_config.json")
 		if err != nil {
 			panic(err)
 		}
 
-		scraper, scraper_command, err := command.GetScraper(scraper_config)
-		if err == nil {
-			bot.AddCommand(regexp.MustCompile(scraper_command), scraper)
-		} else {
-			panic(err)
+		for _, scraper_config := range scraper_configs {
+			scraper, scraper_command, err := command.GetScraper(scraper_config)
+			if err == nil {
+				bot.AddCommand(regexp.MustCompile(scraper_command), scraper)
+			} else {
+				panic(err)
+			}
 		}
 
 		// Start all routines, e.g.

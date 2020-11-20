@@ -20,10 +20,12 @@ type ScraperConfig struct {
 	Re      string // Regular expression used to parse a webpage.
 }
 
-func GetScraperConfig(filepath string) (ScraperConfig, error) {
-	var config ScraperConfig
+// Given a filepath, returns a ScraperConfig.
+// A file doesn't exist, an example is made in its place, and an error is returned.
+func GetScraperConfigs(filepath string) ([]ScraperConfig, error) {
+	var config []ScraperConfig
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
-		return config, MakeExampleScraperConfig(filepath)
+		return config, makeExampleScraperConfig(filepath)
 	}
 
 	bytes, err := ioutil.ReadFile(filepath)
@@ -36,8 +38,8 @@ func GetScraperConfig(filepath string) (ScraperConfig, error) {
 	return config, nil
 }
 
-func MakeExampleScraperConfig(filepath string) error {
-	var config ScraperConfig
+func makeExampleScraperConfig(filepath string) error {
+	config := []ScraperConfig{ScraperConfig{}}
 	bytes, err := json.Marshal(config)
 
 	if err != nil {
@@ -57,7 +59,7 @@ func MakeExampleScraperConfig(filepath string) error {
 	return errors.New(fmt.Sprintf("File %s did not exist, an example has been writen.", filepath))
 }
 
-// Get the scraper for this module
+// Get a usable scraper.
 func GetScraper(config ScraperConfig) (func(service.Conversation, service.User, [][]string, func(service.Conversation, string)), string, error) {
 
 	curry := func(sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, string)) {
