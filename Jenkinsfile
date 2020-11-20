@@ -12,7 +12,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Compiling and building'
-                sh 'cd src/main && go build'
+                sh 'cd src/main && echo `pwd` && go build'
             }
         }
 
