@@ -20,7 +20,7 @@ pipeline {
             steps {
                 withEnv(["PATH+GO=${GOPATH}/bin"]){
                     echo 'Running test'
-                    sh 'cd src/test && go test -v'
+                    sh 'export PATH=$PATH:/usr/local/go/bin && export GOROOT=/usr/local/go && cd src/test && go test -v'
                 }
             }
         }
