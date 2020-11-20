@@ -12,7 +12,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Compiling and building'
-                sh 'export PATH=$PATH:/usr/local/go/bin && cd src/main && echo `pwd` && go build'
+                sh 'export PATH=$PATH:/usr/local/go/bin && export GOROOT=/usr/local/go && cd src/main && go build'
             }
         }
 
