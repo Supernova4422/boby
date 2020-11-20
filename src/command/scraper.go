@@ -109,6 +109,6 @@ func scraper(url_template string, re_s string, sender service.Conversation, user
 			sink(sender, "An error occurred when processing the webpage.")
 		}
 	} else {
-		sink(sender, "An error occurred retrieving the webpage.")
+		sink(sender, "An error occurred retrieving the webpage: "+url)
 	}
 }
