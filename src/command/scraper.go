@@ -20,37 +20,45 @@ type ScraperConfig struct {
 	Re      string // Regular expression used to parse a webpage.
 }
 
-// Get the scraper for this module
-func GetScraper(filepath string) (func(service.Conversation, service.User, [][]string, func(service.Conversation, string)), string, error) {
-
+func GetScraperConfig(filepath string) (ScraperConfig, error) {
 	var config ScraperConfig
-
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
-		bytes, err := json.Marshal(config)
-
-		if err != nil {
-			return nil, "", errors.New("Unable to create example JSON")
-		}
-
-		file, err := os.Create(filepath)
-		if err != nil {
-			return nil, "", errors.New(fmt.Sprintf("Unable to create file: %s", filepath))
-		}
-		defer file.Close()
-
-		_, err = file.Write(bytes)
-		if err != nil {
-			return nil, "", errors.New(fmt.Sprintf("Unable to write to file: %s", filepath))
-		}
-		return nil, "", errors.New(fmt.Sprintf("File %s did not exist, an example has been writen.", filepath))
+		return config, MakeExampleScraperConfig(filepath)
 	}
+
 	bytes, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		fmt.Printf("Unable to read file: %s", filepath)
-		return nil, "", err
+		return config, nil
 	}
 
 	json.Unmarshal(bytes, &config)
+	return config, nil
+}
+
+func MakeExampleScraperConfig(filepath string) error {
+	var config ScraperConfig
+	bytes, err := json.Marshal(config)
+
+	if err != nil {
+		return errors.New("Unable to create example JSON")
+	}
+
+	file, err := os.Create(filepath)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Unable to create file: %s", filepath))
+	}
+	defer file.Close()
+
+	_, err = file.Write(bytes)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Unable to write to file: %s", filepath))
+	}
+	return errors.New(fmt.Sprintf("File %s did not exist, an example has been writen.", filepath))
+}
+
+// Get the scraper for this module
+func GetScraper(config ScraperConfig) (func(service.Conversation, service.User, [][]string, func(service.Conversation, string)), string, error) {
 
 	curry := func(sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, string)) {
 		scraper(config.Url, config.Re, sender, user, msg, sink)
