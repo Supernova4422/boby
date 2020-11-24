@@ -34,7 +34,13 @@ func (self *Bot) OnMessage(conversation service.Conversation, sender service.Use
 		for i, command := range self.commands {
 			help_msg += fmt.Sprintf("%s. %s\n", strconv.Itoa(i+1), command.Help)
 		}
-		self.RouteById(conversation, help_msg)
+		self.RouteById(
+			conversation,
+			service.Message{
+				Title:       "Help",
+				Description: help_msg,
+				Url:         "https://github.com/BKrajancic/FLD-Bot",
+			})
 	} else {
 		for _, command := range self.commands {
 			matches := command.Pattern.FindAllStringSubmatch(msg, -1)
@@ -46,7 +52,7 @@ func (self *Bot) OnMessage(conversation service.Conversation, sender service.Use
 }
 
 // Route a message to a service sender owned by this Bot.
-func (self *Bot) RouteById(conversation service.Conversation, msg string) {
+func (self *Bot) RouteById(conversation service.Conversation, msg service.Message) {
 	for _, observer := range self.observers {
 		if observer.Id() == conversation.ServiceId {
 			observer.SendMessage(conversation, msg)

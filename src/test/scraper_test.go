@@ -39,7 +39,7 @@ func TestScraperWithCapture(t *testing.T) {
 	bot.OnMessage(test_conversation, test_sender, test_cmd+" e-commerce/allinone")
 
 	result_message, result_conversation := demo_service_sender.PopMessage()
-	if !strings.HasPrefix(result_message, "Test Sites E-commerce training site") {
+	if !strings.HasPrefix(result_message.Description, "Test Sites E-commerce training site") {
 		t.Errorf("Message was different!")
 	}
 
@@ -49,7 +49,7 @@ func TestScraperWithCapture(t *testing.T) {
 
 	bot.OnMessage(test_conversation, test_sender, test_cmd+" tables")
 	result_message, result_conversation = demo_service_sender.PopMessage()
-	if !strings.HasPrefix(result_message, "Table playground") {
+	if !strings.HasPrefix(result_message.Description, "Table playground") {
 		t.Errorf("Message was different!")
 	}
 
@@ -87,7 +87,7 @@ func TestScraperNoCapture(t *testing.T) {
 	bot.OnMessage(test_conversation, test_sender, test_cmd)
 
 	result_message, result_conversation := demo_service_sender.PopMessage()
-	if strings.HasPrefix(result_message, "E-commerce training site") {
+	if !strings.HasPrefix(result_message.Description, "Test Sites E-commerce training site") {
 		t.Errorf("Message was different!")
 	}
 

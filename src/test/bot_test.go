@@ -30,7 +30,7 @@ func TestRouteById(t *testing.T) {
 
 	bot.RouteById(
 		test_conversation,
-		test_msg,
+		service.Message{Description: test_msg},
 	)
 
 	if demo_service_sender2.IsEmpty() == false {
@@ -39,7 +39,7 @@ func TestRouteById(t *testing.T) {
 
 	result_message, result_conversation := demo_service_sender1.PopMessage()
 
-	if result_message != test_msg {
+	if result_message.Description != test_msg {
 		t.Errorf("Message was different!")
 	}
 
@@ -77,7 +77,8 @@ func TestOnMessage(t *testing.T) {
 	if result_conversation != test_conversation {
 		t.Errorf("Sender was different!")
 	}
-	if result_message != test_msg {
+
+	if result_message.Description != test_msg {
 		t.Errorf("Message was different!")
 	}
 }

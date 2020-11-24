@@ -13,4 +13,4 @@ type Command struct {
 }
 
 // A command gets a parsed message from a user, then sends messages conversations.
-type CommandFunc func(service.Conversation, service.User, [][]string, func(service.Conversation, string))
+type CommandFunc func(service.Conversation, service.User, [][]string, func(service.Conversation, service.Message))

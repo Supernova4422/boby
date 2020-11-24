@@ -45,7 +45,7 @@ func TestParse(t *testing.T) {
 	if result_conversation != test_conversation {
 		t.Errorf("Sender was different!")
 	}
-	if result_message != test_msg {
+	if result_message.Description != test_msg {
 		t.Errorf("Message was different!")
 	}
 }

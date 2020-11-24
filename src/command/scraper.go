@@ -16,6 +16,7 @@ import (
 
 type ScraperConfig struct {
 	Command string // Regular expression which triggers this scraper. Can contain capture groups.
+	Title   string // Title for messages that are sent
 	Url     string // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
 	Re      string // Regular expression used to parse a webpage.
 	Help    string // Help message to display
@@ -63,8 +64,8 @@ func makeExampleScraperConfig(filepath string) error {
 // Get a usable scraper.
 func GetScraper(config ScraperConfig) (Command, error) {
 
-	curry := func(sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, string)) {
-		scraper(config.Url, config.Re, sender, user, msg, sink)
+	curry := func(sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, service.Message)) {
+		scraper(config.Url, config.Re, config.Title, sender, user, msg, sink)
 	}
 	regex, err := regexp.Compile(config.Command)
 	if err != nil {
@@ -78,11 +79,11 @@ func GetScraper(config ScraperConfig) (Command, error) {
 }
 
 // Return the received message
-func scraper(url_template string, re_s string, sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, string)) {
+func scraper(url_template string, re_s string, title string, sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, service.Message)) {
 	substitutions := strings.Count(url_template, "%s")
 	url := url_template
 	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
-		sink(sender, "An error when building the url.")
+		sink(sender, service.Message{Description: "An error when building the url."})
 		return
 	}
 
@@ -91,7 +92,6 @@ func scraper(url_template string, re_s string, sender service.Conversation, user
 	}
 
 	re := regexp.MustCompile(re_s)
-	msg_template := "%s.\nRead more at: %s"
 
 	response, err := http.Get(url)
 	if err == nil {
@@ -110,15 +110,22 @@ func scraper(url_template string, re_s string, sender service.Conversation, user
 					all_captures[i] = strings.Join(captures[1:], " ")
 				}
 
-				reply := fmt.Sprintf(msg_template, strings.Join(all_captures, " "), url)
-				sink(sender, reply)
+				reply := fmt.Sprintf("%s.\n Read more at: %s", strings.Join(all_captures, " "), url)
+				sink(sender, service.Message{
+					Title:       title,
+					Description: reply,
+					Url:         url,
+				})
 			} else {
-				sink(sender, "The webpage was not found.")
+				sink(sender, service.Message{Description: "The webpage was not found."})
 			}
 		} else {
-			sink(sender, "An error occurred when processing the webpage.")
+			sink(sender, service.Message{Description: "An error occurred when processing the webpage."})
 		}
 	} else {
-		sink(sender, "An error occurred retrieving the webpage: "+url)
+		sink(sender, service.Message{
+			Description: "An error occurred retrieving the webpage.",
+			Url:         url,
+		})
 	}
 }
