@@ -1,7 +1,6 @@
 package test
 
 import (
-	"regexp"
 	"strings"
 	"testing"
 
@@ -31,12 +30,12 @@ func TestScraperWithCapture(t *testing.T) {
 		Re:      "<h1>([^<]*)</h1>",
 	}
 
-	scraper, scraper_command, err := command.GetScraper(config)
+	scraper, err := command.GetScraper(config)
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
 	}
 
-	bot.AddCommand(regexp.MustCompile(scraper_command), scraper)
+	bot.AddCommand(scraper)
 	bot.OnMessage(test_conversation, test_sender, test_cmd+" e-commerce/allinone")
 
 	result_message, result_conversation := demo_service_sender.PopMessage()
@@ -79,12 +78,12 @@ func TestScraperNoCapture(t *testing.T) {
 		Re:      "<h1>([^<]*)</h1>",
 	}
 
-	scraper, scraper_command, err := command.GetScraper(config)
+	scraper, err := command.GetScraper(config)
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
 	}
 
-	bot.AddCommand(regexp.MustCompile(scraper_command), scraper)
+	bot.AddCommand(scraper)
 	bot.OnMessage(test_conversation, test_sender, test_cmd)
 
 	result_message, result_conversation := demo_service_sender.PopMessage()

@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 	"os/signal"
-	"regexp"
 	"syscall"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
@@ -22,7 +21,13 @@ func main() {
 		bot.AddSender(discordSender)
 
 		// Add all bot comamnds.
-		bot.AddCommand(regexp.MustCompile("^!repeat (.*)"), command.Repeater)
+		/*
+			bot.AddCommand(command.Command{
+				Pattern: regexp.MustCompile("^!repeat (.*)"),
+				Exec:    command.Repeater,
+				Help:    "",
+			})
+		*/
 
 		scraper_configs, err := command.GetScraperConfigs("scraper_config.json")
 		if err != nil {
@@ -30,9 +35,9 @@ func main() {
 		}
 
 		for _, scraper_config := range scraper_configs {
-			scraper, scraper_command, err := command.GetScraper(scraper_config)
+			scraper_command, err := command.GetScraper(scraper_config)
 			if err == nil {
-				bot.AddCommand(regexp.MustCompile(scraper_command), scraper)
+				bot.AddCommand(scraper_command)
 			} else {
 				panic(err)
 			}

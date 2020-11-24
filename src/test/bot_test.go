@@ -64,7 +64,12 @@ func TestOnMessage(t *testing.T) {
 	test_msg := "Test1"
 	test_cmd := "!repeat"
 
-	bot.AddCommand(regexp.MustCompile("^"+test_cmd+" (.*)"), command.Repeater) // Repeater command.
+	bot.AddCommand(
+		command.Command{Pattern: regexp.MustCompile("^" + test_cmd + " (.*)"),
+			Exec: command.Repeater,
+			Help: "",
+		}) // Repeater command.
+
 	bot.OnMessage(test_conversation, test_sender, test_cmd+" "+test_msg)
 
 	// Get messages and evaluate

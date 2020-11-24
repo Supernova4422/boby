@@ -23,7 +23,11 @@ func TestParse(t *testing.T) {
 	bot.AddSender(&demo_service_sender)
 
 	test_cmd := "!repeat"
-	bot.AddCommand(regexp.MustCompile("^"+test_cmd+" (.*)"), command.Repeater) // Repeater command.
+	bot.AddCommand(
+		command.Command{Pattern: regexp.MustCompile("^" + test_cmd + " (.*)"),
+			Exec: command.Repeater,
+			Help: "",
+		}) // Repeater command.
 
 	// Message to repeat.
 	test_conversation := service.Conversation{
@@ -56,7 +60,11 @@ func TestEmpty(t *testing.T) {
 	bot.AddSender(&demo_service_sender)
 
 	test_cmd := "!repeat"
-	bot.AddCommand(regexp.MustCompile("^"+test_cmd+" (.*)"), command.Repeater) // Repeater command.
+	bot.AddCommand(
+		command.Command{Pattern: regexp.MustCompile("^" + test_cmd + " (.*)"),
+			Exec: command.Repeater,
+			Help: "",
+		}) // Repeater command.
 
 	// Message to repeat.
 	test_conversation := service.Conversation{

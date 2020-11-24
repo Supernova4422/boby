@@ -18,6 +18,7 @@ type ScraperConfig struct {
 	Command string // Regular expression which triggers this scraper. Can contain capture groups.
 	Url     string // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
 	Re      string // Regular expression used to parse a webpage.
+	Help    string // Help message to display
 }
 
 // Given a filepath, returns a ScraperConfig.
@@ -60,13 +61,20 @@ func makeExampleScraperConfig(filepath string) error {
 }
 
 // Get a usable scraper.
-func GetScraper(config ScraperConfig) (func(service.Conversation, service.User, [][]string, func(service.Conversation, string)), string, error) {
+func GetScraper(config ScraperConfig) (Command, error) {
 
 	curry := func(sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, string)) {
 		scraper(config.Url, config.Re, sender, user, msg, sink)
 	}
-
-	return curry, config.Command, nil
+	regex, err := regexp.Compile(config.Command)
+	if err != nil {
+		return Command{}, err
+	}
+	return Command{
+		Pattern: regex,
+		Exec:    curry,
+		Help:    config.Help,
+	}, nil
 }
 
 // Return the received message
