@@ -110,7 +110,7 @@ func scraper(url_template string, re_s string, title string, sender service.Conv
 					all_captures[i] = strings.Join(captures[1:], " ")
 				}
 
-				reply := fmt.Sprintf("%s.\n Read more at: %s", strings.Join(all_captures, " "), url)
+				reply := fmt.Sprintf("%s.\n\nRead more at: %s", strings.Join(all_captures, " "), url)
 				sink(sender, service.Message{
 					Title:       title,
 					Description: reply,
