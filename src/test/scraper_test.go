@@ -58,6 +58,85 @@ func TestScraperWithCapture(t *testing.T) {
 	}
 }
 
+func TestScraperWithCaptureAndNoTitleCapture(t *testing.T) {
+	bot := bot.Bot{}
+
+	demo_service_sender := demo_service.DemoServiceSender{}
+	bot.AddSender(&demo_service_sender)
+
+	test_conversation := service.Conversation{
+		ServiceId:      demo_service_sender.Id(),
+		ConversationId: "0",
+	}
+
+	test_sender := service.User{Name: "Test_User", Id: demo_service_sender.Id()}
+	test_cmd := "!scrape"
+
+	config := command.ScraperConfig{
+		Command:        test_cmd + " (.*)",
+		Url:            "https://webscraper.io/test-sites/%s",
+		Reply_capture:  "<h1>([^<]*)</h1>",
+		Title_template: "Title",
+	}
+
+	scraper, err := command.GetScraper(config)
+	if err != nil {
+		t.Errorf("An error occured when making a reasonable scraper!")
+	}
+
+	bot.AddCommand(scraper)
+	bot.OnMessage(test_conversation, test_sender, test_cmd+" e-commerce/allinone")
+
+	result_message, result_conversation := demo_service_sender.PopMessage()
+	if result_message.Title != config.Title_template {
+		t.Errorf("Title was different!")
+	}
+
+	if result_conversation != test_conversation {
+		t.Errorf("Sender was different!")
+	}
+}
+
+func TestScraperWithTitleCapture(t *testing.T) {
+	bot := bot.Bot{}
+
+	demo_service_sender := demo_service.DemoServiceSender{}
+	bot.AddSender(&demo_service_sender)
+
+	test_conversation := service.Conversation{
+		ServiceId:      demo_service_sender.Id(),
+		ConversationId: "0",
+	}
+
+	test_sender := service.User{Name: "Test_User", Id: demo_service_sender.Id()}
+	test_cmd := "!scrape"
+
+	config := command.ScraperConfig{
+		Command:        test_cmd + " (.*)",
+		Url:            "https://webscraper.io/test-sites/%s",
+		Reply_capture:  "<h1>([^<]*)</h1>",
+		Title_template: "%s",
+		Title_capture:  "<h2>([^<]*)</h2>",
+	}
+
+	scraper, err := command.GetScraper(config)
+	if err != nil {
+		t.Errorf("An error occured when making a reasonable scraper!")
+	}
+
+	bot.AddCommand(scraper)
+	bot.OnMessage(test_conversation, test_sender, test_cmd+" e-commerce/allinone")
+
+	result_message, result_conversation := demo_service_sender.PopMessage()
+	if result_message.Title != "Top items being scraped right now" {
+		t.Errorf("Title was different!")
+	}
+
+	if result_conversation != test_conversation {
+		t.Errorf("Sender was different!")
+	}
+}
+
 func TestScraperNoCapture(t *testing.T) {
 	bot := bot.Bot{}
 
