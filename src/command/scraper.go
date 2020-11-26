@@ -117,7 +117,7 @@ func scraper(url_template string, re_s string, title string, sender service.Conv
 					Url:         url,
 				})
 			} else {
-				sink(sender, service.Message{Description: "The webpage was not found."})
+				sink(sender, service.Message{Description: "Could not extract data from the webpage."})
 			}
 		} else {
 			sink(sender, service.Message{Description: "An error occurred when processing the webpage."})
