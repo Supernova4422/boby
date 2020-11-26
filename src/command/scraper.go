@@ -15,11 +15,12 @@ import (
 )
 
 type ScraperConfig struct {
-	Command string // Regular expression which triggers this scraper. Can contain capture groups.
-	Title   string // Title for messages that are sent
-	Url     string // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
-	Re      string // Regular expression used to parse a webpage.
-	Help    string // Help message to display
+	Command        string // Regular expression which triggers this scraper. Can contain capture groups.
+	Title_template string // Title template that will be replaced by regex captures (using %s).
+	Title_capture  string // Regex captures for title replacement.
+	Url            string // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
+	Reply_capture  string // Regular expression used to parse a webpage.
+	Help           string // Help message to display
 }
 
 // Given a filepath, returns a ScraperConfig.
@@ -63,9 +64,19 @@ func makeExampleScraperConfig(filepath string) error {
 
 // Get a usable scraper.
 func GetScraper(config ScraperConfig) (Command, error) {
+	webpage_capture := regexp.MustCompile(config.Reply_capture)
+	title_capture := regexp.MustCompile(config.Title_capture)
 
 	curry := func(sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, service.Message)) {
-		scraper(config.Url, config.Re, config.Title, sender, user, msg, sink)
+		scraper(config.Url,
+			webpage_capture,
+			config.Title_template,
+			title_capture,
+			sender,
+			user,
+			msg,
+			sink,
+		)
 	}
 	regex, err := regexp.Compile(config.Command)
 	if err != nil {
@@ -79,7 +90,7 @@ func GetScraper(config ScraperConfig) (Command, error) {
 }
 
 // Return the received message
-func scraper(url_template string, re_s string, title string, sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, service.Message)) {
+func scraper(url_template string, webpage_capture *regexp.Regexp, title_template string, title_capture *regexp.Regexp, sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, service.Message)) {
 	substitutions := strings.Count(url_template, "%s")
 	url := url_template
 	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
@@ -91,8 +102,6 @@ func scraper(url_template string, re_s string, title string, sender service.Conv
 		url = fmt.Sprintf(url, capture)
 	}
 
-	re := regexp.MustCompile(re_s)
-
 	response, err := http.Get(url)
 	if err == nil {
 		// Read response data in to memory
@@ -102,7 +111,8 @@ func scraper(url_template string, re_s string, title string, sender service.Conv
 			// Create a regular expression to find comments
 			body_s := string(body)
 
-			matches := re.FindAllStringSubmatch(body_s, -1)
+			matches := webpage_capture.FindAllStringSubmatch(body_s, -1)
+			title_matches := title_capture.FindAllStringSubmatch(body_s, -1)
 
 			if matches != nil {
 				all_captures := make([]string, len(matches))
@@ -111,8 +121,16 @@ func scraper(url_template string, re_s string, title string, sender service.Conv
 				}
 
 				reply := fmt.Sprintf("%s.\n\nRead more at: %s", strings.Join(all_captures, " "), url)
+				reply_title := title_template
+
+				for _, captures := range title_matches {
+					for _, capture_group := range captures[1:] {
+						reply_title = fmt.Sprintf(reply_title, capture_group)
+					}
+				}
+
 				sink(sender, service.Message{
-					Title:       title,
+					Title:       reply_title,
 					Description: reply,
 					Url:         url,
 				})

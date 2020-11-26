@@ -25,9 +25,9 @@ func TestScraperWithCapture(t *testing.T) {
 	test_cmd := "!scrape"
 
 	config := command.ScraperConfig{
-		Command: test_cmd + " (.*)",
-		Url:     "https://webscraper.io/test-sites/%s",
-		Re:      "<h1>([^<]*)</h1>",
+		Command:       test_cmd + " (.*)",
+		Url:           "https://webscraper.io/test-sites/%s",
+		Reply_capture: "<h1>([^<]*)</h1>",
 	}
 
 	scraper, err := command.GetScraper(config)
@@ -73,9 +73,9 @@ func TestScraperNoCapture(t *testing.T) {
 	test_cmd := "!scrape"
 
 	config := command.ScraperConfig{
-		Command: test_cmd,
-		Url:     "https://webscraper.io/test-sites/e-commerce/allinone",
-		Re:      "<h1>([^<]*)</h1>",
+		Command:       test_cmd,
+		Url:           "https://webscraper.io/test-sites/e-commerce/allinone",
+		Reply_capture: "<h1>([^<]*)</h1>",
 	}
 
 	scraper, err := command.GetScraper(config)
