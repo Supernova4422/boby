@@ -56,11 +56,13 @@ func Selector_Capture_To_String(doc goquery.Document, selector_capture Selector_
 	max_length--
 
 	var index int = 0
-	if selector_capture.Handle_multiple == "Random" {
-		rand.Seed(time.Now().UnixNano())
-		index = int(rand.Int63n(max_length))
-	} else if selector_capture.Handle_multiple == "Last" {
-		index = int(max_length)
+	if max_length > 0 {
+		if selector_capture.Handle_multiple == "Random" {
+			rand.Seed(time.Now().UnixNano())
+			index = int(rand.Int63n(max_length))
+		} else if selector_capture.Handle_multiple == "Last" {
+			index = int(max_length)
+		}
 	}
 
 	tmp := make([]interface{}, len(selector_capture.Selectors))
