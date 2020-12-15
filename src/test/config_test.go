@@ -27,7 +27,12 @@ func Message_in_List(msg service.Message, list []service.Message) bool {
 		if msg.Title == msg2.Title {
 			if msg.Url == msg2.Url {
 				good := true
-				for i, _ := range msg.Description {
+				desc_len := len(msg.Description)
+				if len(msg2.Description) < desc_len {
+					desc_len = len(msg.Description)
+				}
+
+				for i := 0; i < desc_len; i++ {
 					char1 := msg.Description[i]
 					char2 := msg2.Description[i]
 					if char1 != char2 {
