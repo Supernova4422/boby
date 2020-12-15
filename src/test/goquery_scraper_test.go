@@ -59,7 +59,7 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 		t.Errorf("Title was different!")
 	}
 
-	if result_message.Description != "Test Sites" {
+	if !strings.HasPrefix(result_message.Description, "Test Sites") {
 		t.Errorf("Message was different!")
 	}
 
