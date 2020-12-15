@@ -78,6 +78,63 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 	}
 }
 
+func TestGoQueryScraperWithOneCapture(t *testing.T) {
+	test_cmd := "!scrape"
+	bot := bot.Bot{}
+
+	demo_service_sender := demo_service.DemoServiceSender{}
+	bot.AddSender(&demo_service_sender)
+
+	test_conversation := service.Conversation{
+		ServiceId:      demo_service_sender.Id(),
+		ConversationId: "0",
+	}
+
+	test_sender := service.User{Name: "Test_User", Id: demo_service_sender.Id()}
+
+	config := command.GoQueryScraperConfig{
+		Command: fmt.Sprintf("^%s (.*)", test_cmd),
+		Title_selector: command.Selector_Capture{
+			Template: "%s",
+			Selectors: []string{
+				"h2",
+			},
+			Handle_multiple: "First",
+		},
+		Url: "https://webscraper.io/test-sites/%s",
+		Reply_selector: command.Selector_Capture{
+			Template: "%s",
+			Selectors: []string{
+				"h2",
+			},
+			Handle_multiple: "Random",
+		},
+		Help: "This is just a test!",
+	}
+
+	scraper, err := command.GetGoqueryScraper(config)
+	if err != nil {
+		t.Errorf("An error occured when making a reasonable scraper!")
+	}
+
+	bot.AddCommand(scraper)
+	bot.OnMessage(test_conversation, test_sender, test_cmd+" e-commerce/allinone")
+
+	result_message, result_conversation := demo_service_sender.PopMessage()
+
+	if result_message.Title != "Top items being scraped right now" {
+		t.Errorf("Title was different!")
+	}
+
+	if !strings.HasPrefix(result_message.Description, "Top items being scraped right now") {
+		t.Errorf("Message was different!")
+	}
+
+	if result_conversation != test_conversation {
+		t.Errorf("Sender was different!")
+	}
+}
+
 func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	test_cmd := "!scrape"
 	bot := bot.Bot{}

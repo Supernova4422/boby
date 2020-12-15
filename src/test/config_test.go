@@ -17,7 +17,31 @@ import (
 
 type Config_Test struct {
 	Input  string
-	Expect service.Message
+	Expect []service.Message
+}
+
+// Check if msg is in a list.
+func Message_in_List(msg service.Message, list []service.Message) bool {
+	// Checks each character one by one for breakpoint debugging.
+	for _, msg2 := range list {
+		if msg.Title == msg2.Title {
+			if msg.Url == msg2.Url {
+				good := true
+				for i, _ := range msg.Description {
+					char1 := msg.Description[i]
+					char2 := msg2.Description[i]
+					if char1 != char2 {
+						good = false
+						break
+					}
+				}
+				if good && msg == msg2 {
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 func Get_Test_Inputs(filepath string) ([]Config_Test, error) {
@@ -32,8 +56,7 @@ func Get_Test_Inputs(filepath string) ([]Config_Test, error) {
 	return config_tests, nil
 }
 
-func get_demo_bot(filepath string) (bot.Bot, *demo_service.DemoServiceSender) {
-	bot := bot.Bot{}
+func get_demo_bot(filepath string, bot *bot.Bot) *demo_service.DemoServiceSender {
 	demo_service_sender := demo_service.DemoServiceSender{}
 	bot.AddSender(&demo_service_sender)
 
@@ -51,31 +74,35 @@ func get_demo_bot(filepath string) (bot.Bot, *demo_service.DemoServiceSender) {
 		}
 	}
 
-	return bot, &demo_service_sender
+	return &demo_service_sender
 }
 
 func TestConfig(t *testing.T) {
-	config_fp := "../main/scraper_config.json"
-	_, err1 := os.Stat(config_fp)
-
 	input_fp := "./config_tests.json"
-	_, err2 := os.Stat(input_fp)
+	_, err := os.Stat(input_fp)
 
-	if err1 == nil && err2 == nil {
-		bot, demo_service_sender := get_demo_bot(config_fp)
-		input_test, _ := Get_Test_Inputs(input_fp)
+	if err == nil {
+		bot, err := bot.ConfiguredBot("../main")
 
-		test_conversation := service.Conversation{
-			ServiceId:      demo_service_sender.Id(),
-			ConversationId: "0",
-		}
+		if err == nil {
+			demo_service_sender := demo_service.DemoServiceSender{}
+			bot.AddSender(&demo_service_sender)
 
-		test_sender := service.User{Name: "Test_User", Id: demo_service_sender.Id()}
-		for _, input := range input_test {
-			bot.OnMessage(test_conversation, test_sender, input.Input)
-			result_message, _ := demo_service_sender.PopMessage()
-			if result_message != input.Expect {
-				t.Fail()
+			input_test, _ := Get_Test_Inputs(input_fp)
+
+			test_conversation := service.Conversation{
+				ServiceId:      demo_service_sender.Id(),
+				ConversationId: "0",
+			}
+
+			test_sender := service.User{Name: "Test_User", Id: demo_service_sender.Id()}
+			for _, input := range input_test {
+				bot.OnMessage(test_conversation, test_sender, input.Input)
+				result_message, _ := demo_service_sender.PopMessage()
+				fmt.Print(result_message)
+				if !Message_in_List(result_message, input.Expect) {
+					t.Fail()
+				}
 			}
 		}
 	}

@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+	"path"
 	"strconv"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
@@ -58,4 +59,38 @@ func (self *Bot) RouteById(conversation service.Conversation, msg service.Messag
 			observer.SendMessage(conversation, msg)
 		}
 	}
+}
+
+// Get a bot that is configured.
+func ConfiguredBot(config_dir string) (Bot, error) {
+	bot := Bot{}
+	scraper_path := path.Join(config_dir, "scraper_config.json")
+	scraper_configs, err := command.GetScraperConfigs(scraper_path)
+	if err != nil {
+		return bot, err
+	}
+
+	for _, scraper_config := range scraper_configs {
+		scraper_command, err := command.GetScraper(scraper_config)
+		if err == nil {
+			bot.AddCommand(scraper_command)
+		} else {
+			return bot, err
+		}
+	}
+	config_path := path.Join(config_dir, "goquery_scraper_config.json")
+	goquery_scraper_configs, err := command.GetGoqueryScraperConfigs(config_path)
+	if err != nil {
+		return bot, err
+	}
+
+	for _, goquery_scraper_config := range goquery_scraper_configs {
+		scraper_command, err := command.GetGoqueryScraper(goquery_scraper_config)
+		if err == nil {
+			bot.AddCommand(scraper_command)
+		} else {
+			return bot, err
+		}
+	}
+	return bot, nil
 }
