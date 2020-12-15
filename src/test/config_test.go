@@ -99,7 +99,6 @@ func TestConfig(t *testing.T) {
 			for _, input := range input_test {
 				bot.OnMessage(test_conversation, test_sender, input.Input)
 				result_message, _ := demo_service_sender.PopMessage()
-				fmt.Print(result_message)
 				if !Message_in_List(result_message, input.Expect) {
 					t.Fail()
 				}

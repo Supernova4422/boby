@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	bot, err := bot.ConfiguredBot("scraper_config.json")
+	bot, err := bot.ConfiguredBot(".")
 	if err == nil {
 		discordSubject, discordSender, err := discord_service.NewDiscords()
 		if err == nil {
