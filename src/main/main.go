@@ -20,15 +20,6 @@ func main() {
 		discordSubject.Register(&bot)
 		bot.AddSender(discordSender)
 
-		// Add all bot comamnds.
-		/*
-			bot.AddCommand(command.Command{
-				Pattern: regexp.MustCompile("^!repeat (.*)"),
-				Exec:    command.Repeater,
-				Help:    "",
-			})
-		*/
-
 		scraper_configs, err := command.GetScraperConfigs("scraper_config.json")
 		if err != nil {
 			panic(err)
@@ -36,6 +27,19 @@ func main() {
 
 		for _, scraper_config := range scraper_configs {
 			scraper_command, err := command.GetScraper(scraper_config)
+			if err == nil {
+				bot.AddCommand(scraper_command)
+			} else {
+				panic(err)
+			}
+		}
+		goquery_scraper_configs, err := command.GetGoqueryScraperConfigs("goquery_scraper_config.json")
+		if err != nil {
+			panic(err)
+		}
+
+		for _, goquery_scraper_config := range goquery_scraper_configs {
+			scraper_command, err := command.GetGoqueryScraper(goquery_scraper_config)
 			if err == nil {
 				bot.AddCommand(scraper_command)
 			} else {
