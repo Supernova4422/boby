@@ -40,7 +40,7 @@ func (self *Bot) OnMessage(conversation service.Conversation, sender service.Use
 			service.Message{
 				Title:       "Help",
 				Description: help_msg,
-				Url:         "https://github.com/BKrajancic/FLD-Bot",
+				URL:         "https://github.com/BKrajancic/FLD-Bot",
 			})
 	} else {
 		for _, command := range self.commands {

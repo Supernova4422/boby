@@ -13,37 +13,37 @@ import (
 func TestRouteById(t *testing.T) {
 	bot := bot.Bot{}
 
-	service_id_1 := demo_service.SERVICE_ID + "1"
-	demo_service_sender1 := demo_service.DemoServiceSender{ServiceId: service_id_1}
-	service_id_2 := demo_service.SERVICE_ID + "2"
-	demo_service_sender2 := demo_service.DemoServiceSender{ServiceId: service_id_2}
+	serviceID1 := demo_service.SERVICE_ID + "1"
+	demoServiceSender1 := demo_service.DemoServiceSender{ServiceId: serviceID1}
+	serviceID2 := demo_service.SERVICE_ID + "2"
+	demoServiceSender2 := demo_service.DemoServiceSender{ServiceId: serviceID2}
 
-	bot.AddSender(&demo_service_sender1)
-	bot.AddSender(&demo_service_sender2)
+	bot.AddSender(&demoServiceSender1)
+	bot.AddSender(&demoServiceSender2)
 
-	test_msg := "test_msg"
+	testMsg := "test_msg"
 
-	test_conversation := service.Conversation{
-		ServiceId:      service_id_1,
+	testConversation := service.Conversation{
+		ServiceId:      serviceID1,
 		ConversationId: "0",
 	}
 
 	bot.RouteById(
-		test_conversation,
-		service.Message{Description: test_msg},
+		testConversation,
+		service.Message{Description: testMsg},
 	)
 
-	if demo_service_sender2.IsEmpty() == false {
+	if demoServiceSender2.IsEmpty() == false {
 		t.Errorf("Incorrect parsing!")
 	}
 
-	result_message, result_conversation := demo_service_sender1.PopMessage()
+	resultMessage, resultConversation := demoServiceSender1.PopMessage()
 
-	if result_message.Description != test_msg {
+	if resultMessage.Description != testMsg {
 		t.Errorf("Message was different!")
 	}
 
-	if result_conversation != test_conversation {
+	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
 }
@@ -52,33 +52,33 @@ func TestOnMessage(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
 
-	demo_service_sender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
-	bot.AddSender(&demo_service_sender)
+	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
+	bot.AddSender(&demoServiceSender)
 
 	// Message to repeat.
-	test_conversation := service.Conversation{
-		ServiceId:      demo_service_sender.Id(),
+	testConversation := service.Conversation{
+		ServiceId:      demoServiceSender.Id(),
 		ConversationId: "0",
 	}
-	test_sender := service.User{Name: "Test_User", Id: demo_service_sender.Id()}
-	test_msg := "Test1"
-	test_cmd := "!repeat"
+	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+	testMsg := "Test1"
+	testCmd := "!repeat"
 
 	bot.AddCommand(
-		command.Command{Pattern: regexp.MustCompile("^" + test_cmd + " (.*)"),
+		command.Command{Pattern: regexp.MustCompile("^" + testCmd + " (.*)"),
 			Exec: command.Repeater,
 			Help: "",
 		}) // Repeater command.
 
-	bot.OnMessage(test_conversation, test_sender, test_cmd+" "+test_msg)
+	bot.OnMessage(testConversation, testSender, testCmd+" "+testMsg)
 
 	// Get messages and evaluate
-	result_message, result_conversation := demo_service_sender.PopMessage()
-	if result_conversation != test_conversation {
+	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
 
-	if result_message.Description != test_msg {
+	if resultMessage.Description != testMsg {
 		t.Errorf("Message was different!")
 	}
 }
@@ -88,17 +88,17 @@ func TestOnMessageRequireCommand(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
 
-	demo_service_sender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
-	bot.AddSender(&demo_service_sender)
+	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
+	bot.AddSender(&demoServiceSender)
 
 	// Message to repeat.
-	test_conversation := service.Conversation{
-		ServiceId:      demo_service_sender.Id(),
+	testConversation := service.Conversation{
+		ServiceId:      demoServiceSender.Id(),
 		ConversationId: "0",
 	}
-	test_sender := service.User{Name: "Test_User", Id: demo_service_sender.Id()}
-	bot.OnMessage(test_conversation, test_sender, "Test1")
-	if demo_service_sender.IsEmpty() == false {
+	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+	bot.OnMessage(testConversation, testSender, "Test1")
+	if demoServiceSender.IsEmpty() == false {
 		t.Errorf("Nothing should have happened!")
 	}
 }

@@ -17,35 +17,35 @@ import (
 func TestParse(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
-	demo_service_subject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
-	demo_service_subject.Register(&bot)
-	demo_service_sender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
-	bot.AddSender(&demo_service_sender)
+	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
+	demoServiceSubject.Register(&bot)
+	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
+	bot.AddSender(&demoServiceSender)
 
-	test_cmd := "!repeat"
+	testCmd := "!repeat"
 	bot.AddCommand(
-		command.Command{Pattern: regexp.MustCompile("^" + test_cmd + " (.*)"),
+		command.Command{Pattern: regexp.MustCompile("^" + testCmd + " (.*)"),
 			Exec: command.Repeater,
 			Help: "",
 		}) // Repeater command.
 
 	// Message to repeat.
-	test_conversation := service.Conversation{
-		ServiceId:      demo_service_subject.Id(),
+	testConversation := service.Conversation{
+		ServiceId:      demoServiceSubject.Id(),
 		ConversationId: "0",
 	}
-	test_sender := service.User{Name: "Test_User", Id: demo_service_subject.Id()}
-	test_msg := "Test1"
-	test_msg_sent := test_cmd + " " + test_msg
-	demo_service_subject.AddMessage(test_conversation, test_sender, test_msg_sent) // Message to repeat
+	testSender := service.User{Name: "Test_User", Id: demoServiceSubject.Id()}
+	testMsg := "Test1"
+	testMsgSent := testCmd + " " + testMsg
+	demoServiceSubject.AddMessage(testConversation, testSender, testMsgSent) // Message to repeat
 
 	// Get messages and evaluate
-	demo_service_subject.Run()
-	result_message, result_conversation := demo_service_sender.PopMessage()
-	if result_conversation != test_conversation {
+	demoServiceSubject.Run()
+	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
-	if result_message.Description != test_msg {
+	if resultMessage.Description != testMsg {
 		t.Errorf("Message was different!")
 	}
 }
@@ -54,30 +54,30 @@ func TestParse(t *testing.T) {
 func TestEmpty(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
-	demo_service_subject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
-	demo_service_subject.Register(&bot)
-	demo_service_sender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
-	bot.AddSender(&demo_service_sender)
+	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
+	demoServiceSubject.Register(&bot)
+	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
+	bot.AddSender(&demoServiceSender)
 
-	test_cmd := "!repeat"
+	testCmd := "!repeat"
 	bot.AddCommand(
-		command.Command{Pattern: regexp.MustCompile("^" + test_cmd + " (.*)"),
+		command.Command{Pattern: regexp.MustCompile("^" + testCmd + " (.*)"),
 			Exec: command.Repeater,
 			Help: "",
 		}) // Repeater command.
 
 	// Message to repeat.
-	test_conversation := service.Conversation{
-		ServiceId:      demo_service_subject.Id(),
+	testConversation := service.Conversation{
+		ServiceId:      demoServiceSubject.Id(),
 		ConversationId: "0",
 	}
-	test_sender := service.User{Name: "Test_User", Id: demo_service_subject.Id()}
-	demo_service_subject.AddMessage(test_conversation, test_sender, "Test1")            // Message to repeat
-	demo_service_subject.AddMessage(test_conversation, test_sender, test_cmd+"Message") // Message to repeat
+	testSender := service.User{Name: "Test_User", Id: demoServiceSubject.Id()}
+	demoServiceSubject.AddMessage(testConversation, testSender, "Test1")           // Message to repeat
+	demoServiceSubject.AddMessage(testConversation, testSender, testCmd+"Message") // Message to repeat
 
 	// Get messages and evaluate
-	demo_service_subject.Run()
-	if demo_service_sender.IsEmpty() == false {
+	demoServiceSubject.Run()
+	if demoServiceSender.IsEmpty() == false {
 		t.Errorf("Incorrect parsing!")
 	}
 }

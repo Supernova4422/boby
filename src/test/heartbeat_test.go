@@ -15,29 +15,29 @@ import (
 func TestHeartbeat(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
-	demo_service_sender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
-	bot.AddSender(&demo_service_sender)
+	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
+	bot.AddSender(&demoServiceSender)
 
 	// Message to repeat.
-	test_conversation := service.Conversation{
-		ServiceId:      demo_service_sender.Id(),
+	testConversation := service.Conversation{
+		ServiceId:      demoServiceSender.Id(),
 		ConversationId: "0",
 	}
-	test_msg := "Hello"
+	testMsg := "Hello"
 	delay := time.Second / 100
-	go routine.Heartbeat(delay, test_conversation, service.Message{Description: test_msg}, bot.RouteById)
+	go routine.Heartbeat(delay, testConversation, service.Message{Description: testMsg}, bot.RouteById)
 
-	if demo_service_sender.IsEmpty() == false {
+	if demoServiceSender.IsEmpty() == false {
 		t.Errorf("Routine is not working or test execution halted for too long!")
 	}
 
 	time.Sleep(2 * delay)
-	result_message, result_conversation := demo_service_sender.PopMessage()
+	resultMessage, resultConversation := demoServiceSender.PopMessage()
 
-	if result_conversation != test_conversation {
+	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
-	if result_message.Description != test_msg {
+	if resultMessage.Description != testMsg {
 		t.Errorf("Message was different!")
 	}
 }

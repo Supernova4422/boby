@@ -10,9 +10,8 @@ type DiscordSender struct {
 }
 
 func (self *DiscordSender) SendMessage(destination service.Conversation, msg service.Message) {
-	// self.discord.ChannelMessageSend(destination.ConversationId, msg)
 	embed := discordgo.MessageEmbed{
-		URL:         msg.Url,
+		URL:         msg.URL,
 		Title:       msg.Title,
 		Description: msg.Description,
 	}

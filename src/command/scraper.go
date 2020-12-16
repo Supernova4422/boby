@@ -18,7 +18,7 @@ type ScraperConfig struct {
 	Command        string // Regular expression which triggers this scraper. Can contain capture groups.
 	Title_template string // Title template that will be replaced by regex captures (using %s).
 	Title_capture  string // Regex captures for title replacement.
-	Url            string // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
+	URL            string // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
 	Reply_capture  string // Regular expression used to parse a webpage.
 	Help           string // Help message to display
 }
@@ -68,7 +68,7 @@ func GetScraper(config ScraperConfig) (Command, error) {
 	title_capture := regexp.MustCompile(config.Title_capture)
 
 	curry := func(sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, service.Message)) {
-		scraper(config.Url,
+		scraper(config.URL,
 			webpage_capture,
 			config.Title_template,
 			title_capture,
@@ -132,7 +132,7 @@ func scraper(url_template string, webpage_capture *regexp.Regexp, title_template
 				sink(sender, service.Message{
 					Title:       reply_title,
 					Description: reply,
-					Url:         url,
+					URL:         url,
 				})
 			} else {
 				sink(sender, service.Message{Description: "Could not extract data from the webpage."})
@@ -143,7 +143,7 @@ func scraper(url_template string, webpage_capture *regexp.Regexp, title_template
 	} else {
 		sink(sender, service.Message{
 			Description: "An error occurred retrieving the webpage.",
-			Url:         url,
+			URL:         url,
 		})
 	}
 }

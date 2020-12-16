@@ -19,67 +19,67 @@ import (
 )
 
 type GoQueryScraperConfig struct {
-	Command        string           // Regular expression which triggers this scraper. Can contain capture groups.
-	Title_selector Selector_Capture // Regex captures for title replacement.
-	Url            string           // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
-	Reply_selector Selector_Capture
-	Help           string // Help message to display
+	Command       string          // Regular expression which triggers this scraper. Can contain capture groups.
+	TitleSelector SelectorCapture // Regex captures for title replacement.
+	URL           string          // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
+	ReplySelector SelectorCapture
+	Help          string // Help message to display
 }
 
-type Selector_Capture struct {
-	Template        string   // Message template to be filled out.
-	Selectors       []string // What captures to use to fill out the template
-	Handle_multiple string   // How to handle multiple captures. "Random" or "First."
+// SelectorCapture is a method to capture from a webpage.
+type SelectorCapture struct {
+	Template       string   // Message template to be filled out.
+	Selectors      []string // What captures to use to fill out the template
+	HandleMultiple string   // How to handle multiple captures. "Random" or "First."
 }
 
-// Match all selectors and fill out template. Then using handle_multiple decide which to use.
-func Selector_Capture_To_String(doc goquery.Document, selector_capture Selector_Capture) string {
-
-	var max_length int64 = math.MaxInt64
-	all_captures := make([](*(goquery.Selection)), len(selector_capture.Selectors))
-	for i, selector := range selector_capture.Selectors {
+// Match all selectors and fill out template. Then using HandleMultiple decide which to use.
+func selectorCaptureToString(doc goquery.Document, selectorCapture SelectorCapture) string {
+	var maxLength int64 = math.MaxInt64
+	allCaptures := make([](*(goquery.Selection)), len(selectorCapture.Selectors))
+	for i, selector := range selectorCapture.Selectors {
 		capture := doc.Find(selector)
-		all_captures[i] = capture
-		capture_length := int64(capture.Length())
+		allCaptures[i] = capture
+		captureLength := int64(capture.Length())
 
-		if capture_length < max_length {
-			max_length = capture_length
+		if captureLength < maxLength {
+			maxLength = captureLength
 		}
 	}
 
-	reply := selector_capture.Template
+	reply := selectorCapture.Template
 
-	if max_length == 0 {
+	if maxLength == 0 {
 		return "There was an error retrieving information from the webpage."
 	}
 
-	max_length--
+	maxLength--
 
 	var index int = 0
-	if max_length > 0 {
-		if selector_capture.Handle_multiple == "Random" {
+	if maxLength > 0 {
+		if selectorCapture.HandleMultiple == "Random" {
 			rand.Seed(time.Now().UnixNano())
-			index = int(rand.Int63n(max_length))
-		} else if selector_capture.Handle_multiple == "Last" {
-			index = int(max_length)
+			index = int(rand.Int63n(maxLength))
+		} else if selectorCapture.HandleMultiple == "Last" {
+			index = int(maxLength)
 		}
 	}
 
-	tmp := make([]interface{}, len(selector_capture.Selectors))
-	for i, selector := range all_captures {
-		selector_i := selector.Slice(int(index), int(index)+1)
-		tmp[i] = strings.TrimSpace(selector_i.Text())
+	tmp := make([]interface{}, len(selectorCapture.Selectors))
+	for i, selector := range allCaptures {
+		selectorIndex := selector.Slice(int(index), int(index)+1)
+		tmp[i] = strings.TrimSpace(selectorIndex.Text())
 	}
 
 	reply = fmt.Sprintf(reply, tmp...)
 	return reply
 }
 
-// Get a usable scraper.
+// GetGoqueryScraper converts a config to a scraper.
 func GetGoqueryScraper(config GoQueryScraperConfig) (Command, error) {
 
 	curry := func(sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, service.Message)) {
-		goquery_scraper(
+		goqueryScraper(
 			config,
 			sender,
 			user,
@@ -99,9 +99,9 @@ func GetGoqueryScraper(config GoQueryScraperConfig) (Command, error) {
 }
 
 // Return the received message
-func goquery_scraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, service.Message)) {
-	substitutions := strings.Count(goQueryScraperConfig.Url, "%s")
-	url := goQueryScraperConfig.Url
+func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, service.Message)) {
+	substitutions := strings.Count(goQueryScraperConfig.URL, "%s")
+	url := goQueryScraperConfig.URL
 	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
 		sink(sender, service.Message{Description: "An error when building the url."})
 		return
@@ -111,40 +111,49 @@ func goquery_scraper(goQueryScraperConfig GoQueryScraperConfig, sender service.C
 		url = fmt.Sprintf(url, capture)
 	}
 
+	fmt.Print(url)
 	res, err := http.Get(url)
-	defer res.Body.Close()
 	if err == nil {
+		defer res.Body.Close()
 		doc, err := goquery.NewDocumentFromReader(res.Body)
 		if err == nil {
-			title := Selector_Capture_To_String(
-				*doc,
-				goQueryScraperConfig.Title_selector,
-			)
+			if doc.Text() == "" {
+				sink(sender, service.Message{
+					Title:       "Webpage not found.",
+					Description: "Webpage not found at: " + url,
+					URL:         url,
+				})
+			} else {
+				title := selectorCaptureToString(
+					*doc,
+					goQueryScraperConfig.TitleSelector,
+				)
 
-			reply := fmt.Sprintf(
-				"%s\n\nRead more at: %s",
-				Selector_Capture_To_String(*doc, goQueryScraperConfig.Reply_selector),
-				url,
-			)
+				reply := fmt.Sprintf(
+					"%s\n\nRead more at: %s",
+					selectorCaptureToString(*doc, goQueryScraperConfig.ReplySelector),
+					url,
+				)
 
-			sink(sender, service.Message{
-				Title:       title,
-				Description: reply,
-				Url:         url,
-			})
+				sink(sender, service.Message{
+					Title:       title,
+					Description: reply,
+					URL:         url,
+				})
+			}
 		} else {
 			sink(sender, service.Message{Description: "An error occurred when processing the webpage."})
 		}
 	} else {
 		sink(sender, service.Message{
 			Description: "An error occurred retrieving the webpage.",
-			Url:         url,
+			URL:         url,
 		})
 	}
 }
 
-// Given a filepath, returns a ScraperConfig.
-// A file doesn't exist, an example is made in its place, and an error is returned.
+// GetGoqueryScraperConfigs retrieves an array of GoQueryScraperConfig from a json file.
+// If a file doesn't exist, an example is made in its place, and an error is returned.
 func GetGoqueryScraperConfigs(filepath string) ([]GoQueryScraperConfig, error) {
 	var config []GoQueryScraperConfig
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
@@ -162,7 +171,7 @@ func GetGoqueryScraperConfigs(filepath string) ([]GoQueryScraperConfig, error) {
 }
 
 func makeExampleGoQueryScraperConfig(filepath string) error {
-	config := []GoQueryScraperConfig{GoQueryScraperConfig{}}
+	config := []GoQueryScraperConfig{{}}
 	bytes, err := json.Marshal(config)
 
 	if err != nil {
@@ -171,13 +180,13 @@ func makeExampleGoQueryScraperConfig(filepath string) error {
 
 	file, err := os.Create(filepath)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Unable to create file: %s", filepath))
+		return fmt.Errorf("Unable to create file: %s", filepath)
 	}
 	defer file.Close()
 
 	_, err = file.Write(bytes)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Unable to write to file: %s", filepath))
+		return fmt.Errorf("Unable to write to file: %s", filepath)
 	}
-	return errors.New(fmt.Sprintf("File %s did not exist, an example has been writen.", filepath))
+	return fmt.Errorf("File %s did not exist, an example has been writen", filepath)
 }

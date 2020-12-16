@@ -1,7 +1,7 @@
 package service
 
 type Message struct {
-	Url         string
+	URL         string
 	Title       string
 	Description string
 }

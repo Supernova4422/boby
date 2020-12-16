@@ -15,24 +15,24 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demo_service"
 )
 
-type Config_Test struct {
+type ConfigTest struct {
 	Input  string
 	Expect []service.Message
 }
 
 // Check if msg is in a list.
-func Message_in_List(msg service.Message, list []service.Message) bool {
+func MessageInList(msg service.Message, list []service.Message) bool {
 	// Checks each character one by one for breakpoint debugging.
 	for _, msg2 := range list {
 		if msg.Title == msg2.Title {
-			if msg.Url == msg2.Url {
+			if msg.URL == msg2.URL {
 				good := true
-				desc_len := len(msg.Description)
-				if len(msg2.Description) < desc_len {
-					desc_len = len(msg.Description)
+				descLength := len(msg.Description)
+				if len(msg2.Description) < descLength {
+					descLength = len(msg.Description)
 				}
 
-				for i := 0; i < desc_len; i++ {
+				for i := 0; i < descLength; i++ {
 					char1 := msg.Description[i]
 					char2 := msg2.Description[i]
 					if char1 != char2 {
@@ -49,62 +49,62 @@ func Message_in_List(msg service.Message, list []service.Message) bool {
 	return false
 }
 
-func Get_Test_Inputs(filepath string) ([]Config_Test, error) {
-	var config_tests []Config_Test
+func GetTestInputs(filepath string) ([]ConfigTest, error) {
+	var configTests []ConfigTest
 	bytes, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		fmt.Printf("Unable to read file: %s", filepath)
-		return config_tests, nil
+		return configTests, nil
 	}
 
-	json.Unmarshal(bytes, &config_tests)
-	return config_tests, nil
+	json.Unmarshal(bytes, &configTests)
+	return configTests, nil
 }
 
-func get_demo_bot(filepath string, bot *bot.Bot) *demo_service.DemoServiceSender {
-	demo_service_sender := demo_service.DemoServiceSender{}
-	bot.AddSender(&demo_service_sender)
+func getDemoBot(filepath string, bot *bot.Bot) *demo_service.DemoServiceSender {
+	demoServiceSender := demo_service.DemoServiceSender{}
+	bot.AddSender(&demoServiceSender)
 
-	scraper_configs, err := command.GetScraperConfigs(filepath)
+	scraperConfigs, err := command.GetScraperConfigs(filepath)
 	if err != nil {
 		panic(err)
 	}
 
-	for _, scraper_config := range scraper_configs {
-		scraper_command, err := command.GetScraper(scraper_config)
+	for _, scraperConfig := range scraperConfigs {
+		scraperCommand, err := command.GetScraper(scraperConfig)
 		if err == nil {
-			bot.AddCommand(scraper_command)
+			bot.AddCommand(scraperCommand)
 		} else {
 			panic(err)
 		}
 	}
 
-	return &demo_service_sender
+	return &demoServiceSender
 }
 
 func TestConfig(t *testing.T) {
-	input_fp := "./config_tests.json"
-	_, err := os.Stat(input_fp)
+	inputFp := "./config_tests.json"
+	_, err := os.Stat(inputFp)
 
 	if err == nil {
-		bot, err := bot.ConfiguredBot("../main")
+		bot, err := bot.ConfiguredBot("./../main")
 
 		if err == nil {
-			demo_service_sender := demo_service.DemoServiceSender{}
-			bot.AddSender(&demo_service_sender)
+			demoServiceSender := demo_service.DemoServiceSender{}
+			bot.AddSender(&demoServiceSender)
 
-			input_test, _ := Get_Test_Inputs(input_fp)
+			inputTest, _ := GetTestInputs(inputFp)
 
-			test_conversation := service.Conversation{
-				ServiceId:      demo_service_sender.Id(),
+			testConversation := service.Conversation{
+				ServiceId:      demoServiceSender.Id(),
 				ConversationId: "0",
 			}
 
-			test_sender := service.User{Name: "Test_User", Id: demo_service_sender.Id()}
-			for _, input := range input_test {
-				bot.OnMessage(test_conversation, test_sender, input.Input)
-				result_message, _ := demo_service_sender.PopMessage()
-				if !Message_in_List(result_message, input.Expect) {
+			testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+			for _, input := range inputTest {
+				bot.OnMessage(testConversation, testSender, input.Input)
+				resultMessage, _ := demoServiceSender.PopMessage()
+				if !MessageInList(resultMessage, input.Expect) {
 					t.Fail()
 				}
 			}
