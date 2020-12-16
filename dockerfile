@@ -17,8 +17,7 @@ RUN go build -o ${binary_filepath} ${binary_dir}
 ARG test_dir=${project_path}/src/test
 WORKDIR ${test_dir}
 RUN go test
-RUN binary_filename=${binary_filename}
 
-ENV PATH=${binary_dir}:$PATH
+# TODO Need to use variables here instead of full path. 
 WORKDIR ${binary_dir}
-CMD [${binary_filename}]
+CMD ["/go/src/github.com/BKrajancic/FLD-Bot/src/main/fld-bot"]
