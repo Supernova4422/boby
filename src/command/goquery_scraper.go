@@ -111,7 +111,6 @@ func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Co
 		url = fmt.Sprintf(url, capture)
 	}
 
-	fmt.Print(url)
 	res, err := http.Get(url)
 	if err == nil {
 		defer res.Body.Close()
