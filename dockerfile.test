@@ -1,0 +1,12 @@
+FROM golang:1.15
+
+ARG project_path=/go/src/github.com/BKrajancic/FLD-Bot
+
+COPY . ${project_path}
+WORKDIR ${project_path}
+
+RUN go get -d -v ./...
+RUN go install -v ./...
+
+WORKDIR ${project_path}/src/test
+CMD ["go", "test", "-v"]

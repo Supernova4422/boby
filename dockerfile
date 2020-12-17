@@ -14,10 +14,6 @@ ARG binary_filepath=${binary_dir}/${binary_filename}
 
 RUN go build -o ${binary_filepath} ${binary_dir}
 
-ARG test_dir=${project_path}/src/test
-WORKDIR ${test_dir}
-RUN go test
-
 # TODO Need to use variables here instead of full path. 
 WORKDIR ${binary_dir}
 CMD ["/go/src/github.com/BKrajancic/FLD-Bot/src/main/fld-bot"]
