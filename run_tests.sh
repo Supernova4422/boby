@@ -1,6 +1,7 @@
 #!/bin/bash
 
-export tag=fld-bot-test
-docker build --force-rm -t ${tag} -f dockerfile.test .
-docker run --rm ${tag} 
-docker rmi ${tag}
+export tag=latest
+export name=fld-bot-test
+docker build --force-rm -t ${name}:${tag} -f dockerfile.test .
+docker run --rm ${name}:${tag} 
+docker rmi ${name}:${tag}

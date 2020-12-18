@@ -5,8 +5,8 @@ export name=fld-bot
 docker stop ${name} || true
 docker rm ${name} || true
 
-export tag=fld-bot
-docker rmi ${tag} || true
-docker build -t ${tag} -f dockerfile .
+export tag=latest
+docker rmi ${name}:${tag} || true
+docker build -t ${name}:${tag} -f dockerfile .
 
-docker run --name ${name} -d ${tag}
+docker run --name ${name} -d ${name}:${tag}
