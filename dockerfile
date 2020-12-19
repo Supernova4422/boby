@@ -16,4 +16,4 @@ RUN go build -o ${binary_filepath} ${binary_dir}
 
 # TODO Need to use variables here instead of full path. 
 WORKDIR ${binary_dir}
-CMD ["/go/src/github.com/BKrajancic/FLD-Bot/src/main/fld-bot"]
+CMD ["./fld-bot"]

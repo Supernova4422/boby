@@ -9,7 +9,7 @@ export tag=latest
 docker rmi ${name}:${tag} || true
 
 docker build -t ${name}:${tag} -f dockerfile .
-if $? == 0
+if [ $? != 0 ]
 then 
     exit $? 
 fi
