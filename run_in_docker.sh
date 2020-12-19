@@ -7,6 +7,11 @@ docker rm ${name} || true
 
 export tag=latest
 docker rmi ${name}:${tag} || true
+
 docker build -t ${name}:${tag} -f dockerfile .
+if $? == 0
+then 
+    exit $? 
+fi
 
 docker run --name ${name} -d ${name}:${tag}
