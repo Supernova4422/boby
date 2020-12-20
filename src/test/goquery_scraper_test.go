@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
@@ -12,7 +11,7 @@ import (
 )
 
 func TestGoQueryScraperWithCapture(t *testing.T) {
-	testCmd := "!scrape"
+	testCmd := "scrape"
 	bot := bot.Bot{}
 
 	demoServiceSender := demo_service.DemoServiceSender{}
@@ -26,7 +25,8 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
 
 	config := command.GoQueryScraperConfig{
-		Command: fmt.Sprintf("^%s (.*)", testCmd),
+		Trigger: testCmd,
+		Capture: "(.*)",
 		TitleSelector: command.SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
@@ -76,10 +76,14 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
+
+	if demoServiceSender.IsEmpty() == false {
+		t.Errorf("Too many messages!")
+	}
 }
 
 func TestGoQueryScraperWithOneCapture(t *testing.T) {
-	testCmd := "!scrape"
+	testCmd := "scrape"
 	bot := bot.Bot{}
 
 	demoServiceSender := demo_service.DemoServiceSender{}
@@ -93,7 +97,8 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
 
 	config := command.GoQueryScraperConfig{
-		Command: fmt.Sprintf("^%s (.*)", testCmd),
+		Trigger: testCmd,
+		Capture: "(.*)",
 		TitleSelector: command.SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
@@ -118,7 +123,7 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 	}
 
 	bot.AddCommand(scraper)
-	bot.OnMessage(testConversation, testSender, testCmd+" e-commerce/allinone")
+	bot.OnMessage(testConversation, testSender, bot.Prefix+testCmd+" e-commerce/allinone")
 
 	resultMessage, resultConversation := demoServiceSender.PopMessage()
 
@@ -133,10 +138,14 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
+
+	if demoServiceSender.IsEmpty() == false {
+		t.Errorf("Too many messages!")
+	}
 }
 
 func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
-	testCmd := "!scrape"
+	testCmd := "scrape"
 	bot := bot.Bot{}
 
 	demoServiceSender := demo_service.DemoServiceSender{}
@@ -150,7 +159,8 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
 
 	config := command.GoQueryScraperConfig{
-		Command: fmt.Sprintf("^%s (.*)", testCmd),
+		Trigger: testCmd,
+		Capture: "(.*)",
 		TitleSelector: command.SelectorCapture{
 			Template:       "Title Template!",
 			Selectors:      []string{},
@@ -174,7 +184,7 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	}
 
 	bot.AddCommand(scraper)
-	bot.OnMessage(testConversation, testSender, testCmd+" e-commerce/allinone")
+	bot.OnMessage(testConversation, testSender, bot.Prefix+testCmd+" e-commerce/allinone")
 
 	resultMessage, resultConversation := demoServiceSender.PopMessage()
 	if resultMessage.Title != config.TitleSelector.Template {
@@ -184,10 +194,14 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
+
+	if demoServiceSender.IsEmpty() == false {
+		t.Errorf("Too many messages!")
+	}
 }
 
 func TestGoQueryScraperNoCapture(t *testing.T) {
-	testCmd := "!scrape"
+	testCmd := "scrape"
 	bot := bot.Bot{}
 
 	demoServiceSender := demo_service.DemoServiceSender{}
@@ -201,7 +215,8 @@ func TestGoQueryScraperNoCapture(t *testing.T) {
 	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
 
 	config := command.GoQueryScraperConfig{
-		Command: fmt.Sprintf("^%s", testCmd),
+		Trigger: testCmd,
+		Capture: "", // Gotta capture something, even if it is unused.
 		TitleSelector: command.SelectorCapture{
 			Template:       "Example Scrape",
 			Selectors:      []string{},
@@ -224,7 +239,7 @@ func TestGoQueryScraperNoCapture(t *testing.T) {
 	}
 
 	bot.AddCommand(scraper)
-	bot.OnMessage(testConversation, testSender, testCmd)
+	bot.OnMessage(testConversation, testSender, bot.Prefix+testCmd+" ")
 
 	resultMessage, resultConversation := demoServiceSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Test Sites") {
@@ -233,5 +248,64 @@ func TestGoQueryScraperNoCapture(t *testing.T) {
 
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
+	}
+
+	if demoServiceSender.IsEmpty() == false {
+		t.Errorf("Too many messages!")
+	}
+}
+
+func TestGoQueryScraperUnusedCapture(t *testing.T) {
+	testCmd := "scrape"
+	bot := bot.Bot{}
+
+	demoServiceSender := demo_service.DemoServiceSender{}
+	bot.AddSender(&demoServiceSender)
+
+	testConversation := service.Conversation{
+		ServiceId:      demoServiceSender.Id(),
+		ConversationId: "0",
+	}
+
+	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+
+	config := command.GoQueryScraperConfig{
+		Trigger: testCmd,
+		Capture: "(.*)", // This is a bad idea.
+		TitleSelector: command.SelectorCapture{
+			Template:       "Example Scrape",
+			Selectors:      []string{},
+			HandleMultiple: "First",
+		},
+		URL: "https://webscraper.io/test-sites/e-commerce/allinone",
+		ReplySelector: command.SelectorCapture{
+			Template: "%s",
+			Selectors: []string{
+				"h1",
+			},
+			HandleMultiple: "First",
+		},
+		Help: "This is just a test!",
+	}
+
+	scraper, err := command.GetGoqueryScraper(config)
+	if err != nil {
+		t.Errorf("An error occured when making a reasonable scraper!")
+	}
+
+	bot.AddCommand(scraper)
+	bot.OnMessage(testConversation, testSender, bot.Prefix+testCmd)
+
+	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	if resultMessage.Description != "An error occurred retrieving the webpage." {
+		t.Errorf("An error should be thrown!")
+	}
+
+	if resultConversation != testConversation {
+		t.Errorf("Sender was different!")
+	}
+
+	if demoServiceSender.IsEmpty() == false {
+		t.Errorf("Too many messages!")
 	}
 }

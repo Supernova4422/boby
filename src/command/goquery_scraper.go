@@ -19,7 +19,8 @@ import (
 )
 
 type GoQueryScraperConfig struct {
-	Command       string          // Regular expression which triggers this scraper. Can contain capture groups.
+	Trigger       string          // Word which triggers this command to activate.
+	Capture       string          // How to capture words.
 	TitleSelector SelectorCapture // Regex captures for title replacement.
 	URL           string          // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
 	ReplySelector SelectorCapture
@@ -87,11 +88,14 @@ func GetGoqueryScraper(config GoQueryScraperConfig) (Command, error) {
 			sink,
 		)
 	}
-	regex, err := regexp.Compile(config.Command)
+
+	regex, err := regexp.Compile(config.Capture)
 	if err != nil {
 		return Command{}, err
 	}
+
 	return Command{
+		Trigger: config.Trigger,
 		Pattern: regex,
 		Exec:    curry,
 		Help:    config.Help,
@@ -101,53 +105,56 @@ func GetGoqueryScraper(config GoQueryScraperConfig) (Command, error) {
 // Return the received message
 func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, service.Message)) {
 	substitutions := strings.Count(goQueryScraperConfig.URL, "%s")
-	url := goQueryScraperConfig.URL
 	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
 		sink(sender, service.Message{Description: "An error when building the url."})
 		return
 	}
 
-	for _, capture := range msg[0][1:] {
-		url = fmt.Sprintf(url, capture)
-	}
+	for _, capture := range msg {
+		url := goQueryScraperConfig.URL
 
-	res, err := http.Get(url)
-	if err == nil {
-		defer res.Body.Close()
-		doc, err := goquery.NewDocumentFromReader(res.Body)
+		for _, word := range capture[1:] {
+			url = fmt.Sprintf(url, word)
+		}
+
+		res, err := http.Get(url)
 		if err == nil {
-			if doc.Text() == "" {
-				sink(sender, service.Message{
-					Title:       "Webpage not found.",
-					Description: "Webpage not found at: " + url,
-					URL:         url,
-				})
+			defer res.Body.Close()
+			doc, err := goquery.NewDocumentFromReader(res.Body)
+			if err == nil {
+				if doc.Text() == "" {
+					sink(sender, service.Message{
+						Title:       "Webpage not found.",
+						Description: "Webpage not found at: " + url,
+						URL:         url,
+					})
+				} else {
+					title := selectorCaptureToString(
+						*doc,
+						goQueryScraperConfig.TitleSelector,
+					)
+
+					reply := fmt.Sprintf(
+						"%s\n\nRead more at: %s",
+						selectorCaptureToString(*doc, goQueryScraperConfig.ReplySelector),
+						url,
+					)
+
+					sink(sender, service.Message{
+						Title:       title,
+						Description: reply,
+						URL:         url,
+					})
+				}
 			} else {
-				title := selectorCaptureToString(
-					*doc,
-					goQueryScraperConfig.TitleSelector,
-				)
-
-				reply := fmt.Sprintf(
-					"%s\n\nRead more at: %s",
-					selectorCaptureToString(*doc, goQueryScraperConfig.ReplySelector),
-					url,
-				)
-
-				sink(sender, service.Message{
-					Title:       title,
-					Description: reply,
-					URL:         url,
-				})
+				sink(sender, service.Message{Description: "An error occurred when processing the webpage."})
 			}
 		} else {
-			sink(sender, service.Message{Description: "An error occurred when processing the webpage."})
+			sink(sender, service.Message{
+				Description: "An error occurred retrieving the webpage.",
+				URL:         url,
+			})
 		}
-	} else {
-		sink(sender, service.Message{
-			Description: "An error occurred retrieving the webpage.",
-			URL:         url,
-		})
 	}
 }
 

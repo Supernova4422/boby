@@ -17,7 +17,7 @@ import (
 
 type ConfigTest struct {
 	Input  string
-	Expect []service.Message
+	Expect [][]service.Message
 }
 
 // Check if msg is in a list.
@@ -83,11 +83,14 @@ func getDemoBot(filepath string, bot *bot.Bot) *demo_service.DemoServiceSender {
 }
 
 func TestConfig(t *testing.T) {
-	inputFp := "./config_tests.json"
+	configDir := "./../main"
+	inputFp := configDir + "/config_tests.json"
 	_, err := os.Stat(inputFp)
 
-	if err == nil {
-		bot, err := bot.ConfiguredBot("./../main")
+	if err != nil {
+		t.Log("Configuration file was not used for this test.")
+	} else {
+		bot, err := bot.ConfiguredBot(configDir)
 
 		if err == nil {
 			demoServiceSender := demo_service.DemoServiceSender{}
@@ -103,8 +106,15 @@ func TestConfig(t *testing.T) {
 			testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
 			for _, input := range inputTest {
 				bot.OnMessage(testConversation, testSender, input.Input)
-				resultMessage, _ := demoServiceSender.PopMessage()
-				if !MessageInList(resultMessage, input.Expect) {
+				for _, expect := range input.Expect {
+					resultMessage, _ := demoServiceSender.PopMessage()
+					if !MessageInList(resultMessage, expect) {
+						t.Errorf("Failed on msg: %s", input.Input)
+						t.Fail()
+					}
+				}
+				if demoServiceSender.IsEmpty() == false {
+					t.Errorf("Too many responses from: %s", input.Input)
 					t.Fail()
 				}
 			}

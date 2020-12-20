@@ -7,6 +7,7 @@ import (
 )
 
 type Command struct {
+	Trigger string
 	Pattern *regexp.Regexp
 	Exec    CommandFunc
 	Help    string

@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"regexp"
 	"testing"
 
@@ -14,7 +15,7 @@ import (
 // 1. AddSender
 // 2. AddCommand
 
-func TestParse(t *testing.T) {
+func TestParseWithoutPrefix(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
 	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
@@ -22,11 +23,13 @@ func TestParse(t *testing.T) {
 	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
 	bot.AddSender(&demoServiceSender)
 
-	testCmd := "!repeat"
+	testCmd := "repeat "
 	bot.AddCommand(
-		command.Command{Pattern: regexp.MustCompile("^" + testCmd + " (.*)"),
-			Exec: command.Repeater,
-			Help: "",
+		command.Command{
+			Trigger: testCmd,
+			Pattern: regexp.MustCompile("(.*)"),
+			Exec:    command.Repeater,
+			Help:    "",
 		}) // Repeater command.
 
 	// Message to repeat.
@@ -36,7 +39,85 @@ func TestParse(t *testing.T) {
 	}
 	testSender := service.User{Name: "Test_User", Id: demoServiceSubject.Id()}
 	testMsg := "Test1"
-	testMsgSent := testCmd + " " + testMsg
+	testMsgSent := fmt.Sprintf("%s%s %s", bot.Prefix, testCmd, testMsg)
+	demoServiceSubject.AddMessage(testConversation, testSender, testMsgSent) // Message to repeat
+
+	// Get messages and evaluate
+	demoServiceSubject.Run()
+	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	if resultConversation != testConversation {
+		t.Errorf("Sender was different!")
+	}
+	if resultMessage.Description != testMsg {
+		t.Errorf("Message was different!")
+	}
+}
+
+func TestParseWithPrefix(t *testing.T) {
+	// Prepare context.
+	bot := bot.Bot{}
+	bot.Prefix = "!"
+	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
+	demoServiceSubject.Register(&bot)
+	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
+	bot.AddSender(&demoServiceSender)
+
+	testCmd := "repeat "
+	bot.AddCommand(
+		command.Command{
+			Trigger: testCmd,
+			Pattern: regexp.MustCompile("(.*)"),
+			Exec:    command.Repeater,
+			Help:    "",
+		}) // Repeater command.
+
+	// Message to repeat.
+	testConversation := service.Conversation{
+		ServiceId:      demoServiceSubject.Id(),
+		ConversationId: "0",
+	}
+	testSender := service.User{Name: "Test_User", Id: demoServiceSubject.Id()}
+	testMsg := "Test1"
+	testMsgSent := fmt.Sprintf("%s%s %s", bot.Prefix, testCmd, testMsg)
+	demoServiceSubject.AddMessage(testConversation, testSender, testMsgSent) // Message to repeat
+
+	// Get messages and evaluate
+	demoServiceSubject.Run()
+	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	if resultConversation != testConversation {
+		t.Errorf("Sender was different!")
+	}
+	if resultMessage.Description != testMsg {
+		t.Errorf("Message was different!")
+	}
+}
+
+func TestParseWithoutSpace(t *testing.T) {
+	// Prepare context.
+	bot := bot.Bot{}
+	bot.Prefix = "!"
+	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
+	demoServiceSubject.Register(&bot)
+	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
+	bot.AddSender(&demoServiceSender)
+
+	testCmd := "repeat" // Should be fine.
+	bot.AddCommand(
+		command.Command{
+			Trigger: testCmd,
+			Pattern: regexp.MustCompile("(.*)"),
+			Exec:    command.Repeater,
+			Help:    "",
+		}) // Repeater command.
+	testConversation := service.Conversation{
+		ServiceId:      demoServiceSubject.Id(),
+		ConversationId: "0",
+	}
+	testSender := service.User{Name: "Test_User", Id: demoServiceSubject.Id()}
+	testMsg := "Test1"
+
+	// There are no spaces, however it was neverspecified in testCmd.
+	testMsgSent := fmt.Sprintf("%s%s%s", bot.Prefix, testCmd, testMsg)
 	demoServiceSubject.AddMessage(testConversation, testSender, testMsgSent) // Message to repeat
 
 	// Get messages and evaluate
@@ -54,16 +135,19 @@ func TestParse(t *testing.T) {
 func TestEmpty(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
+	bot.Prefix = "!"
 	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
 	demoServiceSubject.Register(&bot)
 	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
 	bot.AddSender(&demoServiceSender)
 
-	testCmd := "!repeat"
+	testCmd := "repeat"
 	bot.AddCommand(
-		command.Command{Pattern: regexp.MustCompile("^" + testCmd + " (.*)"),
-			Exec: command.Repeater,
-			Help: "",
+		command.Command{
+			Trigger: testCmd + " ",
+			Pattern: regexp.MustCompile("(.*)"),
+			Exec:    command.Repeater,
+			Help:    "",
 		}) // Repeater command.
 
 	// Message to repeat.
@@ -72,8 +156,15 @@ func TestEmpty(t *testing.T) {
 		ConversationId: "0",
 	}
 	testSender := service.User{Name: "Test_User", Id: demoServiceSubject.Id()}
-	demoServiceSubject.AddMessage(testConversation, testSender, "Test1")           // Message to repeat
-	demoServiceSubject.AddMessage(testConversation, testSender, testCmd+"Message") // Message to repeat
+
+	// All should not return a thing.
+
+	// Repeat only after a command.
+	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s", "message3"))
+	// Respect prefix.
+	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s", testCmd, "message2"))
+	// Respect whitespace.
+	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s%s", bot.Prefix, testCmd, "message1"))
 
 	// Get messages and evaluate
 	demoServiceSubject.Run()

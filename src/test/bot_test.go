@@ -62,15 +62,17 @@ func TestOnMessage(t *testing.T) {
 	}
 	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
 	testMsg := "Test1"
-	testCmd := "!repeat"
+	testCmd := "repeat"
 
 	bot.AddCommand(
-		command.Command{Pattern: regexp.MustCompile("^" + testCmd + " (.*)"),
-			Exec: command.Repeater,
-			Help: "",
+		command.Command{
+			Trigger: testCmd,
+			Pattern: regexp.MustCompile("(.*)"),
+			Exec:    command.Repeater,
+			Help:    "",
 		}) // Repeater command.
 
-	bot.OnMessage(testConversation, testSender, testCmd+" "+testMsg)
+	bot.OnMessage(testConversation, testSender, bot.Prefix+testCmd+" "+testMsg)
 
 	// Get messages and evaluate
 	resultMessage, resultConversation := demoServiceSender.PopMessage()
