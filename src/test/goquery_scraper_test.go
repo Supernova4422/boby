@@ -200,6 +200,62 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	}
 }
 
+func TestGoQueryScrapeEscapeUrl(t *testing.T) {
+	testCmd := "scrape"
+	bot := bot.Bot{}
+
+	demoServiceSender := demo_service.DemoServiceSender{}
+	bot.AddSender(&demoServiceSender)
+
+	testConversation := service.Conversation{
+		ServiceId:      demoServiceSender.Id(),
+		ConversationId: "0",
+	}
+
+	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+
+	config := command.GoQueryScraperConfig{
+		Trigger: testCmd,
+		Capture: "(.*)",
+		TitleSelector: command.SelectorCapture{
+			Template:       "Title Template!",
+			Selectors:      []string{},
+			HandleMultiple: "First",
+		},
+		URL: "https://webscraper.io/test-sites/%s",
+		ReplySelector: command.SelectorCapture{
+			Template: "%s",
+			Selectors: []string{
+				"h1",
+			},
+			HandleMultiple: "First",
+		},
+		Help: "This is just a test!",
+	}
+
+	scraper, err := command.GetGoqueryScraper(config)
+
+	if err != nil {
+		t.Errorf("An error occured when making a reasonable scraper!")
+	}
+
+	bot.AddCommand(scraper)
+	bot.OnMessage(testConversation, testSender, bot.Prefix+testCmd+" e-commerce/ allinone")
+
+	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	if resultMessage.URL != "https://webscraper.io/test-sites/e-commerce%2F%20allinone" {
+		t.Errorf("Url should be escaped.")
+	}
+
+	if resultConversation != testConversation {
+		t.Errorf("Sender was different!")
+	}
+
+	if demoServiceSender.IsEmpty() == false {
+		t.Errorf("Too many messages!")
+	}
+}
+
 func TestGoQueryScraperNoCapture(t *testing.T) {
 	testCmd := "scrape"
 	bot := bot.Bot{}

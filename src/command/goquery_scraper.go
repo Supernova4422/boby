@@ -12,6 +12,7 @@ import (
 
 	"math"
 	"net/http"
+	"net/url"
 	"regexp"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
@@ -111,13 +112,13 @@ func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Co
 	}
 
 	for _, capture := range msg {
-		url := goQueryScraperConfig.URL
+		msgUrl := goQueryScraperConfig.URL
 
 		for _, word := range capture[1:] {
-			url = fmt.Sprintf(url, word)
+			msgUrl = fmt.Sprintf(msgUrl, url.PathEscape(word))
 		}
 
-		res, err := http.Get(url)
+		res, err := http.Get(msgUrl)
 		if err == nil {
 			defer res.Body.Close()
 			doc, err := goquery.NewDocumentFromReader(res.Body)
@@ -125,8 +126,8 @@ func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Co
 				if doc.Text() == "" {
 					sink(sender, service.Message{
 						Title:       "Webpage not found.",
-						Description: "Webpage not found at: " + url,
-						URL:         url,
+						Description: "Webpage not found at: " + msgUrl,
+						URL:         msgUrl,
 					})
 				} else {
 					title := selectorCaptureToString(
@@ -137,13 +138,13 @@ func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Co
 					reply := fmt.Sprintf(
 						"%s\n\nRead more at: %s",
 						selectorCaptureToString(*doc, goQueryScraperConfig.ReplySelector),
-						url,
+						msgUrl,
 					)
 
 					sink(sender, service.Message{
 						Title:       title,
 						Description: reply,
-						URL:         url,
+						URL:         msgUrl,
 					})
 				}
 			} else {
@@ -152,7 +153,7 @@ func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Co
 		} else {
 			sink(sender, service.Message{
 				Description: "An error occurred retrieving the webpage.",
-				URL:         url,
+				URL:         msgUrl,
 			})
 		}
 	}
