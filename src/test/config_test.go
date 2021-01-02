@@ -13,6 +13,7 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demo_service"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 )
 
 type ConfigTest struct {
@@ -91,6 +92,9 @@ func TestConfig(t *testing.T) {
 		t.Log("Configuration file was not used for this test.")
 	} else {
 		bot, err := bot.ConfiguredBot(configDir)
+		tempStorage := storage.TempStorage{}
+		var _storage storage.Storage = &tempStorage
+		bot.SetStorage(&_storage)
 
 		if err == nil {
 			demoServiceSender := demo_service.DemoServiceSender{}

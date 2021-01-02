@@ -14,10 +14,11 @@ import (
 
 // Immediately routes all messages from a service.
 type Bot struct {
-	observers []service.ServiceSender
-	commands  []command.Command
-	prefixes  map[string]map[string]string // Example usage:  prefix := prefixes[serviceID][guildID]
-	storage   *storage.Storage
+	observers     []service.ServiceSender
+	commands      []command.Command
+	storage       *storage.Storage
+	prefixes      map[string]map[string]string // Example usage:  prefix := prefixes[serviceID][guildID]
+	defaultPrefix string                       // Prefix to use when one doesn't exist.
 }
 
 func (self *Bot) SetStorage(storage *storage.Storage) {
@@ -38,7 +39,6 @@ func (self *Bot) AddCommand(cmd command.Command) {
 }
 
 func (self *Bot) GetPrefix(conversation service.Conversation) string {
-	defaultPrefix := "!"
 	val, ok := self.prefixes[conversation.ServiceId]
 	if ok {
 		prefix, ok := val[conversation.GuildID]
@@ -46,7 +46,12 @@ func (self *Bot) GetPrefix(conversation service.Conversation) string {
 			return prefix
 		}
 	}
-	return defaultPrefix
+	return self.defaultPrefix
+}
+
+// SetDefaultPrefix sets the bot's prefix when there is no existing one.
+func (self *Bot) SetDefaultPrefix(prefix string) {
+	self.defaultPrefix = prefix
 }
 
 // Given a message, check if any of the commands match, if so, run the command.

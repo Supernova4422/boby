@@ -18,6 +18,8 @@ import (
 func TestParseWithoutPrefix(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
+	prefix := "!"
+	bot.SetDefaultPrefix(prefix)
 	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
 	demoServiceSubject.Register(&bot)
 	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
@@ -39,7 +41,7 @@ func TestParseWithoutPrefix(t *testing.T) {
 	}
 	testSender := service.User{Name: "Test_User", Id: demoServiceSubject.Id()}
 	testMsg := "Test1"
-	testMsgSent := fmt.Sprintf("%s%s %s", bot.Prefix, testCmd, testMsg)
+	testMsgSent := fmt.Sprintf("%s%s %s", prefix, testCmd, testMsg)
 	demoServiceSubject.AddMessage(testConversation, testSender, testMsgSent) // Message to repeat
 
 	// Get messages and evaluate
@@ -56,7 +58,8 @@ func TestParseWithoutPrefix(t *testing.T) {
 func TestParseWithPrefix(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
-	bot.Prefix = "!"
+	prefix := "!"
+	bot.SetDefaultPrefix(prefix)
 	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
 	demoServiceSubject.Register(&bot)
 	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
@@ -78,7 +81,7 @@ func TestParseWithPrefix(t *testing.T) {
 	}
 	testSender := service.User{Name: "Test_User", Id: demoServiceSubject.Id()}
 	testMsg := "Test1"
-	testMsgSent := fmt.Sprintf("%s%s %s", bot.Prefix, testCmd, testMsg)
+	testMsgSent := fmt.Sprintf("%s%s %s", prefix, testCmd, testMsg)
 	demoServiceSubject.AddMessage(testConversation, testSender, testMsgSent) // Message to repeat
 
 	// Get messages and evaluate
@@ -95,7 +98,8 @@ func TestParseWithPrefix(t *testing.T) {
 func TestParseWithoutSpace(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
-	bot.Prefix = "!"
+	prefix := "!"
+	bot.SetDefaultPrefix(prefix)
 	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
 	demoServiceSubject.Register(&bot)
 	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
@@ -117,7 +121,7 @@ func TestParseWithoutSpace(t *testing.T) {
 	testMsg := "Test1"
 
 	// There are no spaces, however it was neverspecified in testCmd.
-	testMsgSent := fmt.Sprintf("%s%s%s", bot.Prefix, testCmd, testMsg)
+	testMsgSent := fmt.Sprintf("%s%s%s", prefix, testCmd, testMsg)
 	demoServiceSubject.AddMessage(testConversation, testSender, testMsgSent) // Message to repeat
 
 	// Get messages and evaluate
@@ -135,7 +139,8 @@ func TestParseWithoutSpace(t *testing.T) {
 func TestEmpty(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
-	bot.Prefix = "!"
+	prefix := "!"
+	bot.SetDefaultPrefix(prefix)
 	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
 	demoServiceSubject.Register(&bot)
 	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
@@ -164,7 +169,7 @@ func TestEmpty(t *testing.T) {
 	// Respect prefix.
 	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s", testCmd, "message2"))
 	// Respect whitespace.
-	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s%s", bot.Prefix, testCmd, "message1"))
+	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s%s", prefix, testCmd, "message1"))
 
 	// Get messages and evaluate
 	demoServiceSubject.Run()
