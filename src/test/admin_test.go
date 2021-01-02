@@ -12,10 +12,11 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 )
 
-const IM_ADMIN = "imadmin"
-const SET_ADMIN = "setadmin"
-const UNSET_ADMIN = "unsetadmin"
-const IS_ADMIN = "isadmin"
+const PREFIX = ""
+const IM_ADMIN = PREFIX + "imadmin"
+const SET_ADMIN = PREFIX + "setadmin"
+const UNSET_ADMIN = PREFIX + "unsetadmin"
+const IS_ADMIN = PREFIX + "isadmin"
 
 // getBot retrieves a bot with commands for managing admins.
 func getBot() (*bot.Bot, *demo_service.DemoServiceSender, *storage.TempStorage) {
@@ -62,6 +63,8 @@ func getBot() (*bot.Bot, *demo_service.DemoServiceSender, *storage.TempStorage) 
 	tempStorage := storage.TempStorage{}
 	var _storage storage.Storage = &tempStorage
 	bot.SetStorage(&_storage)
+	bot.SetDefaultPrefix(PREFIX)
+
 	return &bot, &demoServiceSender, &tempStorage
 }
 
