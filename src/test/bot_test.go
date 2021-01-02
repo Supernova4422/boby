@@ -51,6 +51,8 @@ func TestRouteById(t *testing.T) {
 func TestOnMessage(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
+	prefix := "!"
+	bot.SetDefaultPrefix(prefix)
 
 	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
 	bot.AddSender(&demoServiceSender)
@@ -72,7 +74,7 @@ func TestOnMessage(t *testing.T) {
 			Help:    "",
 		}) // Repeater command.
 
-	bot.OnMessage(testConversation, testSender, bot.Prefix+testCmd+" "+testMsg)
+	bot.OnMessage(testConversation, testSender, prefix+testCmd+" "+testMsg)
 
 	// Get messages and evaluate
 	resultMessage, resultConversation := demoServiceSender.PopMessage()
@@ -102,5 +104,18 @@ func TestOnMessageRequireCommand(t *testing.T) {
 	bot.OnMessage(testConversation, testSender, "Test1")
 	if demoServiceSender.IsEmpty() == false {
 		t.Errorf("Nothing should have happened!")
+	}
+}
+
+func TestDefaultPrefix(t *testing.T) {
+	bot := bot.Bot{}
+	testConversation := service.Conversation{
+		ServiceId:      demo_service.SERVICE_ID,
+		ConversationId: "0",
+	}
+	prefix := bot.GetPrefix(testConversation)
+
+	if prefix != "" {
+		t.Errorf("The default prefix should be the empty string.")
 	}
 }

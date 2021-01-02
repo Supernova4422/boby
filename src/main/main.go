@@ -7,6 +7,7 @@ import (
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/discord_service"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 )
 
 func main() {
@@ -15,6 +16,12 @@ func main() {
 		discordSubject, discordSender, err := discord_service.NewDiscords()
 		if err == nil {
 			defer discordSubject.Close() // Cleanly close down the Discord session.
+			_jsonStorage, err := storage.LoadFromFile("storage.json")
+			var jsonStorage storage.Storage = &_jsonStorage
+			if err == nil {
+				discordSubject.SetStorage(&jsonStorage)
+				bot.SetStorage(&jsonStorage)
+			}
 
 			discordSubject.Register(&bot)
 			bot.AddSender(discordSender)

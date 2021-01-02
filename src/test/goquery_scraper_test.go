@@ -85,6 +85,8 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 func TestGoQueryScraperWithOneCapture(t *testing.T) {
 	testCmd := "scrape"
 	bot := bot.Bot{}
+	prefix := "!"
+	bot.SetDefaultPrefix(prefix)
 
 	demoServiceSender := demo_service.DemoServiceSender{}
 	bot.AddSender(&demoServiceSender)
@@ -123,7 +125,7 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 	}
 
 	bot.AddCommand(scraper)
-	bot.OnMessage(testConversation, testSender, bot.Prefix+testCmd+" e-commerce/allinone")
+	bot.OnMessage(testConversation, testSender, prefix+testCmd+" e-commerce/allinone")
 
 	resultMessage, resultConversation := demoServiceSender.PopMessage()
 
@@ -147,6 +149,8 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	testCmd := "scrape"
 	bot := bot.Bot{}
+	prefix := "!"
+	bot.SetDefaultPrefix(prefix)
 
 	demoServiceSender := demo_service.DemoServiceSender{}
 	bot.AddSender(&demoServiceSender)
@@ -184,7 +188,7 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	}
 
 	bot.AddCommand(scraper)
-	bot.OnMessage(testConversation, testSender, bot.Prefix+testCmd+" e-commerce/allinone")
+	bot.OnMessage(testConversation, testSender, prefix+testCmd+" e-commerce/allinone")
 
 	resultMessage, resultConversation := demoServiceSender.PopMessage()
 	if resultMessage.Title != config.TitleSelector.Template {
@@ -203,6 +207,8 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 func TestGoQueryScrapeEscapeUrl(t *testing.T) {
 	testCmd := "scrape"
 	bot := bot.Bot{}
+	prefix := "!"
+	bot.SetDefaultPrefix(prefix)
 
 	demoServiceSender := demo_service.DemoServiceSender{}
 	bot.AddSender(&demoServiceSender)
@@ -240,7 +246,7 @@ func TestGoQueryScrapeEscapeUrl(t *testing.T) {
 	}
 
 	bot.AddCommand(scraper)
-	bot.OnMessage(testConversation, testSender, bot.Prefix+testCmd+" e-commerce/ allinone")
+	bot.OnMessage(testConversation, testSender, prefix+testCmd+" e-commerce/ allinone")
 
 	resultMessage, resultConversation := demoServiceSender.PopMessage()
 	if resultMessage.URL != "https://webscraper.io/test-sites/e-commerce%2F%20allinone" {
@@ -259,6 +265,8 @@ func TestGoQueryScrapeEscapeUrl(t *testing.T) {
 func TestGoQueryScraperNoCapture(t *testing.T) {
 	testCmd := "scrape"
 	bot := bot.Bot{}
+	prefix := "!"
+	bot.SetDefaultPrefix(prefix)
 
 	demoServiceSender := demo_service.DemoServiceSender{}
 	bot.AddSender(&demoServiceSender)
@@ -295,7 +303,7 @@ func TestGoQueryScraperNoCapture(t *testing.T) {
 	}
 
 	bot.AddCommand(scraper)
-	bot.OnMessage(testConversation, testSender, bot.Prefix+testCmd+" ")
+	bot.OnMessage(testConversation, testSender, prefix+testCmd+" ")
 
 	resultMessage, resultConversation := demoServiceSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Test Sites") {
@@ -314,6 +322,8 @@ func TestGoQueryScraperNoCapture(t *testing.T) {
 func TestGoQueryScraperUnusedCapture(t *testing.T) {
 	testCmd := "scrape"
 	bot := bot.Bot{}
+	prefix := "!"
+	bot.SetDefaultPrefix(prefix)
 
 	demoServiceSender := demo_service.DemoServiceSender{}
 	bot.AddSender(&demoServiceSender)
@@ -350,7 +360,7 @@ func TestGoQueryScraperUnusedCapture(t *testing.T) {
 	}
 
 	bot.AddCommand(scraper)
-	bot.OnMessage(testConversation, testSender, bot.Prefix+testCmd)
+	bot.OnMessage(testConversation, testSender, prefix+testCmd)
 
 	resultMessage, resultConversation := demoServiceSender.PopMessage()
 	if resultMessage.Description != "An error occurred retrieving the webpage." {
