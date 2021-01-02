@@ -6,9 +6,7 @@ package service
 // Examples include:
 // 	   1. A conversation between a bot and a user.
 // 	   2. A chatroom with many human and bot users.
-type Conversation struct {
-	ServiceId      string
-	ConversationId string
-	GuildID        string
-	Admin          bool
+type Guild struct {
+	ServiceId string
+	GuildID   string
 }

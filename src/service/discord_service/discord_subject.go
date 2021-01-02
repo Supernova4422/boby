@@ -1,7 +1,10 @@
 package discord_service
 
 import (
+	"fmt"
+
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -9,6 +12,11 @@ type DiscordSubject struct {
 	discord       *discordgo.Session
 	discordSender DiscordSender
 	observers     []*service.ServiceObserver
+	storage       *storage.Storage
+}
+
+func (self *DiscordSubject) SetStorage(storage *storage.Storage) {
+	self.storage = storage
 }
 
 func (self *DiscordSubject) Register(observer service.ServiceObserver) {
@@ -33,11 +41,33 @@ func (self *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.Mes
 	conversation := service.Conversation{
 		ServiceId:      self.Id(),
 		ConversationId: m.ChannelID,
+		GuildID:        m.GuildID,
+		Admin:          false,
+	}
+
+	discordGuild, err := s.Guild(m.GuildID)
+	if err == nil {
+		conversation.Admin = discordGuild.OwnerID == m.Author.ID
 	}
 
 	user := service.User{
 		Name: m.Author.ID,
 		Id:   self.Id(),
+	}
+
+	guild := service.Guild{
+		ServiceId: self.Id(),
+		GuildID:   m.GuildID,
+	}
+
+	if conversation.Admin == false {
+		for _, role := range m.Member.Roles {
+			updatedRole := fmt.Sprintf("<@&%s>", role)
+			if (*self.storage).IsAdmin(guild, updatedRole) {
+				conversation.Admin = true
+				break
+			}
+		}
 	}
 
 	for _, service := range self.observers {

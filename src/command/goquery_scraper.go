@@ -16,6 +16,7 @@ import (
 	"regexp"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -79,13 +80,13 @@ func selectorCaptureToString(doc goquery.Document, selectorCapture SelectorCaptu
 
 // GetGoqueryScraper converts a config to a scraper.
 func GetGoqueryScraper(config GoQueryScraperConfig) (Command, error) {
-
-	curry := func(sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, service.Message)) {
+	curry := func(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 		goqueryScraper(
 			config,
 			sender,
 			user,
 			msg,
+			storage,
 			sink,
 		)
 	}
@@ -104,7 +105,7 @@ func GetGoqueryScraper(config GoQueryScraperConfig) (Command, error) {
 }
 
 // Return the received message
-func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, service.Message)) {
+func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 	substitutions := strings.Count(goQueryScraperConfig.URL, "%s")
 	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
 		sink(sender, service.Message{Description: "An error when building the url."})

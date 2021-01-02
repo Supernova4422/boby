@@ -12,6 +12,7 @@ import (
 	"regexp"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 )
 
 type ScraperConfig struct {
@@ -67,7 +68,7 @@ func GetScraper(config ScraperConfig) (Command, error) {
 	webpage_capture := regexp.MustCompile(config.Reply_capture)
 	title_capture := regexp.MustCompile(config.Title_capture)
 
-	curry := func(sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, service.Message)) {
+	curry := func(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 		scraper(config.URL,
 			webpage_capture,
 			config.Title_template,
@@ -75,6 +76,7 @@ func GetScraper(config ScraperConfig) (Command, error) {
 			sender,
 			user,
 			msg,
+			storage,
 			sink,
 		)
 	}
@@ -90,7 +92,7 @@ func GetScraper(config ScraperConfig) (Command, error) {
 }
 
 // Return the received message
-func scraper(url_template string, webpage_capture *regexp.Regexp, title_template string, title_capture *regexp.Regexp, sender service.Conversation, user service.User, msg [][]string, sink func(service.Conversation, service.Message)) {
+func scraper(url_template string, webpage_capture *regexp.Regexp, title_template string, title_capture *regexp.Regexp, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 	substitutions := strings.Count(url_template, "%s")
 	url := url_template
 	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
