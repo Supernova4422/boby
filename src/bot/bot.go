@@ -99,6 +99,8 @@ func (self *Bot) RouteById(conversation service.Conversation, msg service.Messag
 // Get a bot that is configured.
 func ConfiguredBot(config_dir string) (Bot, error) {
 	bot := Bot{}
+	bot.SetDefaultPrefix("!")
+
 	scraper_path := path.Join(config_dir, "scraper_config.json")
 	scraper_configs, err := command.GetScraperConfigs(scraper_path)
 	if err != nil {
