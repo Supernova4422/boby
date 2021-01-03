@@ -127,6 +127,8 @@ func ConfiguredBot(config_dir string) (Bot, error) {
 			return bot, err
 		}
 	}
+
+	// TODO: Helptext is hardcoded for discord, and is therefore a leaky abstraction.
 	bot.AddCommand(
 		command.Command{
 			Trigger: "imadmin",
@@ -150,7 +152,7 @@ func ConfiguredBot(config_dir string) (Bot, error) {
 			Trigger: "setadmin",
 			Pattern: regexp.MustCompile("(.*)"),
 			Exec:    command.SetAdmin,
-			Help:    "[@role or @user] | set a role or user as an admin, therefore giving them all permissions for this bot. A server owner is always an admin.",
+			Help:    "[@role or @user] | set a role or user as an admin, therefore giving them all permissions for this bot. Users/Roles with any of the following server permissions are automatically treated as admin: 'Administrator', 'Manage Server', 'Manage Webhooks.'",
 		},
 	)
 
