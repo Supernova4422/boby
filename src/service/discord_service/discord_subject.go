@@ -62,6 +62,29 @@ func (self *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.Mes
 
 	if conversation.Admin == false {
 		for _, role := range m.Member.Roles {
+			for _, guildRole := range discordGuild.Roles {
+				if role == guildRole.ID {
+					adminPermissions := []int{
+						discordgo.PermissionAdministrator,
+						discordgo.PermissionManageServer,
+						discordgo.PermissionManageWebhooks,
+					}
+					for permission := range adminPermissions {
+						if (guildRole.Permissions & permission) == permission {
+							conversation.Admin = true
+							break
+						}
+					}
+					if conversation.Admin {
+						break
+					}
+				}
+			}
+
+			if conversation.Admin {
+				break
+			}
+
 			updatedRole := fmt.Sprintf("<@&%s>", role)
 			if (*self.storage).IsAdmin(guild, updatedRole) {
 				conversation.Admin = true
