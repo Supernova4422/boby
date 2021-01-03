@@ -19,6 +19,7 @@ type JsonStorage struct {
 func LoadFromFile(filepath string) (JsonStorage, error) {
 	config := JsonStorage{
 		filepath: filepath,
+		mutex:    &sync.Mutex{},
 	}
 
 	// Make an empty file.
