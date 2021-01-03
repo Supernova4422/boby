@@ -27,7 +27,7 @@ func getBot() (*bot.Bot, *demo_service.DemoServiceSender, *storage.TempStorage) 
 			Trigger: IM_ADMIN,
 			Pattern: regexp.MustCompile("(.*)"),
 			Exec:    command.ImAdmin,
-			Help:    "Check if the sender is an admin.",
+			Help:    "[@role or @user] | Check if the sender is an admin.",
 		},
 	)
 
@@ -36,16 +36,17 @@ func getBot() (*bot.Bot, *demo_service.DemoServiceSender, *storage.TempStorage) 
 			Trigger: IS_ADMIN,
 			Pattern: regexp.MustCompile("(.*)"),
 			Exec:    command.CheckAdmin,
-			Help:    "Check if someone is an admin.",
+			Help:    " | Check if the sender is an admin.",
 		},
 	)
 
+	// This help text is discord specific.
 	bot.AddCommand(
 		command.Command{
 			Trigger: SET_ADMIN,
 			Pattern: regexp.MustCompile("(.*)"),
 			Exec:    command.SetAdmin,
-			Help:    "Check if the sender is an admin.",
+			Help:    "[@role or @user] | set a role or user as an admin, therefore giving them all permissions for this bot. A server owner is always an admin.",
 		},
 	)
 
@@ -54,7 +55,7 @@ func getBot() (*bot.Bot, *demo_service.DemoServiceSender, *storage.TempStorage) 
 			Trigger: UNSET_ADMIN,
 			Pattern: regexp.MustCompile("(.*)"),
 			Exec:    command.UnsetAdmin,
-			Help:    "Check if the sender is an admin.",
+			Help:    "[@role or @user] | unset a role or user as an admin, therefore giving them usual permissions.",
 		},
 	)
 

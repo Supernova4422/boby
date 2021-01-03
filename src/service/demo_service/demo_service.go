@@ -39,4 +39,7 @@ func (self *DemoService) Run() {
 			(*service).OnMessage(conversation, user, msg)
 		}
 	}
+	self.messages = make([]string, 0)
+	self.conversations = make([]service.Conversation, 0)
+	self.users = make([]service.User, 0)
 }
