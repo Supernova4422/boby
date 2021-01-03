@@ -57,8 +57,8 @@ func (j *JsonStorage) SaveToFile() error {
 	return nil
 }
 
-func (j *JsonStorage) GetValue(guild service.Guild, key string) {
-	j.TempStorage.GetValue(guild, key)
+func (j *JsonStorage) GetValue(guild service.Guild, key string) (string, error) {
+	return j.TempStorage.GetValue(guild, key)
 }
 func (j *JsonStorage) SetValue(guild service.Guild, key string, value string) {
 	j.mutex.Lock()
