@@ -31,9 +31,10 @@ type GoQueryScraperConfig struct {
 
 // SelectorCapture is a method to capture from a webpage.
 type SelectorCapture struct {
-	Template       string   // Message template to be filled out.
-	Selectors      []string // What captures to use to fill out the template
-	HandleMultiple string   // How to handle multiple captures. "Random" or "First."
+	Template       string              // Message template to be filled out.
+	Selectors      []string            // What captures to use to fill out the template
+	HandleMultiple string              // How to handle multiple captures. "Random" or "First."
+	Replacements   []map[string]string // Replacements for each entry in selectors.
 }
 
 // Match all selectors and fill out template. Then using HandleMultiple decide which to use.
@@ -71,7 +72,16 @@ func selectorCaptureToString(doc goquery.Document, selectorCapture SelectorCaptu
 	tmp := make([]interface{}, len(selectorCapture.Selectors))
 	for i, selector := range allCaptures {
 		selectorIndex := selector.Slice(int(index), int(index)+1)
-		tmp[i] = strings.TrimSpace(selectorIndex.Text())
+		val := strings.TrimSpace(selectorIndex.Text())
+		if i < len(selectorCapture.Replacements) {
+			for search, replace := range selectorCapture.Replacements[i] {
+				if strings.Contains(val, search) {
+					val = strings.ReplaceAll(val, search, replace)
+					break
+				}
+			}
+		}
+		tmp[i] = val
 	}
 
 	reply = fmt.Sprintf(reply, tmp...)
