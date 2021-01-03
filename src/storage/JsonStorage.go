@@ -20,14 +20,13 @@ func LoadFromFile(filepath string) (JsonStorage, error) {
 	config := JsonStorage{
 		filepath: filepath,
 	}
-	config.mutex.Unlock()
+
+	// Make an empty file.
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
 		err := config.SaveToFile()
 		if err != nil {
 			return config, fmt.Errorf("There was an error making an example file")
 		}
-
-		return config, fmt.Errorf("File not found")
 	}
 
 	bytes, err := ioutil.ReadFile(filepath)
