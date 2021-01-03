@@ -17,8 +17,7 @@ type Bot struct {
 	observers     []service.ServiceSender
 	commands      []command.Command
 	storage       *storage.Storage
-	prefixes      map[string]map[string]string // Example usage:  prefix := prefixes[serviceID][guildID]
-	defaultPrefix string                       // Prefix to use when one doesn't exist.
+	defaultPrefix string // Prefix to use when one doesn't exist.
 }
 
 func (self *Bot) SetStorage(storage *storage.Storage) {
@@ -39,14 +38,19 @@ func (self *Bot) AddCommand(cmd command.Command) {
 }
 
 func (self *Bot) GetPrefix(conversation service.Conversation) string {
-	val, ok := self.prefixes[conversation.ServiceId]
-	if ok {
-		prefix, ok := val[conversation.GuildID]
-		if ok {
-			return prefix
-		}
+	guild := service.Guild{
+		ServiceId: conversation.ServiceId,
+		GuildID:   conversation.GuildID,
 	}
-	return self.defaultPrefix
+	if self.storage == nil {
+		return self.defaultPrefix
+	}
+
+	prefix, err := (*self.storage).GetValue(guild, "prefix")
+	if err != nil {
+		return self.defaultPrefix
+	}
+	return prefix
 }
 
 // SetDefaultPrefix sets the bot's prefix when there is no existing one.
@@ -57,11 +61,10 @@ func (self *Bot) SetDefaultPrefix(prefix string) {
 // Given a message, check if any of the commands match, if so, run the command.
 func (self *Bot) OnMessage(conversation service.Conversation, sender service.User, msg string) {
 	prefix := self.GetPrefix(conversation)
-	setPrefix := prefix + "prefix"
 	if msg == prefix+"help" {
 		helpMsg := "Commands: \n"
 		for i, command := range self.commands {
-			helpMsg += fmt.Sprintf("%s. %s\n", strconv.Itoa(i+1), command.Help)
+			helpMsg += fmt.Sprintf("%s. %s%s %s\n", strconv.Itoa(i+1), prefix, command.Trigger, command.Help)
 		}
 		self.RouteById(
 			conversation,
@@ -70,11 +73,6 @@ func (self *Bot) OnMessage(conversation service.Conversation, sender service.Use
 				Description: helpMsg,
 				URL:         "https://github.com/BKrajancic/FLD-Bot",
 			})
-	} else if strings.HasPrefix(msg, setPrefix) {
-		newPrefix := strings.TrimSpace(msg[len(setPrefix):])
-		if newPrefix != "" {
-			self.prefixes[conversation.ServiceId][conversation.GuildID] = newPrefix
-		}
 	} else {
 		for _, command := range self.commands {
 			trigger := fmt.Sprintf("%s%s", prefix, command.Trigger)
@@ -131,37 +129,46 @@ func ConfiguredBot(config_dir string) (Bot, error) {
 	}
 	bot.AddCommand(
 		command.Command{
-			"imadmin",
-			regexp.MustCompile("(.*)"),
-			command.ImAdmin,
-			"Check if the sender is an admin.",
+			Trigger: "imadmin",
+			Pattern: regexp.MustCompile("(.*)"),
+			Exec:    command.ImAdmin,
+			Help:    "[@role or @user] | Check if the sender is an admin.",
 		},
 	)
 
 	bot.AddCommand(
 		command.Command{
-			"isadmin",
-			regexp.MustCompile("(.*)"),
-			command.CheckAdmin,
-			"Check if the sender is an admin.",
+			Trigger: "isadmin",
+			Pattern: regexp.MustCompile("(.*)"),
+			Exec:    command.CheckAdmin,
+			Help:    " | Check if the sender is an admin.",
 		},
 	)
 
 	bot.AddCommand(
 		command.Command{
-			"setadmin",
-			regexp.MustCompile("(.*)"),
-			command.SetAdmin,
-			"Check if the sender is an admin.",
+			Trigger: "setadmin",
+			Pattern: regexp.MustCompile("(.*)"),
+			Exec:    command.SetAdmin,
+			Help:    "[@role or @user] | set a role or user as an admin, therefore giving them all permissions for this bot. A server owner is always an admin.",
 		},
 	)
 
 	bot.AddCommand(
 		command.Command{
-			"unsetAdmin",
-			regexp.MustCompile("(.*)"),
-			command.UnsetAdmin,
-			"Check if the sender is an admin.",
+			Trigger: "unsetAdmin",
+			Pattern: regexp.MustCompile("(.*)"),
+			Exec:    command.UnsetAdmin,
+			Help:    "[@role or @user] | unset a role or user as an admin, therefore giving them usual permissions.",
+		},
+	)
+
+	bot.AddCommand(
+		command.Command{
+			Trigger: "setprefix",
+			Pattern: regexp.MustCompile("(.*)"),
+			Exec:    command.UnsetAdmin,
+			Help:    "[word] | Set the prefix of all commands of this bot, for this server.",
 		},
 	)
 
