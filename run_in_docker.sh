@@ -14,4 +14,4 @@ then
     exit $? 
 fi
 
-docker run --name ${name} -d ${name}:${tag}
+docker run --name ${name} --restart always -d ${name}:${tag}
