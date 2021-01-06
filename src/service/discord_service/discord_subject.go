@@ -69,7 +69,7 @@ func (self *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.Mes
 						discordgo.PermissionManageServer,
 						discordgo.PermissionManageWebhooks,
 					}
-					for permission := range adminPermissions {
+					for _, permission := range adminPermissions {
 						if (guildRole.Permissions & permission) == permission {
 							conversation.Admin = true
 							break
