@@ -85,7 +85,7 @@ func getDemoBot(filepath string, bot *bot.Bot) *demoservice.DemoSender {
 
 func TestConfig(t *testing.T) {
 	configDir := "./../main"
-	inputFp := configDir + "/configTests.json"
+	inputFp := configDir + "/config_tests.json"
 	_, err := os.Stat(inputFp)
 
 	if err != nil {
