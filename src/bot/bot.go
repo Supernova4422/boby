@@ -104,7 +104,7 @@ func ConfiguredBot(configDir string) (Bot, error) {
 	bot := Bot{}
 	bot.SetDefaultPrefix("!")
 
-	scraperPath := path.Join(configDir, "scraperConfig.json")
+	scraperPath := path.Join(configDir, "scraper_config.json")
 	scraperConfigs, err := command.GetScraperConfigs(scraperPath)
 	if err != nil {
 		return bot, err
@@ -118,7 +118,7 @@ func ConfiguredBot(configDir string) (Bot, error) {
 			return bot, err
 		}
 	}
-	configPath := path.Join(configDir, "goquery_scraperConfig.json")
+	configPath := path.Join(configDir, "goquery_scraper_config.json")
 	goqueryScraperConfigs, err := command.GetGoqueryScraperConfigs(configPath)
 	if err != nil {
 		return bot, err
