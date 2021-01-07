@@ -61,6 +61,13 @@ func (self *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.Mes
 	}
 
 	if conversation.Admin == false {
+		userId := fmt.Sprintf("<@!%s>", m.Author.ID)
+		if (*self.storage).IsAdmin(guild, userId) {
+			conversation.Admin = true
+		}
+	}
+
+	if conversation.Admin == false {
 		for _, role := range m.Member.Roles {
 			for _, guildRole := range discordGuild.Roles {
 				if role == guildRole.ID {
