@@ -1,4 +1,4 @@
-name: Go
+name: Test
 
 on:
   push:
@@ -28,10 +28,6 @@ jobs:
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
         fi
-
-    - name: Build
-      working-directory: ./src/main
-      run: go build -v .
 
     - name: Test
       working-directory: ./src/test
