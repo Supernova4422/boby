@@ -12,11 +12,11 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 )
 
-const PREFIX = ""
-const IM_ADMIN = PREFIX + "imadmin"
-const SET_ADMIN = PREFIX + "setadmin"
-const UNSET_ADMIN = PREFIX + "unsetadmin"
-const IS_ADMIN = PREFIX + "isadmin"
+const prefix = ""
+const imAdmin = prefix + "imadmin"
+const setAdmin = prefix + "setadmin"
+const unsetAdmin = prefix + "unsetadmin"
+const isAdmin = prefix + "isadmin"
 
 // getBot retrieves a bot with commands for managing admins.
 func getBot() (*bot.Bot, *demoservice.DemoSender, *storage.TempStorage) {
@@ -24,7 +24,7 @@ func getBot() (*bot.Bot, *demoservice.DemoSender, *storage.TempStorage) {
 
 	bot.AddCommand(
 		command.Command{
-			Trigger: IM_ADMIN,
+			Trigger: imAdmin,
 			Pattern: regexp.MustCompile("(.*)"),
 			Exec:    command.ImAdmin,
 			Help:    "[@role or @user] | Check if the sender is an admin.",
@@ -33,7 +33,7 @@ func getBot() (*bot.Bot, *demoservice.DemoSender, *storage.TempStorage) {
 
 	bot.AddCommand(
 		command.Command{
-			Trigger: IS_ADMIN,
+			Trigger: isAdmin,
 			Pattern: regexp.MustCompile("(.*)"),
 			Exec:    command.CheckAdmin,
 			Help:    " | Check if the sender is an admin.",
@@ -43,7 +43,7 @@ func getBot() (*bot.Bot, *demoservice.DemoSender, *storage.TempStorage) {
 	// This help text is discord specific.
 	bot.AddCommand(
 		command.Command{
-			Trigger: SET_ADMIN,
+			Trigger: setAdmin,
 			Pattern: regexp.MustCompile("(.*)"),
 			Exec:    command.SetAdmin,
 			Help:    "[@role or @user] | set a role or user as an admin, therefore giving them all permissions for this bot. A server owner is always an admin.",
@@ -52,7 +52,7 @@ func getBot() (*bot.Bot, *demoservice.DemoSender, *storage.TempStorage) {
 
 	bot.AddCommand(
 		command.Command{
-			Trigger: UNSET_ADMIN,
+			Trigger: unsetAdmin,
 			Pattern: regexp.MustCompile("(.*)"),
 			Exec:    command.UnsetAdmin,
 			Help:    "[@role or @user] | unset a role or user as an admin, therefore giving them usual permissions.",
@@ -64,7 +64,7 @@ func getBot() (*bot.Bot, *demoservice.DemoSender, *storage.TempStorage) {
 	tempStorage := storage.TempStorage{}
 	var _storage storage.Storage = &tempStorage
 	bot.SetStorage(&_storage)
-	bot.SetDefaultPrefix(PREFIX)
+	bot.SetDefaultPrefix(prefix)
 
 	return &bot, &demoSender, &tempStorage
 }
@@ -80,7 +80,7 @@ func TestIsAdmin(t *testing.T) {
 	bot.OnMessage(
 		testConversation,
 		testSender,
-		IM_ADMIN,
+		imAdmin,
 	)
 
 	resultMessage, _ := demoSender.PopMessage()
@@ -100,7 +100,7 @@ func TestSetAdmin(t *testing.T) {
 	bot.OnMessage(
 		testConversation,
 		testSender,
-		SET_ADMIN+" "+testSender.Name,
+		setAdmin+" "+testSender.Name,
 	)
 
 	if tempStorage.Admins[testConversation.ServiceID][testConversation.GuildID][0] != testSender.Name {
@@ -119,7 +119,7 @@ func TestDontSetAdmin(t *testing.T) {
 	bot.OnMessage(
 		testConversation,
 		testSender,
-		SET_ADMIN+" "+testSender.Name,
+		setAdmin+" "+testSender.Name,
 	)
 
 	_, ok := tempStorage.Admins[testConversation.ServiceID][testConversation.GuildID]
@@ -140,7 +140,7 @@ func TestUnsetAdmin(t *testing.T) {
 	bot.OnMessage(
 		testConversation,
 		testSender,
-		SET_ADMIN+" "+testSender.Name,
+		setAdmin+" "+testSender.Name,
 	)
 
 	if tempStorage.Admins[testConversation.ServiceID][testConversation.GuildID][0] != testSender.Name {
@@ -150,7 +150,7 @@ func TestUnsetAdmin(t *testing.T) {
 	bot.OnMessage(
 		testConversation,
 		testSender,
-		UNSET_ADMIN+" "+testSender.Name,
+		unsetAdmin+" "+testSender.Name,
 	)
 	admins := tempStorage.Admins[testConversation.ServiceID][testConversation.GuildID]
 	if len(admins) != 0 {
@@ -169,7 +169,7 @@ func TestDontUnsetAdmin(t *testing.T) {
 	bot.OnMessage(
 		testConversation,
 		testSender,
-		SET_ADMIN+" "+testSender.Name,
+		setAdmin+" "+testSender.Name,
 	)
 
 	if tempStorage.Admins[testConversation.ServiceID][testConversation.GuildID][0] != testSender.Name {
@@ -180,7 +180,7 @@ func TestDontUnsetAdmin(t *testing.T) {
 	bot.OnMessage(
 		testConversation,
 		testSender,
-		UNSET_ADMIN+" "+testSender.Name,
+		unsetAdmin+" "+testSender.Name,
 	)
 	if tempStorage.Admins[testConversation.ServiceID][testConversation.GuildID][0] != testSender.Name {
 		t.Errorf("Admin was removed.")
@@ -199,7 +199,7 @@ func TestIsAdminCmd(t *testing.T) {
 	bot.OnMessage(
 		testConversation,
 		testSender,
-		IS_ADMIN+" "+testSender.Name,
+		isAdmin+" "+testSender.Name,
 	)
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Description != fmt.Sprintf("%s is not an admin.", testSender.Name) {
@@ -209,13 +209,13 @@ func TestIsAdminCmd(t *testing.T) {
 	bot.OnMessage(
 		testConversation,
 		testSender,
-		SET_ADMIN+" "+testSender.Name,
+		setAdmin+" "+testSender.Name,
 	)
 
 	bot.OnMessage(
 		testConversation,
 		testSender,
-		IS_ADMIN+" "+testSender.Name,
+		isAdmin+" "+testSender.Name,
 	)
 
 	resultMessage, resultConversation = demoSender.PopMessage()
@@ -239,7 +239,7 @@ func TestImAdminCmd(t *testing.T) {
 	bot.OnMessage(
 		testConversation,
 		testSender,
-		IM_ADMIN,
+		imAdmin,
 	)
 
 	resultMessage, _ := demoSender.PopMessage()
@@ -251,7 +251,7 @@ func TestImAdminCmd(t *testing.T) {
 	bot.OnMessage(
 		testConversation,
 		testSender,
-		IM_ADMIN,
+		imAdmin,
 	)
 	resultMessage, _ = demoSender.PopMessage()
 	if resultMessage.Description != "You are not an admin." {
@@ -271,7 +271,7 @@ func TestImAdminCmdAfterSet(t *testing.T) {
 	bot.OnMessage(
 		testConversation,
 		testSender,
-		IM_ADMIN,
+		imAdmin,
 	)
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Description != "You are not an admin." {
@@ -282,13 +282,13 @@ func TestImAdminCmdAfterSet(t *testing.T) {
 	bot.OnMessage(
 		testConversation,
 		testSender,
-		SET_ADMIN+" "+testSender.Name,
+		setAdmin+" "+testSender.Name,
 	)
 
 	bot.OnMessage(
 		testConversation,
 		testSender,
-		IM_ADMIN,
+		imAdmin,
 	)
 	testConversation.Admin = true
 	resultMessage, resultConversation = demoSender.PopMessage()

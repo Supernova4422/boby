@@ -20,6 +20,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+// GoQueryScraperConfig can be turned into a scraper that uses GoQuery.
 type GoQueryScraperConfig struct {
 	Trigger       string          // Word which triggers this command to activate.
 	Capture       string          // How to capture words.
@@ -123,13 +124,13 @@ func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Co
 	}
 
 	for _, capture := range msg {
-		msgUrl := goQueryScraperConfig.URL
+		msgURL := goQueryScraperConfig.URL
 
 		for _, word := range capture[1:] {
-			msgUrl = fmt.Sprintf(msgUrl, url.PathEscape(word))
+			msgURL = fmt.Sprintf(msgURL, url.PathEscape(word))
 		}
 
-		res, err := http.Get(msgUrl)
+		res, err := http.Get(msgURL)
 		if err == nil {
 			defer res.Body.Close()
 			doc, err := goquery.NewDocumentFromReader(res.Body)
@@ -137,8 +138,8 @@ func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Co
 				if doc.Text() == "" {
 					sink(sender, service.Message{
 						Title:       "Webpage not found.",
-						Description: "Webpage not found at: " + msgUrl,
-						URL:         msgUrl,
+						Description: "Webpage not found at: " + msgURL,
+						URL:         msgURL,
 					})
 				} else {
 					title := selectorCaptureToString(
@@ -149,13 +150,13 @@ func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Co
 					reply := fmt.Sprintf(
 						"%s\n\nRead more at: %s",
 						selectorCaptureToString(*doc, goQueryScraperConfig.ReplySelector),
-						msgUrl,
+						msgURL,
 					)
 
 					sink(sender, service.Message{
 						Title:       title,
 						Description: reply,
-						URL:         msgUrl,
+						URL:         msgURL,
 					})
 				}
 			} else {
@@ -164,7 +165,7 @@ func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Co
 		} else {
 			sink(sender, service.Message{
 				Description: "An error occurred retrieving the webpage.",
-				URL:         msgUrl,
+				URL:         msgURL,
 			})
 		}
 	}

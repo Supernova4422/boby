@@ -15,17 +15,19 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 )
 
+// ScraperConfig is a struct that can be turned into a usable scraper.
 type ScraperConfig struct {
-	Command        string // Regular expression which triggers this scraper. Can contain capture groups.
-	Title_template string // Title template that will be replaced by regex captures (using %s).
-	Title_capture  string // Regex captures for title replacement.
-	URL            string // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
-	Reply_capture  string // Regular expression used to parse a webpage.
-	Help           string // Help message to display
+	Command       string // Regular expression which triggers this scraper. Can contain capture groups.
+	TitleTemplate string // Title template that will be replaced by regex captures (using %s).
+	TitleCapture  string // Regex captures for title replacement.
+	URL           string // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
+	ReplyCapture  string // Regular expression used to parse a webpage.
+	Help          string // Help message to display
 }
 
-// Given a filepath, returns a ScraperConfig.
-// A file doesn't exist, an example is made in its place, and an error is returned.
+// GetScraperConfigs returns a set of ScraperConfig by reading a file.
+// If a file doesn't exist at the given filepath, an example is made in its place,
+// and an error is returned.
 func GetScraperConfigs(filepath string) ([]ScraperConfig, error) {
 	var config []ScraperConfig
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
@@ -43,7 +45,7 @@ func GetScraperConfigs(filepath string) ([]ScraperConfig, error) {
 }
 
 func makeExampleScraperConfig(filepath string) error {
-	config := []ScraperConfig{ScraperConfig{}}
+	config := []ScraperConfig{}
 	bytes, err := json.Marshal(config)
 
 	if err != nil {
@@ -52,27 +54,27 @@ func makeExampleScraperConfig(filepath string) error {
 
 	file, err := os.Create(filepath)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Unable to create file: %s", filepath))
+		return fmt.Errorf("Unable to create file: %s", filepath)
 	}
 	defer file.Close()
 
 	_, err = file.Write(bytes)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Unable to write to file: %s", filepath))
+		return fmt.Errorf("Unable to write to file: %s", filepath)
 	}
-	return errors.New(fmt.Sprintf("File %s did not exist, an example has been writen.", filepath))
+	return fmt.Errorf("File %s did not exist, an example has been writen", filepath)
 }
 
-// Get a usable scraper.
+// GetScraper creates a scraper from a config.
 func GetScraper(config ScraperConfig) (Command, error) {
-	webpage_capture := regexp.MustCompile(config.Reply_capture)
-	title_capture := regexp.MustCompile(config.Title_capture)
+	webpageCapture := regexp.MustCompile(config.ReplyCapture)
+	titleCapture := regexp.MustCompile(config.TitleCapture)
 
 	curry := func(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 		scraper(config.URL,
-			webpage_capture,
-			config.Title_template,
-			title_capture,
+			webpageCapture,
+			config.TitleTemplate,
+			titleCapture,
 			sender,
 			user,
 			msg,
@@ -92,9 +94,9 @@ func GetScraper(config ScraperConfig) (Command, error) {
 }
 
 // Return the received message
-func scraper(url_template string, webpage_capture *regexp.Regexp, title_template string, title_capture *regexp.Regexp, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
-	substitutions := strings.Count(url_template, "%s")
-	url := url_template
+func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate string, titleCapture *regexp.Regexp, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	substitutions := strings.Count(urlTemplate, "%s")
+	url := urlTemplate
 	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
 		sink(sender, service.Message{Description: "An error when building the url."})
 		return
@@ -111,28 +113,28 @@ func scraper(url_template string, webpage_capture *regexp.Regexp, title_template
 
 		if err == nil {
 			// Create a regular expression to find comments
-			body_s := string(body)
+			bodyS := string(body)
 
-			matches := webpage_capture.FindAllStringSubmatch(body_s, -1)
-			title_matches := title_capture.FindAllStringSubmatch(body_s, -1)
+			matches := webpageCapture.FindAllStringSubmatch(bodyS, -1)
+			titleMatches := titleCapture.FindAllStringSubmatch(bodyS, -1)
 
 			if matches != nil {
-				all_captures := make([]string, len(matches))
+				allCaptures := make([]string, len(matches))
 				for i, captures := range matches {
-					all_captures[i] = strings.Join(captures[1:], " ")
+					allCaptures[i] = strings.Join(captures[1:], " ")
 				}
 
-				reply := fmt.Sprintf("%s.\n\nRead more at: %s", strings.Join(all_captures, " "), url)
-				reply_title := title_template
+				reply := fmt.Sprintf("%s.\n\nRead more at: %s", strings.Join(allCaptures, " "), url)
+				replyTitle := titleTemplate
 
-				for _, captures := range title_matches {
-					for _, capture_group := range captures[1:] {
-						reply_title = fmt.Sprintf(reply_title, capture_group)
+				for _, captures := range titleMatches {
+					for _, captureGroup := range captures[1:] {
+						replyTitle = fmt.Sprintf(replyTitle, captureGroup)
 					}
 				}
 
 				sink(sender, service.Message{
-					Title:       reply_title,
+					Title:       replyTitle,
 					Description: reply,
 					URL:         url,
 				})

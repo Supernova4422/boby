@@ -25,9 +25,9 @@ func TestScraperWithCapture(t *testing.T) {
 	testCmd := "!scrape"
 
 	config := command.ScraperConfig{
-		Command:       testCmd + " (.*)",
-		URL:           "https://webscraper.io/test-sites/%s",
-		Reply_capture: "<h1>([^<]*)</h1>",
+		Command:      testCmd + " (.*)",
+		URL:          "https://webscraper.io/test-sites/%s",
+		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
 
 	scraper, err := command.GetScraper(config)
@@ -73,10 +73,10 @@ func TestScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	testCmd := "!scrape"
 
 	config := command.ScraperConfig{
-		Command:        testCmd + " (.*)",
-		URL:            "https://webscraper.io/test-sites/%s",
-		Reply_capture:  "<h1>([^<]*)</h1>",
-		Title_template: "Title",
+		Command:       testCmd + " (.*)",
+		URL:           "https://webscraper.io/test-sites/%s",
+		ReplyCapture:  "<h1>([^<]*)</h1>",
+		TitleTemplate: "Title",
 	}
 
 	scraper, err := command.GetScraper(config)
@@ -88,7 +88,7 @@ func TestScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	bot.OnMessage(testConversation, testSender, testCmd+" e-commerce/allinone")
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if resultMessage.Title != config.Title_template {
+	if resultMessage.Title != config.TitleTemplate {
 		t.Errorf("Title was different!")
 	}
 
@@ -112,11 +112,11 @@ func TestScraperWithTitleCapture(t *testing.T) {
 	testCmd := "!scrape"
 
 	config := command.ScraperConfig{
-		Command:        testCmd + " (.*)",
-		URL:            "https://webscraper.io/test-sites/%s",
-		Reply_capture:  "<h1>([^<]*)</h1>",
-		Title_template: "%s",
-		Title_capture:  "<h2>([^<]*)</h2>",
+		Command:       testCmd + " (.*)",
+		URL:           "https://webscraper.io/test-sites/%s",
+		ReplyCapture:  "<h1>([^<]*)</h1>",
+		TitleTemplate: "%s",
+		TitleCapture:  "<h2>([^<]*)</h2>",
 	}
 
 	scraper, err := command.GetScraper(config)
@@ -152,9 +152,9 @@ func TestScraperNoCapture(t *testing.T) {
 	testCmd := "!scrape"
 
 	config := command.ScraperConfig{
-		Command:       testCmd,
-		URL:           "https://webscraper.io/test-sites/e-commerce/allinone",
-		Reply_capture: "<h1>([^<]*)</h1>",
+		Command:      testCmd,
+		URL:          "https://webscraper.io/test-sites/e-commerce/allinone",
+		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
 
 	scraper, err := command.GetScraper(config)

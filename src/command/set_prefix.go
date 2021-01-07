@@ -7,7 +7,8 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 )
 
-// Return the received message
+// SetPrefix will set the prefix all messages are to be preceeded by, for a guild.
+// This uses key "prefix" in storage.
 func SetPrefix(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 	if sender.Admin {
 		guild := service.Guild{

@@ -5,7 +5,7 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 )
 
-// SetAdmin will set the value to be an admin. This is AS-IS, it is up to a service to handle it.
+// UnsetAdmin will set a user to not be an admin.
 func UnsetAdmin(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 	if sender.Admin {
 		guild := service.Guild{

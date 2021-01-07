@@ -7,6 +7,7 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 )
 
+// A Command is how a User interacts with a bot.
 type Command struct {
 	Trigger string
 	Pattern *regexp.Regexp

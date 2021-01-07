@@ -12,7 +12,7 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 )
 
-// Immediately routes all messages from a service.
+// Bot immediately routes all messages from a service.
 type Bot struct {
 	observers     []service.Sender
 	commands      []command.Command
@@ -20,53 +20,57 @@ type Bot struct {
 	defaultPrefix string // Prefix to use when one doesn't exist.
 }
 
-func (self *Bot) SetStorage(storage *storage.Storage) {
-	self.storage = storage
+// SetStorage sets the interface used for storing and retrieving data.
+// Commands are still free to use their own storage methods, however a storage object
+// can be used to share data between commands.
+func (b *Bot) SetStorage(storage *storage.Storage) {
+	b.storage = storage
 }
 
-// Append a sender that messages may be routed to.
-func (self *Bot) AddSender(sender service.Sender) {
-	self.observers = append(self.observers, sender)
+// AddSender will Append a sender that messages may be routed to.
+func (b *Bot) AddSender(sender service.Sender) {
+	b.observers = append(b.observers, sender)
 }
 
-// Add a command, that is a function which is executed when a regexp does not return nil.
-//
-// pattern can contain subgroups, the output of pattern.FindAllStringSubmatch
-// becomes input for cmd.
-func (self *Bot) AddCommand(cmd command.Command) {
-	self.commands = append(self.commands, cmd)
+// AddCommand adds a command that this bot executes.
+func (b *Bot) AddCommand(cmd command.Command) {
+	b.commands = append(b.commands, cmd)
 }
 
-func (self *Bot) GetPrefix(conversation service.Conversation) string {
+// GetPrefix returns the prefix for a conversation.
+// A prefix at the start of the message identifies the message is a command for the bot
+// to act upon.
+func (b *Bot) GetPrefix(conversation service.Conversation) string {
 	guild := service.Guild{
 		ServiceID: conversation.ServiceID,
 		GuildID:   conversation.GuildID,
 	}
-	if self.storage == nil {
-		return self.defaultPrefix
+	if b.storage == nil {
+		return b.defaultPrefix
 	}
 
-	prefix, err := (*self.storage).GetValue(guild, "prefix")
+	prefix, err := (*b.storage).GetValue(guild, "prefix")
 	if err != nil {
-		return self.defaultPrefix
+		return b.defaultPrefix
 	}
 	return prefix
 }
 
 // SetDefaultPrefix sets the bot's prefix when there is no existing one.
-func (self *Bot) SetDefaultPrefix(prefix string) {
-	self.defaultPrefix = prefix
+func (b *Bot) SetDefaultPrefix(prefix string) {
+	b.defaultPrefix = prefix
 }
 
-// Given a message, check if any of the commands match, if so, run the command.
-func (self *Bot) OnMessage(conversation service.Conversation, sender service.User, msg string) {
-	prefix := self.GetPrefix(conversation)
+// OnMessage runs any command where the message starts with the conversation's
+// prefix + the command's trigger.
+func (b *Bot) OnMessage(conversation service.Conversation, sender service.User, msg string) {
+	prefix := b.GetPrefix(conversation)
 	if msg == prefix+"help" {
 		helpMsg := "Commands: \n"
-		for i, command := range self.commands {
+		for i, command := range b.commands {
 			helpMsg += fmt.Sprintf("%s. %s%s %s\n", strconv.Itoa(i+1), prefix, command.Trigger, command.Help)
 		}
-		self.RouteByID(
+		b.RouteByID(
 			conversation,
 			service.Message{
 				Title:       "Help",
@@ -74,55 +78,56 @@ func (self *Bot) OnMessage(conversation service.Conversation, sender service.Use
 				URL:         "https://github.com/BKrajancic/FLD-Bot",
 			})
 	} else {
-		for _, command := range self.commands {
+		for _, command := range b.commands {
 			trigger := fmt.Sprintf("%s%s", prefix, command.Trigger)
 			if strings.HasPrefix(msg, trigger) {
 				content := strings.TrimSpace(msg[len(trigger):])
 				matches := command.Pattern.FindAllStringSubmatch(content, -1)
-				command.Exec(conversation, sender, matches, self.storage, self.RouteByID)
+				command.Exec(conversation, sender, matches, b.storage, b.RouteByID)
 			}
 		}
 	}
 }
 
-// Route a message to a service sender owned by this Bot.
-func (self *Bot) RouteByID(conversation service.Conversation, msg service.Message) {
-	for _, observer := range self.observers {
+// RouteByID routes a message to an observer of this Bot with the same ID() as
+// conversation.ServiceID.
+func (b *Bot) RouteByID(conversation service.Conversation, msg service.Message) {
+	for _, observer := range b.observers {
 		if observer.ID() == conversation.ServiceID {
 			observer.SendMessage(conversation, msg)
 		}
 	}
 }
 
-// Get a bot that is configured.
-func ConfiguredBot(config_dir string) (Bot, error) {
+// ConfiguredBot uses files in configDir to return a bot ready for usage.
+func ConfiguredBot(configDir string) (Bot, error) {
 	bot := Bot{}
 	bot.SetDefaultPrefix("!")
 
-	scraper_path := path.Join(config_dir, "scraper_config.json")
-	scraper_configs, err := command.GetScraperConfigs(scraper_path)
+	scraperPath := path.Join(configDir, "scraperConfig.json")
+	scraperConfigs, err := command.GetScraperConfigs(scraperPath)
 	if err != nil {
 		return bot, err
 	}
 
-	for _, scraper_config := range scraper_configs {
-		scraper_command, err := command.GetScraper(scraper_config)
+	for _, scraperConfig := range scraperConfigs {
+		scraperCommand, err := command.GetScraper(scraperConfig)
 		if err == nil {
-			bot.AddCommand(scraper_command)
+			bot.AddCommand(scraperCommand)
 		} else {
 			return bot, err
 		}
 	}
-	config_path := path.Join(config_dir, "goquery_scraper_config.json")
-	goquery_scraper_configs, err := command.GetGoqueryScraperConfigs(config_path)
+	configPath := path.Join(configDir, "goquery_scraperConfig.json")
+	goqueryScraperConfigs, err := command.GetGoqueryScraperConfigs(configPath)
 	if err != nil {
 		return bot, err
 	}
 
-	for _, goquery_scraper_config := range goquery_scraper_configs {
-		scraper_command, err := command.GetGoqueryScraper(goquery_scraper_config)
+	for _, goqueryScraperConfig := range goqueryScraperConfigs {
+		scraperCommand, err := command.GetGoqueryScraper(goqueryScraperConfig)
 		if err == nil {
-			bot.AddCommand(scraper_command)
+			bot.AddCommand(scraperCommand)
 		} else {
 			return bot, err
 		}
