@@ -8,7 +8,7 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demo_service"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 )
 
@@ -21,10 +21,10 @@ func TestSetPrefix(t *testing.T) {
 	prefix0 := "!"
 	bot.SetDefaultPrefix(prefix0)
 
-	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
+	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
 	demoServiceSubject.Register(&bot)
-	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
+	bot.AddSender(&demoSender)
 
 	testCmd := "repeat "
 	bot.AddCommand(
@@ -47,17 +47,17 @@ func TestSetPrefix(t *testing.T) {
 
 	// Message to repeat.
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSubject.Id(),
-		ConversationId: "0",
+		ServiceID:      demoServiceSubject.ID(),
+		ConversationID: "0",
 		Admin:          true,
 	}
-	testSender := service.User{Name: "Test_User", Id: demoServiceSubject.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoServiceSubject.ID()}
 	testMsg := "Test1"
 
 	testMsgSent := fmt.Sprintf("%s%s %s", prefix0, testCmd, testMsg)
 	demoServiceSubject.AddMessage(testConversation, testSender, testMsgSent) // Message to repeat
 	demoServiceSubject.Run()
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
@@ -70,15 +70,15 @@ func TestSetPrefix(t *testing.T) {
 	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s %s", prefix1, testCmd, testMsg))
 	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s %s", prefix0, testCmd, testMsg))
 	demoServiceSubject.Run()
-	demoServiceSender.PopMessage() // Response from prefix command
-	resultMessage, resultConversation = demoServiceSender.PopMessage()
+	demoSender.PopMessage() // Response from prefix command
+	resultMessage, resultConversation = demoSender.PopMessage()
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
 	if resultMessage.Description != testMsg {
 		t.Errorf("Message was different!")
 	}
-	if demoServiceSender.IsEmpty() == false {
+	if demoSender.IsEmpty() == false {
 		t.Errorf("There are extra messages")
 	}
 
@@ -88,15 +88,15 @@ func TestSetPrefix(t *testing.T) {
 	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s %s", prefix1, testCmd, testMsg))
 	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s %s", prefix0, testCmd, testMsg))
 	demoServiceSubject.Run()
-	demoServiceSender.PopMessage()
-	resultMessage, resultConversation = demoServiceSender.PopMessage()
+	demoSender.PopMessage()
+	resultMessage, resultConversation = demoSender.PopMessage()
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
 	if resultMessage.Description != testMsg {
 		t.Errorf("Message was different!")
 	}
-	if demoServiceSender.IsEmpty() == false {
+	if demoSender.IsEmpty() == false {
 		t.Errorf("There are extra messages")
 	}
 }
@@ -110,10 +110,10 @@ func TestIgnoreSetPrefix(t *testing.T) {
 	prefix0 := "!"
 	bot.SetDefaultPrefix(prefix0)
 
-	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
+	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
 	demoServiceSubject.Register(&bot)
-	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
+	bot.AddSender(&demoSender)
 
 	testCmd := "repeat "
 	bot.AddCommand(
@@ -136,17 +136,17 @@ func TestIgnoreSetPrefix(t *testing.T) {
 
 	// Message to repeat.
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSubject.Id(),
-		ConversationId: "0",
+		ServiceID:      demoServiceSubject.ID(),
+		ConversationID: "0",
 		Admin:          true,
 	}
-	testSender := service.User{Name: "Test_User", Id: demoServiceSubject.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoServiceSubject.ID()}
 	testMsg := "Test1"
 
 	testMsgSent := fmt.Sprintf("%s%s %s", prefix0, testCmd, testMsg)
 	demoServiceSubject.AddMessage(testConversation, testSender, testMsgSent) // Message to repeat
 	demoServiceSubject.Run()
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
@@ -159,15 +159,15 @@ func TestIgnoreSetPrefix(t *testing.T) {
 	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s %s", prefix1, testCmd, testMsg))
 	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s %s", prefix0, testCmd, testMsg))
 	demoServiceSubject.Run()
-	demoServiceSender.PopMessage() // Response from prefix command
-	resultMessage, resultConversation = demoServiceSender.PopMessage()
+	demoSender.PopMessage() // Response from prefix command
+	resultMessage, resultConversation = demoSender.PopMessage()
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
 	if resultMessage.Description != testMsg {
 		t.Errorf("Message was different!")
 	}
-	if demoServiceSender.IsEmpty() == false {
+	if demoSender.IsEmpty() == false {
 		t.Errorf("There are extra messages")
 	}
 
@@ -177,20 +177,20 @@ func TestIgnoreSetPrefix(t *testing.T) {
 	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s %s", prefix2, testCmd, testMsg))
 	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s %s", prefix0, testCmd, testMsg))
 	demoServiceSubject.Run()
-	if demoServiceSender.IsEmpty() == false {
+	if demoSender.IsEmpty() == false {
 		t.Errorf("There are extra messages")
 	}
 
 	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s %s", prefix1, testCmd, testMsg))
 	demoServiceSubject.Run()
-	resultMessage, resultConversation = demoServiceSender.PopMessage()
+	resultMessage, resultConversation = demoSender.PopMessage()
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
 	if resultMessage.Description != testMsg {
 		t.Errorf("Message was different!")
 	}
-	if demoServiceSender.IsEmpty() == false {
+	if demoSender.IsEmpty() == false {
 		t.Errorf("There are extra messages")
 	}
 }

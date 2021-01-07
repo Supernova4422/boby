@@ -8,7 +8,7 @@ import (
 // CheckAdmin will let you know if you're an admin.
 func CheckAdmin(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 	guild := service.Guild{
-		ServiceId: sender.ServiceId,
+		ServiceID: sender.ServiceID,
 		GuildID:   sender.GuildID,
 	}
 

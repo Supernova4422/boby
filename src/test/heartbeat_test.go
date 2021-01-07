@@ -7,7 +7,7 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/routine"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demo_service"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
 )
 
 // Test if the heartbeat routine works.
@@ -15,24 +15,24 @@ import (
 func TestHeartbeat(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
-	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
+	bot.AddSender(&demoSender)
 
 	// Message to repeat.
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSender.Id(),
-		ConversationId: "0",
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
 	}
 	testMsg := "Hello"
 	delay := time.Second / 100
-	go routine.Heartbeat(delay, testConversation, service.Message{Description: testMsg}, bot.RouteById)
+	go routine.Heartbeat(delay, testConversation, service.Message{Description: testMsg}, bot.RouteByID)
 
-	if demoServiceSender.IsEmpty() == false {
+	if demoSender.IsEmpty() == false {
 		t.Errorf("Routine is not working or test execution halted for too long!")
 	}
 
 	time.Sleep(2 * delay)
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")

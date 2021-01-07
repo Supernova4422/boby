@@ -12,7 +12,7 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demo_service"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 )
 
@@ -62,9 +62,9 @@ func GetTestInputs(filepath string) ([]ConfigTest, error) {
 	return configTests, nil
 }
 
-func getDemoBot(filepath string, bot *bot.Bot) *demo_service.DemoServiceSender {
-	demoServiceSender := demo_service.DemoServiceSender{}
-	bot.AddSender(&demoServiceSender)
+func getDemoBot(filepath string, bot *bot.Bot) *demoservice.DemoSender {
+	demoSender := demoservice.DemoSender{}
+	bot.AddSender(&demoSender)
 
 	scraperConfigs, err := command.GetScraperConfigs(filepath)
 	if err != nil {
@@ -80,7 +80,7 @@ func getDemoBot(filepath string, bot *bot.Bot) *demo_service.DemoServiceSender {
 		}
 	}
 
-	return &demoServiceSender
+	return &demoSender
 }
 
 func TestConfig(t *testing.T) {
@@ -97,27 +97,27 @@ func TestConfig(t *testing.T) {
 		bot.SetStorage(&_storage)
 
 		if err == nil {
-			demoServiceSender := demo_service.DemoServiceSender{}
-			bot.AddSender(&demoServiceSender)
+			demoSender := demoservice.DemoSender{}
+			bot.AddSender(&demoSender)
 
 			inputTest, _ := GetTestInputs(inputFp)
 
 			testConversation := service.Conversation{
-				ServiceId:      demoServiceSender.Id(),
-				ConversationId: "0",
+				ServiceID:      demoSender.ID(),
+				ConversationID: "0",
 			}
 
-			testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+			testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 			for _, input := range inputTest {
 				bot.OnMessage(testConversation, testSender, input.Input)
 				for _, expect := range input.Expect {
-					resultMessage, _ := demoServiceSender.PopMessage()
+					resultMessage, _ := demoSender.PopMessage()
 					if !MessageInList(resultMessage, expect) {
 						t.Errorf("Failed on msg: %s", input.Input)
 						t.Fail()
 					}
 				}
-				if demoServiceSender.IsEmpty() == false {
+				if demoSender.IsEmpty() == false {
 					t.Errorf("Too many responses from: %s", input.Input)
 					t.Fail()
 				}

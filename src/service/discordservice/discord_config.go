@@ -1,4 +1,4 @@
-package discord_service
+package discordservice
 
 import (
 	"encoding/json"
@@ -10,20 +10,21 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-const SERVICE_ID = "Discord"
+// ServiceID is used as an identifier for sending/receiving using discord.
+const ServiceID = "Discord"
 
-// Represents configuration required for discord to work (e.g. Token).
+// DiscordConfig has data required for discord to work (e.g. Token).
 type DiscordConfig struct {
 	Token string
 }
 
-// Get configuratino data for loading discord, from a file.
+// getConfig reads a local file, and returns a configuration object to load discord.
 func getConfig() (*DiscordConfig, error) {
 	const filepath = "config.json"
-	const token_default = "TOKEN"
+	const tokenDefault = "TOKEN"
 
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
-		example := &DiscordConfig{Token: token_default}
+		example := &DiscordConfig{Token: tokenDefault}
 		bytes, err := json.Marshal(example)
 		if err != nil {
 			fmt.Printf("Unable to create an example json (haven't even tried creating a file yet).")
@@ -43,7 +44,7 @@ func getConfig() (*DiscordConfig, error) {
 			return nil, err
 		}
 		fmt.Printf("Wrote an example to %s", filepath)
-		return nil, errors.New("Did not exist!")
+		return nil, errors.New("Did not exist")
 	}
 
 	bytes, err := ioutil.ReadFile(filepath)
@@ -54,15 +55,15 @@ func getConfig() (*DiscordConfig, error) {
 
 	var config DiscordConfig
 	json.Unmarshal(bytes, &config)
-	if config.Token == token_default {
+	if config.Token == tokenDefault {
 		fmt.Printf("Demo JSON has not been updated to have a valid token! A user should edit: %s", filepath)
-		return nil, errors.New("Default file used.")
+		return nil, errors.New("Default file used")
 	}
 
 	return &config, nil
 }
 
-// Create subject and sender service adapters for discord.
+// NewDiscords Creates subject and sender service adapters for discord.
 func NewDiscords() (*DiscordSubject, *DiscordSender, error) {
 	// Get token
 	config, err := getConfig()

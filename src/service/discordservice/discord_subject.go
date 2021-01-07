@@ -1,4 +1,4 @@
-package discord_service
+package discordservice
 
 import (
 	"fmt"
@@ -8,39 +8,44 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// A DiscordSubject receives messages from discord, and passes events to its observers.
 type DiscordSubject struct {
 	discord       *discordgo.Session
 	discordSender DiscordSender
-	observers     []*service.ServiceObserver
+	observers     []*service.Observer
 	storage       *storage.Storage
 }
 
-func (self *DiscordSubject) SetStorage(storage *storage.Storage) {
-	self.storage = storage
+// SetStorage sets an object to use for storage/retrieval purposes.
+func (d *DiscordSubject) SetStorage(storage *storage.Storage) {
+	d.storage = storage
 }
 
-func (self *DiscordSubject) Register(observer service.ServiceObserver) {
-	self.observers = append(self.observers, &observer)
+// Register will add an observer that will handle discord messages being received.
+func (d *DiscordSubject) Register(observer service.Observer) {
+	d.observers = append(d.observers, &observer)
 }
 
-func (self *DiscordSubject) Id() string {
-	return SERVICE_ID
+// ID returns the discord service ID, this is the same for all DiscordSubject objects.
+func (*DiscordSubject) ID() string {
+	return ServiceID
 }
 
-func (self *DiscordSubject) Close() {
-	self.discord.Close()
+// Close will safely close all objects that are managed by this object.
+func (d *DiscordSubject) Close() {
+	d.discord.Close()
 }
 
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the authenticated bot has access to.
-func (self *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+func (d *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
 	conversation := service.Conversation{
-		ServiceId:      self.Id(),
-		ConversationId: m.ChannelID,
+		ServiceID:      d.ID(),
+		ConversationID: m.ChannelID,
 		GuildID:        m.GuildID,
 		Admin:          false,
 	}
@@ -52,17 +57,17 @@ func (self *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.Mes
 
 	user := service.User{
 		Name: m.Author.ID,
-		Id:   self.Id(),
+		ID:   d.ID(),
 	}
 
 	guild := service.Guild{
-		ServiceId: self.Id(),
+		ServiceID: d.ID(),
 		GuildID:   m.GuildID,
 	}
 
 	if conversation.Admin == false {
-		userId := fmt.Sprintf("<@!%s>", m.Author.ID)
-		if (*self.storage).IsAdmin(guild, userId) {
+		userID := fmt.Sprintf("<@!%s>", m.Author.ID)
+		if (*d.storage).IsAdmin(guild, userID) {
 			conversation.Admin = true
 		}
 	}
@@ -93,14 +98,14 @@ func (self *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.Mes
 			}
 
 			updatedRole := fmt.Sprintf("<@&%s>", role)
-			if (*self.storage).IsAdmin(guild, updatedRole) {
+			if (*d.storage).IsAdmin(guild, updatedRole) {
 				conversation.Admin = true
 				break
 			}
 		}
 	}
 
-	for _, service := range self.observers {
+	for _, service := range d.observers {
 		(*service).OnMessage(conversation, user, m.Content)
 	}
 }

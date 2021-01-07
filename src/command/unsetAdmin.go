@@ -9,7 +9,7 @@ import (
 func UnsetAdmin(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 	if sender.Admin {
 		guild := service.Guild{
-			ServiceId: sender.ServiceId,
+			ServiceID: sender.ServiceID,
 			GuildID:   sender.GuildID,
 		}
 

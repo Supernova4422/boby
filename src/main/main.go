@@ -6,14 +6,14 @@ import (
 	"syscall"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/discord_service"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/discordservice"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 )
 
 func main() {
 	bot, err := bot.ConfiguredBot(".")
 	if err == nil {
-		discordSubject, discordSender, err := discord_service.NewDiscords()
+		discordSubject, discordSender, err := discordservice.NewDiscords()
 		if err == nil {
 			defer discordSubject.Close() // Cleanly close down the Discord session.
 			_jsonStorage, err := storage.LoadFromFile("storage.json")

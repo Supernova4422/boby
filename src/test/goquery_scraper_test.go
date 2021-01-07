@@ -7,22 +7,22 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demo_service"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
 )
 
 func TestGoQueryScraperWithCapture(t *testing.T) {
 	testCmd := "scrape"
 	bot := bot.Bot{}
 
-	demoServiceSender := demo_service.DemoServiceSender{}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{}
+	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSender.Id(),
-		ConversationId: "0",
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := command.GoQueryScraperConfig{
 		Trigger: testCmd,
@@ -53,7 +53,7 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 	bot.AddCommand(scraper)
 	bot.OnMessage(testConversation, testSender, testCmd+" e-commerce/allinone")
 
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 
 	if resultMessage.Title != "Top items being scraped right now" {
 		t.Errorf("Title was different!")
@@ -68,7 +68,7 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 	}
 
 	bot.OnMessage(testConversation, testSender, testCmd+" tables")
-	resultMessage, resultConversation = demoServiceSender.PopMessage()
+	resultMessage, resultConversation = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Table playground") {
 		t.Errorf("Message was different!")
 	}
@@ -77,7 +77,7 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 		t.Errorf("Sender was different!")
 	}
 
-	if demoServiceSender.IsEmpty() == false {
+	if demoSender.IsEmpty() == false {
 		t.Errorf("Too many messages!")
 	}
 }
@@ -88,15 +88,15 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 	prefix := "!"
 	bot.SetDefaultPrefix(prefix)
 
-	demoServiceSender := demo_service.DemoServiceSender{}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{}
+	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSender.Id(),
-		ConversationId: "0",
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := command.GoQueryScraperConfig{
 		Trigger: testCmd,
@@ -127,7 +127,7 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 	bot.AddCommand(scraper)
 	bot.OnMessage(testConversation, testSender, prefix+testCmd+" e-commerce/allinone")
 
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 
 	if resultMessage.Title != "Top items being scraped right now" {
 		t.Errorf("Title was different!")
@@ -141,7 +141,7 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 		t.Errorf("Sender was different!")
 	}
 
-	if demoServiceSender.IsEmpty() == false {
+	if demoSender.IsEmpty() == false {
 		t.Errorf("Too many messages!")
 	}
 }
@@ -152,15 +152,15 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	prefix := "!"
 	bot.SetDefaultPrefix(prefix)
 
-	demoServiceSender := demo_service.DemoServiceSender{}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{}
+	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSender.Id(),
-		ConversationId: "0",
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := command.GoQueryScraperConfig{
 		Trigger: testCmd,
@@ -190,7 +190,7 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	bot.AddCommand(scraper)
 	bot.OnMessage(testConversation, testSender, prefix+testCmd+" e-commerce/allinone")
 
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Title != config.TitleSelector.Template {
 		t.Errorf("Title was different!")
 	}
@@ -199,7 +199,7 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 		t.Errorf("Sender was different!")
 	}
 
-	if demoServiceSender.IsEmpty() == false {
+	if demoSender.IsEmpty() == false {
 		t.Errorf("Too many messages!")
 	}
 }
@@ -210,15 +210,15 @@ func TestGoQueryScrapeEscapeUrl(t *testing.T) {
 	prefix := "!"
 	bot.SetDefaultPrefix(prefix)
 
-	demoServiceSender := demo_service.DemoServiceSender{}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{}
+	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSender.Id(),
-		ConversationId: "0",
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := command.GoQueryScraperConfig{
 		Trigger: testCmd,
@@ -248,7 +248,7 @@ func TestGoQueryScrapeEscapeUrl(t *testing.T) {
 	bot.AddCommand(scraper)
 	bot.OnMessage(testConversation, testSender, prefix+testCmd+" e-commerce/ allinone")
 
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.URL != "https://webscraper.io/test-sites/e-commerce%2F%20allinone" {
 		t.Errorf("Url should be escaped.")
 	}
@@ -257,7 +257,7 @@ func TestGoQueryScrapeEscapeUrl(t *testing.T) {
 		t.Errorf("Sender was different!")
 	}
 
-	if demoServiceSender.IsEmpty() == false {
+	if demoSender.IsEmpty() == false {
 		t.Errorf("Too many messages!")
 	}
 }
@@ -268,15 +268,15 @@ func TestGoQueryScraperNoCapture(t *testing.T) {
 	prefix := "!"
 	bot.SetDefaultPrefix(prefix)
 
-	demoServiceSender := demo_service.DemoServiceSender{}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{}
+	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSender.Id(),
-		ConversationId: "0",
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := command.GoQueryScraperConfig{
 		Trigger: testCmd,
@@ -305,7 +305,7 @@ func TestGoQueryScraperNoCapture(t *testing.T) {
 	bot.AddCommand(scraper)
 	bot.OnMessage(testConversation, testSender, prefix+testCmd+" ")
 
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Test Sites") {
 		t.Errorf("Message was different!")
 	}
@@ -314,7 +314,7 @@ func TestGoQueryScraperNoCapture(t *testing.T) {
 		t.Errorf("Sender was different!")
 	}
 
-	if demoServiceSender.IsEmpty() == false {
+	if demoSender.IsEmpty() == false {
 		t.Errorf("Too many messages!")
 	}
 }
@@ -325,15 +325,15 @@ func TestGoQueryScraperUnusedCapture(t *testing.T) {
 	prefix := "!"
 	bot.SetDefaultPrefix(prefix)
 
-	demoServiceSender := demo_service.DemoServiceSender{}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{}
+	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSender.Id(),
-		ConversationId: "0",
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := command.GoQueryScraperConfig{
 		Trigger: testCmd,
@@ -362,7 +362,7 @@ func TestGoQueryScraperUnusedCapture(t *testing.T) {
 	bot.AddCommand(scraper)
 	bot.OnMessage(testConversation, testSender, prefix+testCmd)
 
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Description != "An error occurred retrieving the webpage." {
 		t.Errorf("An error should be thrown!")
 	}
@@ -371,7 +371,7 @@ func TestGoQueryScraperUnusedCapture(t *testing.T) {
 		t.Errorf("Sender was different!")
 	}
 
-	if demoServiceSender.IsEmpty() == false {
+	if demoSender.IsEmpty() == false {
 		t.Errorf("Too many messages!")
 	}
 }

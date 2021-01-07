@@ -7,21 +7,21 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demo_service"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
 )
 
 func TestScraperWithCapture(t *testing.T) {
 	bot := bot.Bot{}
 
-	demoServiceSender := demo_service.DemoServiceSender{}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{}
+	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSender.Id(),
-		ConversationId: "0",
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 	testCmd := "!scrape"
 
 	config := command.ScraperConfig{
@@ -38,7 +38,7 @@ func TestScraperWithCapture(t *testing.T) {
 	bot.AddCommand(scraper)
 	bot.OnMessage(testConversation, testSender, testCmd+" e-commerce/allinone")
 
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Test Sites E-commerce training site") {
 		t.Errorf("Message was different!")
 	}
@@ -48,7 +48,7 @@ func TestScraperWithCapture(t *testing.T) {
 	}
 
 	bot.OnMessage(testConversation, testSender, testCmd+" tables")
-	resultMessage, resultConversation = demoServiceSender.PopMessage()
+	resultMessage, resultConversation = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Table playground") {
 		t.Errorf("Message was different!")
 	}
@@ -61,15 +61,15 @@ func TestScraperWithCapture(t *testing.T) {
 func TestScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	bot := bot.Bot{}
 
-	demoServiceSender := demo_service.DemoServiceSender{}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{}
+	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSender.Id(),
-		ConversationId: "0",
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 	testCmd := "!scrape"
 
 	config := command.ScraperConfig{
@@ -87,7 +87,7 @@ func TestScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	bot.AddCommand(scraper)
 	bot.OnMessage(testConversation, testSender, testCmd+" e-commerce/allinone")
 
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Title != config.Title_template {
 		t.Errorf("Title was different!")
 	}
@@ -100,15 +100,15 @@ func TestScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 func TestScraperWithTitleCapture(t *testing.T) {
 	bot := bot.Bot{}
 
-	demoServiceSender := demo_service.DemoServiceSender{}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{}
+	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSender.Id(),
-		ConversationId: "0",
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 	testCmd := "!scrape"
 
 	config := command.ScraperConfig{
@@ -127,7 +127,7 @@ func TestScraperWithTitleCapture(t *testing.T) {
 	bot.AddCommand(scraper)
 	bot.OnMessage(testConversation, testSender, testCmd+" e-commerce/allinone")
 
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Title != "Top items being scraped right now" {
 		t.Errorf("Title was different!")
 	}
@@ -140,15 +140,15 @@ func TestScraperWithTitleCapture(t *testing.T) {
 func TestScraperNoCapture(t *testing.T) {
 	bot := bot.Bot{}
 
-	demoServiceSender := demo_service.DemoServiceSender{}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{}
+	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSender.Id(),
-		ConversationId: "0",
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 	testCmd := "!scrape"
 
 	config := command.ScraperConfig{
@@ -165,7 +165,7 @@ func TestScraperNoCapture(t *testing.T) {
 	bot.AddCommand(scraper)
 	bot.OnMessage(testConversation, testSender, testCmd)
 
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Test Sites E-commerce training site") {
 		t.Errorf("Message was different!")
 	}

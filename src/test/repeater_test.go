@@ -8,7 +8,7 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demo_service"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
 )
 
 // This is able to test
@@ -20,10 +20,10 @@ func TestParseWithoutPrefix(t *testing.T) {
 	bot := bot.Bot{}
 	prefix := "!"
 	bot.SetDefaultPrefix(prefix)
-	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
+	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
 	demoServiceSubject.Register(&bot)
-	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
+	bot.AddSender(&demoSender)
 
 	testCmd := "repeat "
 	bot.AddCommand(
@@ -36,17 +36,17 @@ func TestParseWithoutPrefix(t *testing.T) {
 
 	// Message to repeat.
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSubject.Id(),
-		ConversationId: "0",
+		ServiceID:      demoServiceSubject.ID(),
+		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", Id: demoServiceSubject.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoServiceSubject.ID()}
 	testMsg := "Test1"
 	testMsgSent := fmt.Sprintf("%s%s %s", prefix, testCmd, testMsg)
 	demoServiceSubject.AddMessage(testConversation, testSender, testMsgSent) // Message to repeat
 
 	// Get messages and evaluate
 	demoServiceSubject.Run()
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
@@ -60,10 +60,10 @@ func TestParseWithPrefix(t *testing.T) {
 	bot := bot.Bot{}
 	prefix := "!"
 	bot.SetDefaultPrefix(prefix)
-	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
+	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
 	demoServiceSubject.Register(&bot)
-	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
+	bot.AddSender(&demoSender)
 
 	testCmd := "repeat "
 	bot.AddCommand(
@@ -76,17 +76,17 @@ func TestParseWithPrefix(t *testing.T) {
 
 	// Message to repeat.
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSubject.Id(),
-		ConversationId: "0",
+		ServiceID:      demoServiceSubject.ID(),
+		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", Id: demoServiceSubject.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoServiceSubject.ID()}
 	testMsg := "Test1"
 	testMsgSent := fmt.Sprintf("%s%s %s", prefix, testCmd, testMsg)
 	demoServiceSubject.AddMessage(testConversation, testSender, testMsgSent) // Message to repeat
 
 	// Get messages and evaluate
 	demoServiceSubject.Run()
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
@@ -100,10 +100,10 @@ func TestParseWithoutSpace(t *testing.T) {
 	bot := bot.Bot{}
 	prefix := "!"
 	bot.SetDefaultPrefix(prefix)
-	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
+	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
 	demoServiceSubject.Register(&bot)
-	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
+	bot.AddSender(&demoSender)
 
 	testCmd := "repeat" // Should be fine.
 	bot.AddCommand(
@@ -114,10 +114,10 @@ func TestParseWithoutSpace(t *testing.T) {
 			Help:    "",
 		}) // Repeater command.
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSubject.Id(),
-		ConversationId: "0",
+		ServiceID:      demoServiceSubject.ID(),
+		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", Id: demoServiceSubject.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoServiceSubject.ID()}
 	testMsg := "Test1"
 
 	// There are no spaces, however it was neverspecified in testCmd.
@@ -126,7 +126,7 @@ func TestParseWithoutSpace(t *testing.T) {
 
 	// Get messages and evaluate
 	demoServiceSubject.Run()
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
@@ -141,10 +141,10 @@ func TestEmpty(t *testing.T) {
 	bot := bot.Bot{}
 	prefix := "!"
 	bot.SetDefaultPrefix(prefix)
-	demoServiceSubject := demo_service.DemoService{ServiceId: demo_service.SERVICE_ID}
+	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
 	demoServiceSubject.Register(&bot)
-	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
+	bot.AddSender(&demoSender)
 
 	testCmd := "repeat"
 	bot.AddCommand(
@@ -157,10 +157,10 @@ func TestEmpty(t *testing.T) {
 
 	// Message to repeat.
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSubject.Id(),
-		ConversationId: "0",
+		ServiceID:      demoServiceSubject.ID(),
+		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", Id: demoServiceSubject.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoServiceSubject.ID()}
 
 	// All should not return a thing.
 
@@ -173,7 +173,7 @@ func TestEmpty(t *testing.T) {
 
 	// Get messages and evaluate
 	demoServiceSubject.Run()
-	if demoServiceSender.IsEmpty() == false {
+	if demoSender.IsEmpty() == false {
 		t.Errorf("Incorrect parsing!")
 	}
 }

@@ -14,7 +14,7 @@ import (
 
 // Immediately routes all messages from a service.
 type Bot struct {
-	observers     []service.ServiceSender
+	observers     []service.Sender
 	commands      []command.Command
 	storage       *storage.Storage
 	defaultPrefix string // Prefix to use when one doesn't exist.
@@ -25,7 +25,7 @@ func (self *Bot) SetStorage(storage *storage.Storage) {
 }
 
 // Append a sender that messages may be routed to.
-func (self *Bot) AddSender(sender service.ServiceSender) {
+func (self *Bot) AddSender(sender service.Sender) {
 	self.observers = append(self.observers, sender)
 }
 
@@ -39,7 +39,7 @@ func (self *Bot) AddCommand(cmd command.Command) {
 
 func (self *Bot) GetPrefix(conversation service.Conversation) string {
 	guild := service.Guild{
-		ServiceId: conversation.ServiceId,
+		ServiceID: conversation.ServiceID,
 		GuildID:   conversation.GuildID,
 	}
 	if self.storage == nil {
@@ -66,7 +66,7 @@ func (self *Bot) OnMessage(conversation service.Conversation, sender service.Use
 		for i, command := range self.commands {
 			helpMsg += fmt.Sprintf("%s. %s%s %s\n", strconv.Itoa(i+1), prefix, command.Trigger, command.Help)
 		}
-		self.RouteById(
+		self.RouteByID(
 			conversation,
 			service.Message{
 				Title:       "Help",
@@ -79,16 +79,16 @@ func (self *Bot) OnMessage(conversation service.Conversation, sender service.Use
 			if strings.HasPrefix(msg, trigger) {
 				content := strings.TrimSpace(msg[len(trigger):])
 				matches := command.Pattern.FindAllStringSubmatch(content, -1)
-				command.Exec(conversation, sender, matches, self.storage, self.RouteById)
+				command.Exec(conversation, sender, matches, self.storage, self.RouteByID)
 			}
 		}
 	}
 }
 
 // Route a message to a service sender owned by this Bot.
-func (self *Bot) RouteById(conversation service.Conversation, msg service.Message) {
+func (self *Bot) RouteByID(conversation service.Conversation, msg service.Message) {
 	for _, observer := range self.observers {
-		if observer.Id() == conversation.ServiceId {
+		if observer.ID() == conversation.ServiceID {
 			observer.SendMessage(conversation, msg)
 		}
 	}

@@ -7,37 +7,37 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demo_service"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
 )
 
-func TestRouteById(t *testing.T) {
+func TestRouteByID(t *testing.T) {
 	bot := bot.Bot{}
 
-	serviceID1 := demo_service.SERVICE_ID + "1"
-	demoServiceSender1 := demo_service.DemoServiceSender{ServiceId: serviceID1}
-	serviceID2 := demo_service.SERVICE_ID + "2"
-	demoServiceSender2 := demo_service.DemoServiceSender{ServiceId: serviceID2}
+	ServiceID1 := demoservice.ServiceID + "1"
+	demoSender1 := demoservice.DemoSender{ServiceID: ServiceID1}
+	ServiceID2 := demoservice.ServiceID + "2"
+	demoSender2 := demoservice.DemoSender{ServiceID: ServiceID2}
 
-	bot.AddSender(&demoServiceSender1)
-	bot.AddSender(&demoServiceSender2)
+	bot.AddSender(&demoSender1)
+	bot.AddSender(&demoSender2)
 
 	testMsg := "test_msg"
 
 	testConversation := service.Conversation{
-		ServiceId:      serviceID1,
-		ConversationId: "0",
+		ServiceID:      ServiceID1,
+		ConversationID: "0",
 	}
 
-	bot.RouteById(
+	bot.RouteByID(
 		testConversation,
 		service.Message{Description: testMsg},
 	)
 
-	if demoServiceSender2.IsEmpty() == false {
+	if demoSender2.IsEmpty() == false {
 		t.Errorf("Incorrect parsing!")
 	}
 
-	resultMessage, resultConversation := demoServiceSender1.PopMessage()
+	resultMessage, resultConversation := demoSender1.PopMessage()
 
 	if resultMessage.Description != testMsg {
 		t.Errorf("Message was different!")
@@ -54,15 +54,15 @@ func TestOnMessage(t *testing.T) {
 	prefix := "!"
 	bot.SetDefaultPrefix(prefix)
 
-	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
+	bot.AddSender(&demoSender)
 
 	// Message to repeat.
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSender.Id(),
-		ConversationId: "0",
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 	testMsg := "Test1"
 	testCmd := "repeat"
 
@@ -77,7 +77,7 @@ func TestOnMessage(t *testing.T) {
 	bot.OnMessage(testConversation, testSender, prefix+testCmd+" "+testMsg)
 
 	// Get messages and evaluate
-	resultMessage, resultConversation := demoServiceSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
@@ -92,17 +92,17 @@ func TestOnMessageRequireCommand(t *testing.T) {
 	// Prepare context.
 	bot := bot.Bot{}
 
-	demoServiceSender := demo_service.DemoServiceSender{ServiceId: demo_service.SERVICE_ID}
-	bot.AddSender(&demoServiceSender)
+	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
+	bot.AddSender(&demoSender)
 
 	// Message to repeat.
 	testConversation := service.Conversation{
-		ServiceId:      demoServiceSender.Id(),
-		ConversationId: "0",
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", Id: demoServiceSender.Id()}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 	bot.OnMessage(testConversation, testSender, "Test1")
-	if demoServiceSender.IsEmpty() == false {
+	if demoSender.IsEmpty() == false {
 		t.Errorf("Nothing should have happened!")
 	}
 }
@@ -110,8 +110,8 @@ func TestOnMessageRequireCommand(t *testing.T) {
 func TestDefaultPrefix(t *testing.T) {
 	bot := bot.Bot{}
 	testConversation := service.Conversation{
-		ServiceId:      demo_service.SERVICE_ID,
-		ConversationId: "0",
+		ServiceID:      demoservice.ServiceID,
+		ConversationID: "0",
 	}
 	prefix := bot.GetPrefix(testConversation)
 
