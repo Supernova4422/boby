@@ -50,11 +50,6 @@ func (d *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.Messag
 		Admin:          false,
 	}
 
-	discordGuild, err := s.Guild(m.GuildID)
-	if err == nil {
-		conversation.Admin = discordGuild.OwnerID == m.Author.ID
-	}
-
 	user := service.User{
 		Name: m.Author.ID,
 		ID:   d.ID(),
@@ -62,45 +57,54 @@ func (d *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.Messag
 
 	guild := service.Guild{
 		ServiceID: d.ID(),
-		GuildID:   m.GuildID,
+		GuildID:   "",
 	}
 
-	if conversation.Admin == false {
-		userID := fmt.Sprintf("<@!%s>", m.Author.ID)
-		if (*d.storage).IsAdmin(guild, userID) {
-			conversation.Admin = true
+	if m.GuildID == "" {
+		guild.GuildID = "@" + m.ID
+		conversation.Admin = true
+	} else {
+		discordGuild, err := s.Guild(m.GuildID)
+		if err == nil {
+			conversation.Admin = discordGuild.OwnerID == m.Author.ID
 		}
-	}
+		guild.GuildID = m.GuildID
 
-	if conversation.Admin == false {
-		for _, role := range m.Member.Roles {
-			for _, guildRole := range discordGuild.Roles {
-				if role == guildRole.ID {
-					adminPermissions := []int{
-						discordgo.PermissionAdministrator,
-						discordgo.PermissionManageServer,
-						discordgo.PermissionManageWebhooks,
-					}
-					for _, permission := range adminPermissions {
-						if (guildRole.Permissions & permission) == permission {
-							conversation.Admin = true
-							break
+		if conversation.Admin == false {
+			userID := fmt.Sprintf("<@!%s>", m.Author.ID)
+			if (*d.storage).IsAdmin(guild, userID) {
+				conversation.Admin = true
+			} else {
+				for _, role := range m.Member.Roles {
+					for _, guildRole := range discordGuild.Roles {
+						if role == guildRole.ID {
+							adminPermissions := []int{
+								discordgo.PermissionAdministrator,
+								discordgo.PermissionManageServer,
+								discordgo.PermissionManageWebhooks,
+							}
+							for _, permission := range adminPermissions {
+								if (guildRole.Permissions & permission) == permission {
+									conversation.Admin = true
+									break
+								}
+							}
+							if conversation.Admin {
+								break
+							}
 						}
 					}
+
 					if conversation.Admin {
 						break
 					}
+
+					updatedRole := fmt.Sprintf("<@&%s>", role)
+					if (*d.storage).IsAdmin(guild, updatedRole) {
+						conversation.Admin = true
+						break
+					}
 				}
-			}
-
-			if conversation.Admin {
-				break
-			}
-
-			updatedRole := fmt.Sprintf("<@&%s>", role)
-			if (*d.storage).IsAdmin(guild, updatedRole) {
-				conversation.Admin = true
-				break
 			}
 		}
 	}
