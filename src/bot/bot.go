@@ -61,11 +61,17 @@ func (b *Bot) SetDefaultPrefix(prefix string) {
 	b.defaultPrefix = prefix
 }
 
+// HelpTrigger is a string a user can input to receive information on how to use the bot.
+// The string needs to be prefixed though, the prefix is not included in the value.
+func (b *Bot) HelpTrigger() string {
+	return "help"
+}
+
 // OnMessage runs any command where the message starts with the conversation's
 // prefix + the command's trigger.
 func (b *Bot) OnMessage(conversation service.Conversation, sender service.User, msg string) {
 	prefix := b.GetPrefix(conversation)
-	if msg == prefix+"help" {
+	if msg == prefix+b.HelpTrigger() {
 		helpMsg := "Commands: \n"
 		for i, command := range b.commands {
 			helpMsg += fmt.Sprintf("%s. %s%s %s\n", strconv.Itoa(i+1), prefix, command.Trigger, command.Help)

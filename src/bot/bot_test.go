@@ -144,7 +144,7 @@ func TestHelp(t *testing.T) {
 	bot.AddSender(&demoSender)
 
 	expectedTrigger := prefix + testCmd
-	bot.OnMessage(testConversation, testSender, prefix+"help")
+	bot.OnMessage(testConversation, testSender, prefix+bot.HelpTrigger())
 	msg, _ := demoSender.PopMessage()
 
 	if strings.Contains(msg.Description, expectedTrigger) == false {

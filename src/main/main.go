@@ -13,8 +13,13 @@ import (
 func main() {
 	bot, err := bot.ConfiguredBot(".")
 	if err == nil {
-		discordSubject, discordSender, err := discordservice.NewDiscords()
+		discordSubject, discordSender, discord, err := discordservice.NewDiscords()
 		if err == nil {
+			prefix := "!"
+			bot.SetDefaultPrefix(prefix)
+			help := bot.HelpTrigger()
+			discord.UpdateStatus(0, prefix+help)
+
 			defer discordSubject.Close() // Cleanly close down the Discord session.
 			_jsonStorage, err := storage.LoadFromFile("storage.json")
 			var jsonStorage storage.Storage = &_jsonStorage

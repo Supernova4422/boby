@@ -64,21 +64,21 @@ func getConfig() (*DiscordConfig, error) {
 }
 
 // NewDiscords Creates subject and sender service adapters for discord.
-func NewDiscords() (*DiscordSubject, *DiscordSender, error) {
+func NewDiscords() (*DiscordSubject, *DiscordSender, *discordgo.Session, error) {
 	// Get token
 	config, err := getConfig()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	discord, err := discordgo.New("Bot " + config.Token)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	err = discord.Open()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	discordSubject := DiscordSubject{
@@ -87,6 +87,7 @@ func NewDiscords() (*DiscordSubject, *DiscordSender, error) {
 
 	// Register the messageCreate func as a callback for MessageCreate events.
 	discord.AddHandler(discordSubject.messageCreate)
+	discord.UpdateStatus(0, "!help")
 
-	return &discordSubject, &DiscordSender{discord: discord}, nil
+	return &discordSubject, &DiscordSender{discord: discord}, discord, nil
 }
