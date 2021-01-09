@@ -1,4 +1,4 @@
-name: Test
+name: Coverage
 
 on:
   push:
@@ -28,7 +28,9 @@ jobs:
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
         fi
+    - name: Get dependencies
+      run: go get github.com/jpoles1/gopherbadger
 
-    - name: Test
-      working-directory: ./src
-      run: go test -v ./...
+    - name: Build
+      working-directory: ./src/
+      run: gopherbadger -md="README.md,coverage.md"
