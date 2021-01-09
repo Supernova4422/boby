@@ -31,6 +31,10 @@ github.com/BKrajancic/FLD-Bot/m/v2/src/bot/bot.go:123.16,125.3 1 0
 github.com/BKrajancic/FLD-Bot/m/v2/src/bot/bot.go:127.61,129.17 2 0
 github.com/BKrajancic/FLD-Bot/m/v2/src/bot/bot.go:129.17,131.4 1 0
 github.com/BKrajancic/FLD-Bot/m/v2/src/bot/bot.go:131.9,133.4 1 0
+github.com/BKrajancic/FLD-Bot/m/v2/src/command/setAdmin.go:9.155,10.18 1 1
+github.com/BKrajancic/FLD-Bot/m/v2/src/command/setAdmin.go:10.18,18.3 3 1
+github.com/BKrajancic/FLD-Bot/m/v2/src/command/set_prefix.go:12.156,13.18 1 0
+github.com/BKrajancic/FLD-Bot/m/v2/src/command/set_prefix.go:13.18,25.3 3 0
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/unsetAdmin.go:9.157,10.18 1 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/unsetAdmin.go:10.18,18.3 3 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/check_admin.go:9.157,15.42 2 1
@@ -118,7 +122,3 @@ github.com/BKrajancic/FLD-Bot/m/v2/src/command/scraper.go:131.48,133.7 1 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/scraper.go:141.10,143.5 1 0
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/scraper.go:144.9,146.4 1 0
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/scraper.go:147.8,152.3 1 0
-github.com/BKrajancic/FLD-Bot/m/v2/src/command/setAdmin.go:9.155,10.18 1 1
-github.com/BKrajancic/FLD-Bot/m/v2/src/command/setAdmin.go:10.18,18.3 3 1
-github.com/BKrajancic/FLD-Bot/m/v2/src/command/set_prefix.go:12.156,13.18 1 0
-github.com/BKrajancic/FLD-Bot/m/v2/src/command/set_prefix.go:13.18,25.3 3 0
