@@ -1,10 +1,9 @@
-package command
+package routine
 
 import (
 	"testing"
 	"time"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/routine"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
 )
@@ -22,7 +21,7 @@ func TestHeartbeat(t *testing.T) {
 	}
 	testMsg := "Hello"
 	delay := time.Second / 100
-	go routine.Heartbeat(delay, testConversation, service.Message{Description: testMsg}, demoSender.SendMessage)
+	go Heartbeat(delay, testConversation, service.Message{Description: testMsg}, demoSender.SendMessage)
 
 	if demoSender.IsEmpty() == false {
 		t.Errorf("Routine is not working or test execution halted for too long!")

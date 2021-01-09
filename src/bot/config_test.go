@@ -1,6 +1,6 @@
 // This is not for configuring tests, this is for testing configs.
 
-package test
+package bot
 
 import (
 	"encoding/json"
@@ -9,7 +9,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
@@ -62,7 +61,7 @@ func GetTestInputs(filepath string) ([]ConfigTest, error) {
 	return configTests, nil
 }
 
-func getDemoBot(filepath string, bot *bot.Bot) *demoservice.DemoSender {
+func getDemoBot(filepath string, bot *Bot) *demoservice.DemoSender {
 	demoSender := demoservice.DemoSender{}
 	bot.AddSender(&demoSender)
 
@@ -92,7 +91,7 @@ func TestConfig(t *testing.T) {
 		t.Log("Configuration file was not used for this test.")
 	} else {
 		t.Log("Configuration file was used for this test.")
-		bot, err := bot.ConfiguredBot(configDir)
+		bot, err := ConfiguredBot(configDir)
 		tempStorage := storage.TempStorage{}
 		var _storage storage.Storage = &tempStorage
 		bot.SetStorage(&_storage)

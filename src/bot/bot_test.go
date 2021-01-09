@@ -2,6 +2,7 @@ package bot
 
 import (
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
@@ -116,5 +117,41 @@ func TestDefaultPrefix(t *testing.T) {
 
 	if prefix != "" {
 		t.Errorf("The default prefix should be the empty string.")
+	}
+}
+
+func TestHelp(t *testing.T) {
+	bot := Bot{}
+	testConversation := service.Conversation{
+		ServiceID:      demoservice.ServiceID,
+		ConversationID: "0",
+	}
+
+	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	prefix := "!"
+	bot.SetDefaultPrefix(prefix)
+
+	testCmd := "test"
+	helpMsg := "Here is how to use it"
+	cmd := command.Command{
+		Trigger: testCmd,
+		Pattern: regexp.MustCompile("(.*)"),
+		Exec:    Repeater,
+		Help:    helpMsg,
+	}
+	bot.AddCommand(cmd) // Repeater command.
+	bot.AddSender(&demoSender)
+
+	expectedTrigger := prefix + testCmd
+	bot.OnMessage(testConversation, testSender, prefix+"help")
+	msg, _ := demoSender.PopMessage()
+
+	if strings.Contains(msg.Description, expectedTrigger) == false {
+		t.Errorf("The help message should include the trigger")
+	}
+
+	if strings.Contains(msg.Description, helpMsg) == false {
+		t.Errorf("The help message should include the trigger")
 	}
 }
