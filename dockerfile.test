@@ -8,5 +8,5 @@ WORKDIR ${project_path}
 RUN go get -d -v ./...
 RUN go install -v ./...
 
-WORKDIR ${project_path}/src/test
-CMD ["go", "test", "-v"]
+WORKDIR ${project_path}/src
+CMD ["go", "test", "-v", "./..."]

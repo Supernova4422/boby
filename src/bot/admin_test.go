@@ -1,11 +1,10 @@
-package test
+package bot
 
 import (
 	"fmt"
 	"regexp"
 	"testing"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
@@ -19,8 +18,8 @@ const unsetAdmin = prefix + "unsetadmin"
 const isAdmin = prefix + "isadmin"
 
 // getBot retrieves a bot with commands for managing admins.
-func getBot() (*bot.Bot, *demoservice.DemoSender, *storage.TempStorage) {
-	bot := bot.Bot{}
+func getBot() (*Bot, *demoservice.DemoSender, *storage.TempStorage) {
+	bot := Bot{}
 
 	bot.AddCommand(
 		command.Command{

@@ -1,11 +1,10 @@
-package test
+package bot
 
 import (
 	"fmt"
 	"regexp"
 	"testing"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
@@ -14,7 +13,7 @@ import (
 
 func TestSetPrefix(t *testing.T) {
 	// Prepare context.
-	bot := bot.Bot{}
+	bot := Bot{}
 	tempStorage := storage.TempStorage{}
 	var _storage storage.Storage = &tempStorage
 	bot.SetStorage(&_storage)
@@ -31,7 +30,7 @@ func TestSetPrefix(t *testing.T) {
 		command.Command{
 			Trigger: testCmd,
 			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    command.Repeater,
+			Exec:    Repeater,
 			Help:    "",
 		}) // Repeater command.
 
@@ -103,7 +102,7 @@ func TestSetPrefix(t *testing.T) {
 
 func TestIgnoreSetPrefix(t *testing.T) {
 	// Prepare context.
-	bot := bot.Bot{}
+	bot := Bot{}
 	tempStorage := storage.TempStorage{}
 	var _storage storage.Storage = &tempStorage
 	bot.SetStorage(&_storage)
@@ -120,7 +119,7 @@ func TestIgnoreSetPrefix(t *testing.T) {
 		command.Command{
 			Trigger: testCmd,
 			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    command.Repeater,
+			Exec:    Repeater,
 			Help:    "",
 		}) // Repeater command.
 

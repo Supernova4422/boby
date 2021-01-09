@@ -1,17 +1,16 @@
-package test
+package bot
 
 import (
 	"regexp"
 	"testing"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
 )
 
 func TestRouteByID(t *testing.T) {
-	bot := bot.Bot{}
+	bot := Bot{}
 
 	ServiceID1 := demoservice.ServiceID + "1"
 	demoSender1 := demoservice.DemoSender{ServiceID: ServiceID1}
@@ -50,7 +49,7 @@ func TestRouteByID(t *testing.T) {
 
 func TestOnMessage(t *testing.T) {
 	// Prepare context.
-	bot := bot.Bot{}
+	bot := Bot{}
 	prefix := "!"
 	bot.SetDefaultPrefix(prefix)
 
@@ -70,7 +69,7 @@ func TestOnMessage(t *testing.T) {
 		command.Command{
 			Trigger: testCmd,
 			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    command.Repeater,
+			Exec:    Repeater,
 			Help:    "",
 		}) // Repeater command.
 
@@ -90,7 +89,7 @@ func TestOnMessage(t *testing.T) {
 // OnMessage should do nothing if no command is added
 func TestOnMessageRequireCommand(t *testing.T) {
 	// Prepare context.
-	bot := bot.Bot{}
+	bot := Bot{}
 
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
 	bot.AddSender(&demoSender)
@@ -108,7 +107,7 @@ func TestOnMessageRequireCommand(t *testing.T) {
 }
 
 func TestDefaultPrefix(t *testing.T) {
-	bot := bot.Bot{}
+	bot := Bot{}
 	testConversation := service.Conversation{
 		ServiceID:      demoservice.ServiceID,
 		ConversationID: "0",

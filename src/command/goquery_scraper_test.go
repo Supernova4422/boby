@@ -1,21 +1,15 @@
-package test
+package command
 
 import (
 	"strings"
 	"testing"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
 )
 
 func TestGoQueryScraperWithCapture(t *testing.T) {
-	testCmd := "scrape"
-	bot := bot.Bot{}
-
 	demoSender := demoservice.DemoSender{}
-	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
 		ServiceID:      demoSender.ID(),
@@ -24,10 +18,10 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
-	config := command.GoQueryScraperConfig{
-		Trigger: testCmd,
+	config := GoQueryScraperConfig{
+		Trigger: "",
 		Capture: "(.*)",
-		TitleSelector: command.SelectorCapture{
+		TitleSelector: SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
 				"h2",
@@ -35,7 +29,7 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 			HandleMultiple: "First",
 		},
 		URL: "https://webscraper.io/test-sites/%s",
-		ReplySelector: command.SelectorCapture{
+		ReplySelector: SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
 				"h1",
@@ -45,13 +39,12 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := command.GetGoqueryScraper(config)
+	scraper, err := GetGoqueryScraper(config)
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
 	}
 
-	bot.AddCommand(scraper)
-	bot.OnMessage(testConversation, testSender, testCmd+" e-commerce/allinone")
+	scraper.Exec(testConversation, testSender, [][]string{{"", "e-commerce/allinone"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
@@ -67,7 +60,7 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 		t.Errorf("Sender was different!")
 	}
 
-	bot.OnMessage(testConversation, testSender, testCmd+" tables")
+	scraper.Exec(testConversation, testSender, [][]string{{"", "tables"}}, nil, demoSender.SendMessage)
 	resultMessage, resultConversation = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Table playground") {
 		t.Errorf("Message was different!")
@@ -83,13 +76,8 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 }
 
 func TestGoQueryScraperWithOneCapture(t *testing.T) {
-	testCmd := "scrape"
-	bot := bot.Bot{}
-	prefix := "!"
-	bot.SetDefaultPrefix(prefix)
 
 	demoSender := demoservice.DemoSender{}
-	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
 		ServiceID:      demoSender.ID(),
@@ -98,10 +86,10 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
-	config := command.GoQueryScraperConfig{
-		Trigger: testCmd,
+	config := GoQueryScraperConfig{
+		Trigger: "",
 		Capture: "(.*)",
-		TitleSelector: command.SelectorCapture{
+		TitleSelector: SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
 				"h2",
@@ -109,7 +97,7 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 			HandleMultiple: "First",
 		},
 		URL: "https://webscraper.io/test-sites/%s",
-		ReplySelector: command.SelectorCapture{
+		ReplySelector: SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
 				"h2",
@@ -119,13 +107,12 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := command.GetGoqueryScraper(config)
+	scraper, err := GetGoqueryScraper(config)
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
 	}
 
-	bot.AddCommand(scraper)
-	bot.OnMessage(testConversation, testSender, prefix+testCmd+" e-commerce/allinone")
+	scraper.Exec(testConversation, testSender, [][]string{{"", "e-commerce/allinone"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
@@ -147,13 +134,7 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 }
 
 func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
-	testCmd := "scrape"
-	bot := bot.Bot{}
-	prefix := "!"
-	bot.SetDefaultPrefix(prefix)
-
 	demoSender := demoservice.DemoSender{}
-	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
 		ServiceID:      demoSender.ID(),
@@ -162,16 +143,16 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
-	config := command.GoQueryScraperConfig{
-		Trigger: testCmd,
+	config := GoQueryScraperConfig{
+		Trigger: "",
 		Capture: "(.*)",
-		TitleSelector: command.SelectorCapture{
+		TitleSelector: SelectorCapture{
 			Template:       "Title Template!",
 			Selectors:      []string{},
 			HandleMultiple: "First",
 		},
 		URL: "https://webscraper.io/test-sites/%s",
-		ReplySelector: command.SelectorCapture{
+		ReplySelector: SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
 				"h1",
@@ -181,14 +162,13 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := command.GetGoqueryScraper(config)
+	scraper, err := GetGoqueryScraper(config)
 
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
 	}
 
-	bot.AddCommand(scraper)
-	bot.OnMessage(testConversation, testSender, prefix+testCmd+" e-commerce/allinone")
+	scraper.Exec(testConversation, testSender, [][]string{{"", "e-commerce/allinone"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Title != config.TitleSelector.Template {
@@ -205,13 +185,7 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 }
 
 func TestGoQueryScrapeEscapeUrl(t *testing.T) {
-	testCmd := "scrape"
-	bot := bot.Bot{}
-	prefix := "!"
-	bot.SetDefaultPrefix(prefix)
-
 	demoSender := demoservice.DemoSender{}
-	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
 		ServiceID:      demoSender.ID(),
@@ -220,16 +194,16 @@ func TestGoQueryScrapeEscapeUrl(t *testing.T) {
 
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
-	config := command.GoQueryScraperConfig{
-		Trigger: testCmd,
+	config := GoQueryScraperConfig{
+		Trigger: "",
 		Capture: "(.*)",
-		TitleSelector: command.SelectorCapture{
+		TitleSelector: SelectorCapture{
 			Template:       "Title Template!",
 			Selectors:      []string{},
 			HandleMultiple: "First",
 		},
 		URL: "https://webscraper.io/test-sites/%s",
-		ReplySelector: command.SelectorCapture{
+		ReplySelector: SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
 				"h1",
@@ -239,14 +213,13 @@ func TestGoQueryScrapeEscapeUrl(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := command.GetGoqueryScraper(config)
+	scraper, err := GetGoqueryScraper(config)
 
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
 	}
 
-	bot.AddCommand(scraper)
-	bot.OnMessage(testConversation, testSender, prefix+testCmd+" e-commerce/ allinone")
+	scraper.Exec(testConversation, testSender, [][]string{{"", "e-commerce/ allinone"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.URL != "https://webscraper.io/test-sites/e-commerce%2F%20allinone" {
@@ -263,13 +236,7 @@ func TestGoQueryScrapeEscapeUrl(t *testing.T) {
 }
 
 func TestGoQueryScraperNoCapture(t *testing.T) {
-	testCmd := "scrape"
-	bot := bot.Bot{}
-	prefix := "!"
-	bot.SetDefaultPrefix(prefix)
-
 	demoSender := demoservice.DemoSender{}
-	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
 		ServiceID:      demoSender.ID(),
@@ -278,16 +245,16 @@ func TestGoQueryScraperNoCapture(t *testing.T) {
 
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
-	config := command.GoQueryScraperConfig{
-		Trigger: testCmd,
+	config := GoQueryScraperConfig{
+		Trigger: "",
 		Capture: "", // Gotta capture something, even if it is unused.
-		TitleSelector: command.SelectorCapture{
+		TitleSelector: SelectorCapture{
 			Template:       "Example Scrape",
 			Selectors:      []string{},
 			HandleMultiple: "First",
 		},
 		URL: "https://webscraper.io/test-sites/e-commerce/allinone",
-		ReplySelector: command.SelectorCapture{
+		ReplySelector: SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
 				"h1",
@@ -297,13 +264,12 @@ func TestGoQueryScraperNoCapture(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := command.GetGoqueryScraper(config)
+	scraper, err := GetGoqueryScraper(config)
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
 	}
 
-	bot.AddCommand(scraper)
-	bot.OnMessage(testConversation, testSender, prefix+testCmd+" ")
+	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Test Sites") {
@@ -320,13 +286,7 @@ func TestGoQueryScraperNoCapture(t *testing.T) {
 }
 
 func TestGoQueryScraperUnusedCapture(t *testing.T) {
-	testCmd := "scrape"
-	bot := bot.Bot{}
-	prefix := "!"
-	bot.SetDefaultPrefix(prefix)
-
 	demoSender := demoservice.DemoSender{}
-	bot.AddSender(&demoSender)
 
 	testConversation := service.Conversation{
 		ServiceID:      demoSender.ID(),
@@ -335,16 +295,16 @@ func TestGoQueryScraperUnusedCapture(t *testing.T) {
 
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
-	config := command.GoQueryScraperConfig{
-		Trigger: testCmd,
+	config := GoQueryScraperConfig{
+		Trigger: "",
 		Capture: "(.*)", // This is a bad idea.
-		TitleSelector: command.SelectorCapture{
+		TitleSelector: SelectorCapture{
 			Template:       "Example Scrape",
 			Selectors:      []string{},
 			HandleMultiple: "First",
 		},
 		URL: "https://webscraper.io/test-sites/e-commerce/allinone",
-		ReplySelector: command.SelectorCapture{
+		ReplySelector: SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
 				"h1",
@@ -354,13 +314,12 @@ func TestGoQueryScraperUnusedCapture(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := command.GetGoqueryScraper(config)
+	scraper, err := GetGoqueryScraper(config)
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
 	}
 
-	bot.AddCommand(scraper)
-	bot.OnMessage(testConversation, testSender, prefix+testCmd)
+	scraper.Exec(testConversation, testSender, [][]string{{"", ""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Description != "An error occurred retrieving the webpage." {

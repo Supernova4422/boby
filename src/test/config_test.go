@@ -91,6 +91,7 @@ func TestConfig(t *testing.T) {
 	if err != nil {
 		t.Log("Configuration file was not used for this test.")
 	} else {
+		t.Log("Configuration file was used for this test.")
 		bot, err := bot.ConfiguredBot(configDir)
 		tempStorage := storage.TempStorage{}
 		var _storage storage.Storage = &tempStorage
