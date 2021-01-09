@@ -31,6 +31,9 @@ github.com/BKrajancic/FLD-Bot/m/v2/src/bot/bot.go:123.16,125.3 1 0
 github.com/BKrajancic/FLD-Bot/m/v2/src/bot/bot.go:127.61,129.17 2 0
 github.com/BKrajancic/FLD-Bot/m/v2/src/bot/bot.go:129.17,131.4 1 0
 github.com/BKrajancic/FLD-Bot/m/v2/src/bot/bot.go:131.9,133.4 1 0
+github.com/BKrajancic/FLD-Bot/m/v2/src/command/im_admin.go:9.154,10.18 1 1
+github.com/BKrajancic/FLD-Bot/m/v2/src/command/im_admin.go:10.18,12.3 1 1
+github.com/BKrajancic/FLD-Bot/m/v2/src/command/im_admin.go:12.8,14.3 1 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/scraper.go:31.66,33.53 2 0
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/scraper.go:37.2,38.16 2 0
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/scraper.go:43.2,44.20 2 0
@@ -119,6 +122,3 @@ github.com/BKrajancic/FLD-Bot/m/v2/src/command/goquery_scraper.go:210.2,210.82 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/goquery_scraper.go:196.16,198.3 1 0
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/goquery_scraper.go:201.16,203.3 1 0
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/goquery_scraper.go:207.16,209.3 1 0
-github.com/BKrajancic/FLD-Bot/m/v2/src/command/im_admin.go:9.154,10.18 1 1
-github.com/BKrajancic/FLD-Bot/m/v2/src/command/im_admin.go:10.18,12.3 1 1
-github.com/BKrajancic/FLD-Bot/m/v2/src/command/im_admin.go:12.8,14.3 1 1
