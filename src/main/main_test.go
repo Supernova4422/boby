@@ -1,6 +1,6 @@
 // This is not for configuring tests, this is for testing configs.
 
-package bot
+package main
 
 import (
 	"bufio"
@@ -10,6 +10,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
@@ -62,7 +63,7 @@ func GetTestInputs(filepath string) ([]ConfigTest, error) {
 	return configTests, nil
 }
 
-func getDemoBot(filepath string, bot *Bot) *demoservice.DemoSender {
+func getDemoBot(filepath string, bot *bot.Bot) *demoservice.DemoSender {
 	demoSender := demoservice.DemoSender{}
 	bot.AddSender(&demoSender)
 
