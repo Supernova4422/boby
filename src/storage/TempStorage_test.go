@@ -6,15 +6,6 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 )
 
-func TestSetPrefix(t *testing.T) {
-}
-
-// GetValue(guild service.Guild, key string) (string, error)
-// SetValue(guild service.Guild, key string, value string)
-// IsAdmin(guild service.Guild, UserID string) bool
-// SetAdmin(guild service.Guild, UserID string)
-// UnsetAdmin(guild service.Guild, UserID string)
-
 func TestSetGetValue(t *testing.T) {
 	storage := TempStorage{}
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}

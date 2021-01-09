@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -173,15 +174,11 @@ func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Co
 
 // GetGoqueryScraperConfigs retrieves an array of GoQueryScraperConfig from a json file.
 // If a file doesn't exist, an example is made in its place, and an error is returned.
-func GetGoqueryScraperConfigs(filepath string) ([]GoQueryScraperConfig, error) {
+func GetGoqueryScraperConfigs(reader io.Reader) ([]GoQueryScraperConfig, error) {
 	var config []GoQueryScraperConfig
-	if _, err := os.Stat(filepath); os.IsNotExist(err) {
-		return config, makeExampleGoQueryScraperConfig(filepath)
-	}
-
-	bytes, err := ioutil.ReadFile(filepath)
+	bytes, err := ioutil.ReadAll(reader)
 	if err != nil {
-		fmt.Printf("Unable to read file: %s", filepath)
+		fmt.Printf("Unable to read buffer.")
 		return config, nil
 	}
 

@@ -1,7 +1,9 @@
 package bot
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"path"
 	"regexp"
 	"strconv"
@@ -110,8 +112,12 @@ func ConfiguredBot(configDir string) (Bot, error) {
 	bot := Bot{}
 	bot.SetDefaultPrefix("!")
 
-	scraperPath := path.Join(configDir, "scraper_config.json")
-	scraperConfigs, err := command.GetScraperConfigs(scraperPath)
+	file, err := os.Open(path.Join(configDir, "scraper_config.json"))
+	if err != nil {
+		return bot, err
+	}
+	scraperConfigs, err := command.GetScraperConfigs(bufio.NewReader(file))
+
 	if err != nil {
 		return bot, err
 	}
@@ -124,8 +130,13 @@ func ConfiguredBot(configDir string) (Bot, error) {
 			return bot, err
 		}
 	}
-	configPath := path.Join(configDir, "goquery_scraper_config.json")
-	goqueryScraperConfigs, err := command.GetGoqueryScraperConfigs(configPath)
+
+	file, err = os.Open(path.Join(configDir, "goquery_scraper_config.json"))
+	if err != nil {
+		return bot, err
+	}
+
+	goqueryScraperConfigs, err := command.GetGoqueryScraperConfigs(bufio.NewReader(file))
 	if err != nil {
 		return bot, err
 	}

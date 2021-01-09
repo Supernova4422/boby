@@ -2,40 +2,37 @@ package storage
 
 import (
 	"encoding/json"
-	"fmt"
+	"io"
 	"io/ioutil"
-	"os"
 	"sync"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 )
 
+// A TruncatableWriter is a buffer that supports flexible operations.
+//
+// The behaviour of all functions is that of os.File (os.file fulfills this interface)
+type TruncatableWriter interface {
+	Truncate(n int64) error
+	Write(b []byte) (n int, err error)
+	Read(p []byte) (n int, err error)
+	Seek(offset int64, whence int) (ret int64, err error)
+}
+
 // JSONStorage is an implementation of Storage that uses json and files for data storage.
 type JSONStorage struct {
 	TempStorage TempStorage
-	filepath    string
+	writer      TruncatableWriter
 	mutex       *sync.Mutex // Lock when calling any public function.
 }
 
-// LoadFromFile will load a JSON from a filepath.
-func LoadFromFile(filepath string) (JSONStorage, error) {
-	config := JSONStorage{
-		filepath: filepath,
-		mutex:    &sync.Mutex{},
-	}
+// LoadFromBuffer will load a JSON from a filepath.
+func LoadFromBuffer(t TruncatableWriter) (JSONStorage, error) {
+	config := JSONStorage{writer: t, mutex: &sync.Mutex{}}
 
-	// Make an empty file.
-	if _, err := os.Stat(filepath); os.IsNotExist(err) {
-		err := config.SaveToFile()
-		if err != nil {
-			return config, fmt.Errorf("There was an error making an example file")
-		}
-	}
-
-	bytes, err := ioutil.ReadFile(filepath)
+	bytes, err := ioutil.ReadAll(t)
 	if err != nil {
-		fmt.Printf("Unable to read file: %s", filepath)
-		return config, nil
+		return config, err
 	}
 
 	err = json.Unmarshal(bytes, &config)
@@ -45,18 +42,14 @@ func LoadFromFile(filepath string) (JSONStorage, error) {
 // SaveToFile saves JSONStorage's state to a file, which can be reloaded later using LoadFromFile.
 func (j *JSONStorage) SaveToFile() error {
 	bytes, err := json.Marshal(j)
-
-	file, err := os.Create(j.filepath)
+	j.writer.Truncate(0)
+	_, err = j.writer.Write(bytes)
 	if err != nil {
-		return fmt.Errorf("Unable to create file: %s", j.filepath)
+		return err
 	}
-	defer file.Close()
 
-	_, err = file.Write(bytes)
-	if err != nil {
-		return fmt.Errorf("Unable to write to file: %s", j.filepath)
-	}
-	return nil
+	_, err = j.writer.Seek(0, io.SeekStart)
+	return err
 }
 
 // GetValue retrieves the value for key, for a Guild.

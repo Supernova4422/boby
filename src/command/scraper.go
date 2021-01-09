@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -28,15 +29,12 @@ type ScraperConfig struct {
 // GetScraperConfigs returns a set of ScraperConfig by reading a file.
 // If a file doesn't exist at the given filepath, an example is made in its place,
 // and an error is returned.
-func GetScraperConfigs(filepath string) ([]ScraperConfig, error) {
+func GetScraperConfigs(reader io.Reader) ([]ScraperConfig, error) {
 	var config []ScraperConfig
-	if _, err := os.Stat(filepath); os.IsNotExist(err) {
-		return config, makeExampleScraperConfig(filepath)
-	}
 
-	bytes, err := ioutil.ReadFile(filepath)
+	bytes, err := ioutil.ReadAll(reader)
 	if err != nil {
-		fmt.Printf("Unable to read file: %s", filepath)
+		fmt.Printf("Unable to read buffer")
 		return config, nil
 	}
 

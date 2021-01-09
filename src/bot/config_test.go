@@ -3,6 +3,7 @@
 package bot
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -65,7 +66,12 @@ func getDemoBot(filepath string, bot *Bot) *demoservice.DemoSender {
 	demoSender := demoservice.DemoSender{}
 	bot.AddSender(&demoSender)
 
-	scraperConfigs, err := command.GetScraperConfigs(filepath)
+	file, err := os.Open(filepath)
+	if err != nil {
+		panic(err)
+	}
+
+	scraperConfigs, err := command.GetScraperConfigs(bufio.NewReader(file))
 	if err != nil {
 		panic(err)
 	}

@@ -13,30 +13,41 @@ import (
 func main() {
 	bot, err := bot.ConfiguredBot(".")
 	if err == nil {
-		discordSubject, discordSender, discord, err := discordservice.NewDiscords()
-		if err == nil {
-			prefix := "!"
-			bot.SetDefaultPrefix(prefix)
-			help := bot.HelpTrigger()
-			discord.UpdateStatus(0, prefix+help)
-
-			defer discordSubject.Close() // Cleanly close down the Discord session.
-			_jsonStorage, err := storage.LoadFromFile("storage.json")
-			var jsonStorage storage.Storage = &_jsonStorage
-			if err == nil {
-				discordSubject.SetStorage(&jsonStorage)
-				bot.SetStorage(&jsonStorage)
-			}
-
-			discordSubject.Register(&bot)
-			bot.AddSender(discordSender)
-
-			// Start all routines, e.g.
-			// go routine()
-
-			sc := make(chan os.Signal, 1)
-			signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-			<-sc
-		}
+		panic(err)
 	}
+
+	discordSubject, discordSender, discord, err := discordservice.NewDiscords()
+	if err == nil {
+		panic(err)
+	}
+	defer discordSubject.Close() // Cleanly close down the Discord session.
+
+	prefix := "!"
+	bot.SetDefaultPrefix(prefix)
+	help := bot.HelpTrigger()
+	discord.UpdateStatus(0, prefix+help)
+
+	file, err := os.Open("storage.json")
+	if err == nil {
+		panic(err)
+	}
+
+	_jsonStorage, err := storage.LoadFromBuffer(file)
+	if err == nil {
+		panic(err)
+	}
+
+	var jsonStorage storage.Storage = &_jsonStorage
+	discordSubject.SetStorage(&jsonStorage)
+	bot.SetStorage(&jsonStorage)
+
+	discordSubject.Register(&bot)
+	bot.AddSender(discordSender)
+
+	// Start all routines, e.g.
+	// go routine()
+
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	<-sc
 }
