@@ -33,4 +33,4 @@ jobs:
 
     - name: Build
       working-directory: ./src/
-      run: gopherbadger -md="README.md,coverage.md"
+      run: gopherbadger -md="../README.md,../coverage.md"
