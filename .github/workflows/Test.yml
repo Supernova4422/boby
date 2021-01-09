@@ -30,5 +30,5 @@ jobs:
         fi
 
     - name: Test
-      working-directory: ./src/test
-      run: go test -v .
+      working-directory: ./src
+      run: go test -v ./...
