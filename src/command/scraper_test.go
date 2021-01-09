@@ -146,10 +146,10 @@ func TestScraperNoCapture(t *testing.T) {
 		t.Errorf("An error occured when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if !strings.HasPrefix(resultMessage.Description, "Test Sites E-commerce training site") {
+	if !strings.HasPrefix(resultMessage.Description, "Test Sites E-commerce training site.") {
 		t.Errorf("Message was different!")
 	}
 
