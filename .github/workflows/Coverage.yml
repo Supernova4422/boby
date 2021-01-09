@@ -39,5 +39,9 @@ jobs:
     - name: Test
       working-directory: ./src/
       run: gopherbadger -md="../README.md,../coverage.md"
+    
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Update test coverage badge.
 
  
