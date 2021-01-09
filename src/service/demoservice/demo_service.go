@@ -32,10 +32,6 @@ func (d *DemoService) AddMessage(conversation service.Conversation, user service
 
 // Run will pass messages enqued using AddMessage to all observers added using Register.
 func (d *DemoService) Run() {
-	if len(d.messages) != len(d.users) {
-		panic("users and messages should have the same length because the arrays are co-indexed (i.e. user[0] sends message [0]).")
-	}
-
 	for i := 0; i < len(d.messages); i++ {
 		conversation := d.conversations[i]
 		user := d.users[i]
