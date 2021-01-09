@@ -6,6 +6,7 @@ on:
   pull_request:
     branches: [ master ]
 
+
 jobs:
 
   build:
@@ -13,6 +14,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.head_ref }}
+    
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
       with:
@@ -28,9 +33,13 @@ jobs:
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
         fi
-    - name: Get dependencies
+    - name: Get GopherBadger
       run: go get github.com/jpoles1/gopherbadger
 
-    - name: Build
+    - name: Test
       working-directory: ./src/
       run: gopherbadger -md="../README.md,../coverage.md"
+
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Update test coverage badge.
