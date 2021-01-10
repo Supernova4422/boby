@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"net/http"
 	"regexp"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
@@ -37,8 +36,13 @@ func GetScraperConfigs(reader io.Reader) ([]ScraperConfig, error) {
 	return config, json.Unmarshal(bytes, &config)
 }
 
-// GetScraper creates a scraper from a config.
-func GetScraper(config ScraperConfig) (Command, error) {
+// GetScraper returns a webscraper command from a config, using HTTP to get a html.
+func (config ScraperConfig) GetScraper() (Command, error) {
+	return GetScraperWithHTMLGetter(config, htmlGetWithHTTP)
+}
+
+// GetScraperWithHTMLGetter makes a scraper from a config.
+func GetScraperWithHTMLGetter(config ScraperConfig, htmlGetter HTMLGetter) (Command, error) {
 	webpageCapture := regexp.MustCompile(config.ReplyCapture)
 	titleCapture := regexp.MustCompile(config.TitleCapture)
 
@@ -52,6 +56,7 @@ func GetScraper(config ScraperConfig) (Command, error) {
 			msg,
 			storage,
 			sink,
+			htmlGetter,
 		)
 	}
 	regex, err := regexp.Compile(config.Command)
@@ -66,7 +71,7 @@ func GetScraper(config ScraperConfig) (Command, error) {
 }
 
 // Return the received message
-func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate string, titleCapture *regexp.Regexp, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate string, titleCapture *regexp.Regexp, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message), htmlGetter HTMLGetter) {
 	substitutions := strings.Count(urlTemplate, "%s")
 	url := urlTemplate
 	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
@@ -78,11 +83,10 @@ func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate st
 		url = fmt.Sprintf(url, capture)
 	}
 
-	response, err := http.Get(url)
+	htmlReader, err := htmlGetter(url)
 	if err == nil {
-		// Read response data in to memory
-		body, err := ioutil.ReadAll(response.Body)
-
+		defer htmlReader.Close()
+		body, err := ioutil.ReadAll(htmlReader)
 		if err == nil {
 			// Create a regular expression to find comments
 			bodyS := string(body)

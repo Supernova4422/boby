@@ -634,10 +634,8 @@ func TestEmptyPage(t *testing.T) {
 }
 
 // htmlReturnErr will use a reader that returns an error.
-func htmlReturnErr() HTMLGetter {
-	return func(string) (io.ReadCloser, error) {
-		return readerCrashes{}, nil
-	}
+var HTMLReturnErr = func(string) (io.ReadCloser, error) {
+	return readerCrashes{}, nil
 }
 
 func TestReaderCrashes(t *testing.T) {
@@ -662,7 +660,7 @@ func TestInvalidReader(t *testing.T) {
 		URL:     "https://webscraper.io/test-sites/e-commerce/",
 	}
 
-	scraper, err := GetGoqueryScraperWithHTMLGetter(config, htmlReturnErr())
+	scraper, err := GetGoqueryScraperWithHTMLGetter(config, HTMLReturnErr)
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
 	}

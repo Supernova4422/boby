@@ -74,7 +74,7 @@ func ConfiguredBot(configDir string) (bot.Bot, error) {
 	}
 
 	for _, scraperConfig := range scraperConfigs {
-		scraperCommand, err := command.GetScraper(scraperConfig)
+		scraperCommand, err := scraperConfig.GetScraper()
 		if err == nil {
 			bot.AddCommand(scraperCommand)
 		} else {
