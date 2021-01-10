@@ -16,12 +16,12 @@ import (
 
 func main() {
 	bot, err := ConfiguredBot(".")
-	if err == nil {
+	if err != nil {
 		panic(err)
 	}
 
 	discordSubject, discordSender, discord, err := discordservice.NewDiscords()
-	if err == nil {
+	if err != nil {
 		panic(err)
 	}
 	defer discordSubject.Close() // Cleanly close down the Discord session.
@@ -32,12 +32,12 @@ func main() {
 	discord.UpdateStatus(0, prefix+help)
 
 	file, err := os.Open("storage.json")
-	if err == nil {
+	if err != nil {
 		panic(err)
 	}
 
 	_jsonStorage, err := storage.LoadFromBuffer(file)
-	if err == nil {
+	if err != nil {
 		panic(err)
 	}
 
