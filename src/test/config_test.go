@@ -1,6 +1,6 @@
 // This is not for configuring tests, this is for testing configs.
 
-package main
+package test
 
 import (
 	"bufio"
@@ -12,6 +12,7 @@ import (
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/config"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
@@ -98,7 +99,7 @@ func TestConfig(t *testing.T) {
 		t.Log("Configuration file was not used for this test.")
 	} else {
 		t.Log("Configuration file was used for this test.")
-		bot, err := ConfiguredBot(configDir)
+		bot, err := config.ConfiguredBot(configDir)
 		tempStorage := storage.TempStorage{}
 		var _storage storage.Storage = &tempStorage
 		bot.SetStorage(&_storage)
