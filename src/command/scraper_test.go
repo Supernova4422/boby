@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -202,6 +203,18 @@ func TestInvalidRegexp(t *testing.T) {
 	_, err := GetScraper(config)
 
 	if err == nil {
+		t.Fail()
+	}
+}
+
+type ReaderErrorProne struct{}
+
+func (r ReaderErrorProne) Read(p []byte) (int, error) {
+	return 0, fmt.Errorf("Expecting an error")
+}
+
+func TestScraperBadReader(t *testing.T) {
+	if _, err := GetScraperConfigs(ReaderErrorProne{}); err == nil {
 		t.Fail()
 	}
 }

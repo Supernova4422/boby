@@ -2,11 +2,9 @@ package command
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"os"
 	"strings"
 
 	"net/http"
@@ -30,37 +28,13 @@ type ScraperConfig struct {
 // If a file doesn't exist at the given filepath, an example is made in its place,
 // and an error is returned.
 func GetScraperConfigs(reader io.Reader) ([]ScraperConfig, error) {
-	var config []ScraperConfig
-
 	bytes, err := ioutil.ReadAll(reader)
 	if err != nil {
-		fmt.Printf("Unable to read buffer")
-		return config, nil
+		return nil, err
 	}
 
-	json.Unmarshal(bytes, &config)
-	return config, nil
-}
-
-func makeExampleScraperConfig(filepath string) error {
-	config := []ScraperConfig{}
-	bytes, err := json.Marshal(config)
-
-	if err != nil {
-		return errors.New("Unable to create example JSON")
-	}
-
-	file, err := os.Create(filepath)
-	if err != nil {
-		return fmt.Errorf("Unable to create file: %s", filepath)
-	}
-	defer file.Close()
-
-	_, err = file.Write(bytes)
-	if err != nil {
-		return fmt.Errorf("Unable to write to file: %s", filepath)
-	}
-	return fmt.Errorf("File %s did not exist, an example has been writen", filepath)
+	var config []ScraperConfig
+	return config, json.Unmarshal(bytes, &config)
 }
 
 // GetScraper creates a scraper from a config.

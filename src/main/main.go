@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"os/signal"
 	"path"
@@ -17,6 +18,7 @@ import (
 func main() {
 	bot, err := ConfiguredBot(".")
 	if err != nil {
+		fmt.Print(err.Error())
 		panic(err)
 	}
 
@@ -91,7 +93,7 @@ func ConfiguredBot(configDir string) (bot.Bot, error) {
 	}
 
 	for _, goqueryScraperConfig := range goqueryScraperConfigs {
-		scraperCommand, err := command.GetGoqueryScraper(goqueryScraperConfig)
+		scraperCommand, err := goqueryScraperConfig.GetWebScraper()
 		if err == nil {
 			bot.AddCommand(scraperCommand)
 		} else {

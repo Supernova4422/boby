@@ -2,12 +2,10 @@ package command
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"math/rand"
-	"os"
 	"strings"
 	"time"
 
@@ -37,6 +35,18 @@ type SelectorCapture struct {
 	Selectors      []string            // What captures to use to fill out the template
 	HandleMultiple string              // How to handle multiple captures. "Random" or "First."
 	Replacements   []map[string]string // Replacements for each entry in selectors.
+}
+
+// A HTMLGetter returns a buffer based on a string when err is nil.
+type HTMLGetter = func(string) (out io.ReadCloser, err error)
+
+// htmlGetWithHTTP retrieves a HTML page from a URL.
+func htmlGetWithHTTP(url string) (out io.ReadCloser, err error) {
+	res, err := http.Get(url)
+	if err == nil {
+		out = res.Body
+	}
+	return out, err
 }
 
 // Match all selectors and fill out template. Then using HandleMultiple decide which to use.
@@ -90,8 +100,13 @@ func selectorCaptureToString(doc goquery.Document, selectorCapture SelectorCaptu
 	return reply
 }
 
-// GetGoqueryScraper converts a config to a scraper.
-func GetGoqueryScraper(config GoQueryScraperConfig) (Command, error) {
+// GetWebScraper returns a webscraper command from a config.
+func (g GoQueryScraperConfig) GetWebScraper() (Command, error) {
+	return GetGoqueryScraperWithHTMLGetter(g, htmlGetWithHTTP)
+}
+
+// GetGoqueryScraperWithHTMLGetter makes a scraper from a config.
+func GetGoqueryScraperWithHTMLGetter(config GoQueryScraperConfig, htmlGetter HTMLGetter) (Command, error) {
 	curry := func(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 		goqueryScraper(
 			config,
@@ -100,6 +115,7 @@ func GetGoqueryScraper(config GoQueryScraperConfig) (Command, error) {
 			msg,
 			storage,
 			sink,
+			htmlGetter,
 		)
 	}
 
@@ -117,7 +133,7 @@ func GetGoqueryScraper(config GoQueryScraperConfig) (Command, error) {
 }
 
 // Return the received message
-func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message), htmlGetter HTMLGetter) {
 	substitutions := strings.Count(goQueryScraperConfig.URL, "%s")
 	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
 		sink(sender, service.Message{Description: "An error when building the url."})
@@ -131,10 +147,10 @@ func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Co
 			msgURL = fmt.Sprintf(msgURL, url.PathEscape(word))
 		}
 
-		res, err := http.Get(msgURL)
+		htmlReader, err := htmlGetter(msgURL)
 		if err == nil {
-			defer res.Body.Close()
-			doc, err := goquery.NewDocumentFromReader(res.Body)
+			defer htmlReader.Close()
+			doc, err := goquery.NewDocumentFromReader(htmlReader)
 			if err == nil {
 				if doc.Text() == "" {
 					sink(sender, service.Message{
@@ -175,34 +191,11 @@ func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Co
 // GetGoqueryScraperConfigs retrieves an array of GoQueryScraperConfig from a json file.
 // If a file doesn't exist, an example is made in its place, and an error is returned.
 func GetGoqueryScraperConfigs(reader io.Reader) ([]GoQueryScraperConfig, error) {
-	var config []GoQueryScraperConfig
 	bytes, err := ioutil.ReadAll(reader)
 	if err != nil {
-		fmt.Printf("Unable to read buffer.")
-		return config, nil
+		return nil, err
 	}
 
-	json.Unmarshal(bytes, &config)
-	return config, nil
-}
-
-func makeExampleGoQueryScraperConfig(filepath string) error {
-	config := []GoQueryScraperConfig{{}}
-	bytes, err := json.Marshal(config)
-
-	if err != nil {
-		return errors.New("Unable to create example JSON")
-	}
-
-	file, err := os.Create(filepath)
-	if err != nil {
-		return fmt.Errorf("Unable to create file: %s", filepath)
-	}
-	defer file.Close()
-
-	_, err = file.Write(bytes)
-	if err != nil {
-		return fmt.Errorf("Unable to write to file: %s", filepath)
-	}
-	return fmt.Errorf("File %s did not exist, an example has been writen", filepath)
+	var config []GoQueryScraperConfig
+	return config, json.Unmarshal(bytes, &config)
 }
