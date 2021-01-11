@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$#" -ne 1 ]; then
-    echo "A single parameter must be passed, which becomes the container's name."
+    echo "A single argument must be given, which becomes a container's name."
     exit 1
 fi
 
