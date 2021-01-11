@@ -24,7 +24,8 @@ func TestScraperWithCapture(t *testing.T) {
 	testCmd := "!scrape"
 
 	config := ScraperConfig{
-		Command:      testCmd + " (.*)",
+		Trigger:      testCmd,
+		Capture:      "(.*)",
 		URL:          "https://webscraper.io/test-sites/%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
@@ -69,7 +70,8 @@ func TestScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	testCmd := "!scrape"
 
 	config := ScraperConfig{
-		Command:       testCmd + " (.*)",
+		Trigger:       testCmd,
+		Capture:       "(.*)",
 		URL:           "https://webscraper.io/test-sites/%s",
 		ReplyCapture:  "<h1>([^<]*)</h1>",
 		TitleTemplate: "Title",
@@ -104,7 +106,8 @@ func TestScraperWithTitleCapture(t *testing.T) {
 	testCmd := "!scrape"
 
 	config := ScraperConfig{
-		Command:       testCmd + " (.*)",
+		Trigger:       testCmd,
+		Capture:       "(.*)",
 		URL:           "https://webscraper.io/test-sites/%s",
 		ReplyCapture:  "<h1>([^<]*)</h1>",
 		TitleTemplate: "%s",
@@ -137,10 +140,11 @@ func TestScraperNoCapture(t *testing.T) {
 	}
 
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
-	testCmd := "!scrape"
+	testCmd := "scrape"
 
 	config := ScraperConfig{
-		Command:      testCmd,
+		Trigger:      testCmd,
+		Capture:      "(.*)",
 		URL:          "https://webscraper.io/test-sites/e-commerce/allinone",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
@@ -164,7 +168,8 @@ func TestScraperNoCapture(t *testing.T) {
 
 func TestGetScraperConfigs(t *testing.T) {
 	configIn := []ScraperConfig{{
-		Command:      "test",
+		Trigger:      "test",
+		Capture:      "(.*)",
 		URL:          "https://webscraper.io/test-sites/e-commerce/allinone",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}}
@@ -196,7 +201,8 @@ func TestGetScraperConfigs(t *testing.T) {
 
 func TestInvalidRegexp(t *testing.T) {
 	config := ScraperConfig{
-		Command:      "(",
+		Trigger:      "test",
+		Capture:      "(",
 		URL:          "https://webscraper.io/test-sites/e-commerce/allinone",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
@@ -230,7 +236,7 @@ func TestScraperNoSubstitutions(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := ScraperConfig{
-		Command:      "!scrape",
+		Trigger:      "!scrape",
 		URL:          "https://webscraper.io/test-sites/e-commerce/%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
@@ -264,7 +270,7 @@ func TestScraperNoMatches(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := ScraperConfig{
-		Command:      "!scrape",
+		Trigger:      "scrape",
 		URL:          "https://webscraper.io/test-sites/e-commerce/allinone",
 		ReplyCapture: "goop",
 	}
@@ -298,7 +304,7 @@ func TestBadURL(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := ScraperConfig{
-		Command:      "!scrape",
+		Trigger:      "scrape",
 		URL:          "https://",
 		ReplyCapture: "goop",
 	}
@@ -332,7 +338,7 @@ func TestScraperInvalidReader(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := ScraperConfig{
-		Command:      "!scrape",
+		Trigger:      "scrape",
 		URL:          "https://",
 		ReplyCapture: "goop",
 	}

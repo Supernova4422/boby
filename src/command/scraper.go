@@ -15,7 +15,8 @@ import (
 
 // ScraperConfig is a struct that can be turned into a usable scraper.
 type ScraperConfig struct {
-	Command       string // Regular expression which triggers this scraper. Can contain capture groups.
+	Trigger       string
+	Capture       string
 	TitleTemplate string // Title template that will be replaced by regex captures (using %s).
 	TitleCapture  string // Regex captures for title replacement.
 	URL           string // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
@@ -59,11 +60,12 @@ func GetScraperWithHTMLGetter(config ScraperConfig, htmlGetter HTMLGetter) (Comm
 			htmlGetter,
 		)
 	}
-	regex, err := regexp.Compile(config.Command)
+	regex, err := regexp.Compile(config.Capture)
 	if err != nil {
 		return Command{}, err
 	}
 	return Command{
+		Trigger: config.Trigger,
 		Pattern: regex,
 		Exec:    curry,
 		Help:    config.Help,
@@ -74,8 +76,8 @@ func GetScraperWithHTMLGetter(config ScraperConfig, htmlGetter HTMLGetter) (Comm
 func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate string, titleCapture *regexp.Regexp, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message), htmlGetter HTMLGetter) {
 	substitutions := strings.Count(urlTemplate, "%s")
 	url := urlTemplate
-	if substitutions > 0 { 
-		if (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
+	if substitutions > 0 {
+		if msg == nil || len(msg) == 0 || len(msg[0]) < substitutions {
 			sink(sender, service.Message{Description: "An error when building the url."})
 			return
 		} else {
