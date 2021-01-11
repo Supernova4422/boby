@@ -1,17 +1,22 @@
 #!/bin/bash
 
+if [ "$#" -ne 1 ]; then
+    echo "A single parameter must be passed, which becomes the container's name."
+    exit 1
+fi
+
+
 # By appending "|| true" execution is allowed to continue even when 0 isn't returned.
-export name=fld-bot
-docker stop ${name} || true
-docker rm ${name} || true
+docker stop ${1} || true
+docker rm ${1} || true
 
 export tag=latest
-docker rmi ${name}:${tag} || true
+docker rmi ${1}:${tag} || true
 
-docker build -t ${name}:${tag} -f dockerfile .
+docker build -t ${1}:${tag} -f dockerfile .
 if [ $? != 0 ]
 then 
     exit $? 
 fi
 
-docker run --name ${name} --restart always -d ${name}:${tag}
+docker run --name ${1} --restart always -d ${1}:${tag}
