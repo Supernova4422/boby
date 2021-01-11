@@ -74,13 +74,15 @@ func GetScraperWithHTMLGetter(config ScraperConfig, htmlGetter HTMLGetter) (Comm
 func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate string, titleCapture *regexp.Regexp, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message), htmlGetter HTMLGetter) {
 	substitutions := strings.Count(urlTemplate, "%s")
 	url := urlTemplate
-	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
-		sink(sender, service.Message{Description: "An error when building the url."})
-		return
-	}
-
-	for _, capture := range msg[0][1:] {
-		url = fmt.Sprintf(url, capture)
+	if substitutions > 0 { 
+		if (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
+			sink(sender, service.Message{Description: "An error when building the url."})
+			return
+		} else {
+			for _, capture := range msg[0][1:] {
+				url = fmt.Sprintf(url, capture)
+			}
+		}
 	}
 
 	htmlReader, err := htmlGetter(url)
