@@ -11,6 +11,7 @@ import (
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/utils"
 )
 
 // ScraperConfig is a struct that can be turned into a usable scraper.
@@ -39,11 +40,11 @@ func GetScraperConfigs(reader io.Reader) ([]ScraperConfig, error) {
 
 // GetScraper returns a webscraper command from a config, using HTTP to get a html.
 func (config ScraperConfig) GetScraper() (Command, error) {
-	return GetScraperWithHTMLGetter(config, htmlGetWithHTTP)
+	return config.GetScraperWithHTMLGetter(utils.HTMLGetWithHTTP)
 }
 
 // GetScraperWithHTMLGetter makes a scraper from a config.
-func GetScraperWithHTMLGetter(config ScraperConfig, htmlGetter HTMLGetter) (Command, error) {
+func (config ScraperConfig) GetScraperWithHTMLGetter(htmlGetter HTMLGetter) (Command, error) {
 	webpageCapture := regexp.MustCompile(config.ReplyCapture)
 	titleCapture := regexp.MustCompile(config.TitleCapture)
 
@@ -80,10 +81,9 @@ func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate st
 		if msg == nil || len(msg) == 0 || len(msg[0]) < substitutions {
 			sink(sender, service.Message{Description: "An error when building the url."})
 			return
-		} else {
-			for _, capture := range msg[0][1:] {
-				url = fmt.Sprintf(url, capture)
-			}
+		}
+		for _, capture := range msg[0][1:] {
+			url = fmt.Sprintf(url, capture)
 		}
 	}
 
@@ -107,10 +107,17 @@ func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate st
 				reply := fmt.Sprintf("%s.\n\nRead more at: %s", strings.Join(allCaptures, " "), url)
 				replyTitle := titleTemplate
 
-				for _, captures := range titleMatches {
-					for _, captureGroup := range captures[1:] {
-						replyTitle = fmt.Sprintf(replyTitle, captureGroup)
+				if strings.Contains(replyTitle, "%s") {
+					titleCaptures := ""
+					for _, captures := range titleMatches {
+						for _, captureGroup := range captures[1:] {
+							if titleCaptures != "" {
+								titleCaptures += " "
+							}
+							titleCaptures += captureGroup
+						}
 					}
+					replyTitle = fmt.Sprintf(replyTitle, titleCaptures)
 				}
 
 				sink(sender, service.Message{

@@ -10,12 +10,12 @@ import (
 	"time"
 
 	"math"
-	"net/http"
 	"net/url"
 	"regexp"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/utils"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -39,15 +39,6 @@ type SelectorCapture struct {
 
 // A HTMLGetter returns a buffer based on a string when err is nil.
 type HTMLGetter = func(string) (out io.ReadCloser, err error)
-
-// htmlGetWithHTTP retrieves a HTML page from a URL.
-func htmlGetWithHTTP(url string) (out io.ReadCloser, err error) {
-	res, err := http.Get(url)
-	if err == nil {
-		out = res.Body
-	}
-	return out, err
-}
 
 // Match all selectors and fill out template. Then using HandleMultiple decide which to use.
 func selectorCaptureToString(doc goquery.Document, selectorCapture SelectorCapture) string {
@@ -106,7 +97,7 @@ func selectorCaptureToString(doc goquery.Document, selectorCapture SelectorCaptu
 
 // GetWebScraper returns a webscraper command from a config.
 func (g GoQueryScraperConfig) GetWebScraper() (Command, error) {
-	return GetGoqueryScraperWithHTMLGetter(g, htmlGetWithHTTP)
+	return GetGoqueryScraperWithHTMLGetter(g, utils.HTMLGetWithHTTP)
 }
 
 // GetGoqueryScraperWithHTMLGetter makes a scraper from a config.
