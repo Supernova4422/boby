@@ -271,3 +271,71 @@ func TestBadSave(t *testing.T) {
 		t.Fail()
 	}
 }
+
+// A TruncatableBufferError returns errors for each function.
+type TruncatableBufferErrorOnWrite struct{}
+
+func (t TruncatableBufferErrorOnWrite) Truncate(n int64) error {
+	return nil
+}
+
+func (t TruncatableBufferErrorOnWrite) Read(p []byte) (int, error) {
+	return 0, nil
+}
+
+func (t TruncatableBufferErrorOnWrite) Write(b []byte) (n int, err error) {
+	return 0, fmt.Errorf("Expecting an error")
+}
+
+func (TruncatableBufferErrorOnWrite) Seek(offset int64, whence int) (n int64, err error) {
+	return 0, nil
+}
+
+func (TruncatableBufferErrorOnWrite) Sync() (err error) {
+	return nil
+}
+
+func TestBadWrite(t *testing.T) {
+	storage := JSONStorage{
+		writer: TruncatableBufferErrorOnWrite{},
+		mutex:  &sync.Mutex{},
+	}
+
+	if storage.SaveToFile() == nil {
+		t.Fail()
+	}
+}
+
+// A TruncatableBufferOnSeek returns errors for each function.
+type TruncatableBufferErrorOnSeek struct{}
+
+func (t TruncatableBufferErrorOnSeek) Truncate(n int64) error {
+	return nil
+}
+
+func (t TruncatableBufferErrorOnSeek) Read(p []byte) (int, error) {
+	return 0, nil
+}
+
+func (t TruncatableBufferErrorOnSeek) Write(b []byte) (n int, err error) {
+	return 0, nil
+}
+
+func (TruncatableBufferErrorOnSeek) Seek(offset int64, whence int) (n int64, err error) {
+	return 0, fmt.Errorf("Expecting an error")
+}
+
+func (TruncatableBufferErrorOnSeek) Sync() (err error) {
+	return nil
+}
+
+func TestBadSeek(t *testing.T) {
+	storage := JSONStorage{
+		writer: TruncatableBufferErrorOnSeek{},
+		mutex:  &sync.Mutex{},
+	}
+
+	if storage.SaveToFile() == nil {
+		t.Fail()
+	}
+}

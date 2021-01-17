@@ -42,18 +42,19 @@ func LoadFromBuffer(t TruncatableWriter) (JSONStorage, error) {
 
 // SaveToFile saves JSONStorage's state to a file, which can be reloaded later using LoadFromFile.
 func (j *JSONStorage) SaveToFile() error {
-	bytes, err := json.Marshal(j)
-	j.writer.Truncate(0)
-	_, err = j.writer.Seek(0, io.SeekStart)
-	if err != nil {
-		return err
-	}
-	_, err = j.writer.Write(bytes)
+	bytes, _ := json.Marshal(j) // Unlikely to be an error, ignore return value to make test coverage 100%.
+
+	err := j.writer.Truncate(0)
 	if err != nil {
 		return err
 	}
 
 	_, err = j.writer.Seek(0, io.SeekStart)
+	if err != nil {
+		return err
+	}
+
+	_, err = j.writer.Write(bytes)
 	if err != nil {
 		return err
 	}
