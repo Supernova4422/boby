@@ -94,7 +94,7 @@ func ConfiguredBot(configDir string) (bot.Bot, error) {
 		command.Command{
 			Trigger: "setprefix",
 			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    command.UnsetAdmin,
+			Exec:    command.SetPrefix,
 			Help:    "[word] | Set the prefix of all commands of this bot, for this server.",
 		},
 	)
