@@ -27,6 +27,10 @@ func (t TruncatableBuffer) Write(b []byte) (n int, err error) {
 	return t.buffer.Write(b)
 }
 
+func (t TruncatableBuffer) Sync() error {
+	return nil
+}
+
 // Seek is supposed to set the offset for following read/write, but here it does nothing.
 //
 // In JsonStorage's usage, we expect that only seek(0, 0) is ever used, this is how
@@ -56,6 +60,10 @@ func (t TruncatableBufferErrorProne) Write(b []byte) (n int, err error) {
 
 func (TruncatableBufferErrorProne) Seek(offset int64, whence int) (n int64, err error) {
 	return 0, fmt.Errorf("Expecting an error")
+}
+
+func (TruncatableBufferErrorProne) Sync() (err error) {
+	return fmt.Errorf("Expecting an error")
 }
 
 func TestJSONSetGetValue(t *testing.T) {

@@ -17,6 +17,7 @@ type TruncatableWriter interface {
 	Write(b []byte) (n int, err error)
 	Read(p []byte) (n int, err error)
 	Seek(offset int64, whence int) (ret int64, err error)
+	Sync() (err error)
 }
 
 // JSONStorage is an implementation of Storage that uses json and files for data storage.
@@ -49,7 +50,11 @@ func (j *JSONStorage) SaveToFile() error {
 	}
 
 	_, err = j.writer.Seek(0, io.SeekStart)
-	return err
+	if err != nil {
+		return err
+	}
+
+	return j.writer.Sync()
 }
 
 // GetValue retrieves the value for key, for a Guild.
