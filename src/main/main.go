@@ -83,7 +83,7 @@ func loadJSONStorage(filepath string) (storage.Storage, error) {
 		}
 	}
 
-	fileBuffer, err := os.Open(filepath)
+	fileBuffer, err := os.OpenFile(filepath, os.O_RDWR, 0755)
 	if err != nil {
 		return nil, err
 	}
