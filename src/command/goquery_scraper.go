@@ -10,12 +10,12 @@ import (
 	"time"
 
 	"math"
-	"net/http"
 	"net/url"
 	"regexp"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/utils"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -40,69 +40,64 @@ type SelectorCapture struct {
 // A HTMLGetter returns a buffer based on a string when err is nil.
 type HTMLGetter = func(string) (out io.ReadCloser, err error)
 
-// htmlGetWithHTTP retrieves a HTML page from a URL.
-func htmlGetWithHTTP(url string) (out io.ReadCloser, err error) {
-	res, err := http.Get(url)
-	if err == nil {
-		out = res.Body
-	}
-	return out, err
-}
-
 // Match all selectors and fill out template. Then using HandleMultiple decide which to use.
 func selectorCaptureToString(doc goquery.Document, selectorCapture SelectorCapture) string {
 	var maxLength int64 = math.MaxInt64
 	allCaptures := make([](*(goquery.Selection)), len(selectorCapture.Selectors))
-	for i, selector := range selectorCapture.Selectors {
-		capture := doc.Find(selector)
-		allCaptures[i] = capture
-		captureLength := int64(capture.Length())
+	if len(selectorCapture.Selectors) == 0 {
+		maxLength = 0
+	} else {
+		for i, selector := range selectorCapture.Selectors {
+			capture := doc.Find(selector)
+			allCaptures[i] = capture
+			captureLength := int64(capture.Length())
 
-		if captureLength < maxLength {
-			maxLength = captureLength
+			if captureLength < maxLength {
+				maxLength = captureLength
+			}
 		}
 	}
 
 	reply := selectorCapture.Template
 
-	if maxLength == 0 {
+	if maxLength == 0 && strings.Contains(reply, "%s") {
 		return "There was an error retrieving information from the webpage."
-	}
+	} else if maxLength > 0 {
+		maxLength--
 
-	maxLength--
-
-	var index int = 0
-	if maxLength > 0 {
-		if selectorCapture.HandleMultiple == "Random" {
-			rand.Seed(time.Now().UnixNano())
-			index = int(rand.Int63n(maxLength))
-		} else if selectorCapture.HandleMultiple == "Last" {
-			index = int(maxLength)
-		}
-	}
-
-	tmp := make([]interface{}, len(selectorCapture.Selectors))
-	for i, selector := range allCaptures {
-		selectorIndex := selector.Slice(int(index), int(index)+1)
-		val := strings.TrimSpace(selectorIndex.Text())
-		if i < len(selectorCapture.Replacements) {
-			for search, replace := range selectorCapture.Replacements[i] {
-				if strings.Contains(val, search) {
-					val = strings.ReplaceAll(val, search, replace)
-					break
-				}
+		var index int = 0
+		if maxLength > 0 {
+			if selectorCapture.HandleMultiple == "Random" {
+				rand.Seed(time.Now().UnixNano())
+				index = int(rand.Int63n(maxLength))
+			} else if selectorCapture.HandleMultiple == "Last" {
+				index = int(maxLength)
 			}
 		}
-		tmp[i] = val
-	}
 
-	reply = fmt.Sprintf(reply, tmp...)
+		tmp := make([]interface{}, len(selectorCapture.Selectors))
+		for i, selector := range allCaptures {
+			selectorIndex := selector.Slice(int(index), int(index)+1)
+			val := strings.TrimSpace(selectorIndex.Text())
+			if i < len(selectorCapture.Replacements) {
+				for search, replace := range selectorCapture.Replacements[i] {
+					if strings.Contains(val, search) {
+						val = strings.ReplaceAll(val, search, replace)
+						break
+					}
+				}
+			}
+			tmp[i] = val
+		}
+
+		reply = fmt.Sprintf(reply, tmp...)
+	}
 	return reply
 }
 
 // GetWebScraper returns a webscraper command from a config.
 func (g GoQueryScraperConfig) GetWebScraper() (Command, error) {
-	return GetGoqueryScraperWithHTMLGetter(g, htmlGetWithHTTP)
+	return GetGoqueryScraperWithHTMLGetter(g, utils.HTMLGetWithHTTP)
 }
 
 // GetGoqueryScraperWithHTMLGetter makes a scraper from a config.

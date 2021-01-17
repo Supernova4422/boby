@@ -10,7 +10,35 @@ import (
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/utils"
 )
+
+func TestMakeScraper(t *testing.T) {
+	config := ScraperConfig{
+		Trigger:      "!",
+		Capture:      "(.*)",
+		URL:          "%s",
+		ReplyCapture: "<h1>([^<]*)</h1>",
+	}
+	_, err := config.GetScraper()
+	if err != nil {
+		t.Fail()
+	}
+}
+
+func TestGetBadGetHttp(t *testing.T) {
+	_, err := utils.HTMLGetWithHTTP("")
+	if err == nil {
+		t.Fail()
+	}
+}
+
+func TestGetGoodGetHttp(t *testing.T) {
+	_, err := utils.HTMLGetWithHTTP("https://google.com")
+	if err != nil {
+		t.Fail()
+	}
+}
 
 func TestScraperWithCapture(t *testing.T) {
 	demoSender := demoservice.DemoSender{}
@@ -24,20 +52,21 @@ func TestScraperWithCapture(t *testing.T) {
 	testCmd := "!scrape"
 
 	config := ScraperConfig{
-		Command:      testCmd + " (.*)",
-		URL:          "https://webscraper.io/test-sites/%s",
+		Trigger:      testCmd,
+		Capture:      "(.*)",
+		URL:          "%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
 
-	scraper, err := config.GetScraper()
+	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "e-commerce/allinone"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if !strings.HasPrefix(resultMessage.Description, "Test Sites E-commerce training site") {
+	if !strings.HasPrefix(resultMessage.Description, "Heading One") {
 		t.Errorf("Message was different!")
 	}
 
@@ -47,7 +76,7 @@ func TestScraperWithCapture(t *testing.T) {
 
 	scraper.Exec(testConversation, testSender, [][]string{{"", "tables"}}, nil, demoSender.SendMessage)
 	resultMessage, resultConversation = demoSender.PopMessage()
-	if !strings.HasPrefix(resultMessage.Description, "Table playground") {
+	if !strings.HasPrefix(resultMessage.Description, "Tables") {
 		t.Errorf("Message was different!")
 	}
 
@@ -69,18 +98,19 @@ func TestScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	testCmd := "!scrape"
 
 	config := ScraperConfig{
-		Command:       testCmd + " (.*)",
-		URL:           "https://webscraper.io/test-sites/%s",
+		Trigger:       testCmd,
+		Capture:       "(.*)",
+		URL:           "%s",
 		ReplyCapture:  "<h1>([^<]*)</h1>",
 		TitleTemplate: "Title",
 	}
 
-	scraper, err := config.GetScraper()
+	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "e-commerce/allinone"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Title != config.TitleTemplate {
@@ -104,22 +134,23 @@ func TestScraperWithTitleCapture(t *testing.T) {
 	testCmd := "!scrape"
 
 	config := ScraperConfig{
-		Command:       testCmd + " (.*)",
-		URL:           "https://webscraper.io/test-sites/%s",
+		Trigger:       testCmd,
+		Capture:       "(.*)",
+		URL:           "%s",
 		ReplyCapture:  "<h1>([^<]*)</h1>",
 		TitleTemplate: "%s",
 		TitleCapture:  "<h2>([^<]*)</h2>",
 	}
 
-	scraper, err := config.GetScraper()
+	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "e-commerce/allinone"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if resultMessage.Title != "Top items being scraped right now" {
+	if resultMessage.Title != "Heading Two 2nd Heading Two" {
 		t.Errorf("Title was different!")
 	}
 
@@ -137,15 +168,16 @@ func TestScraperNoCapture(t *testing.T) {
 	}
 
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
-	testCmd := "!scrape"
+	testCmd := "scrape"
 
 	config := ScraperConfig{
-		Command:      testCmd,
-		URL:          "https://webscraper.io/test-sites/e-commerce/allinone",
+		Trigger:      testCmd,
+		Capture:      "(.*)",
+		URL:          "usual",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
 
-	scraper, err := config.GetScraper()
+	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
 	}
@@ -153,7 +185,7 @@ func TestScraperNoCapture(t *testing.T) {
 	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if !strings.HasPrefix(resultMessage.Description, "Test Sites E-commerce training site.") {
+	if !strings.HasPrefix(resultMessage.Description, "Heading One Last Heading One") {
 		t.Errorf("Message was different!")
 	}
 
@@ -164,8 +196,9 @@ func TestScraperNoCapture(t *testing.T) {
 
 func TestGetScraperConfigs(t *testing.T) {
 	configIn := []ScraperConfig{{
-		Command:      "test",
-		URL:          "https://webscraper.io/test-sites/e-commerce/allinone",
+		Trigger:      "test",
+		Capture:      "(.*)",
+		URL:          "%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}}
 
@@ -196,11 +229,12 @@ func TestGetScraperConfigs(t *testing.T) {
 
 func TestInvalidRegexp(t *testing.T) {
 	config := ScraperConfig{
-		Command:      "(",
-		URL:          "https://webscraper.io/test-sites/e-commerce/allinone",
+		Trigger:      "test",
+		Capture:      "(",
+		URL:          "%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
-	_, err := config.GetScraper()
+	_, err := config.GetScraperWithHTMLGetter(htmlGetRemembered(""))
 
 	if err == nil {
 		t.Fail()
@@ -230,12 +264,12 @@ func TestScraperNoSubstitutions(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := ScraperConfig{
-		Command:      "!scrape",
+		Trigger:      "!scrape",
 		URL:          "https://webscraper.io/test-sites/e-commerce/%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
 
-	scraper, err := config.GetScraper()
+	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
 
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
@@ -264,18 +298,18 @@ func TestScraperNoMatches(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := ScraperConfig{
-		Command:      "!scrape",
-		URL:          "https://webscraper.io/test-sites/e-commerce/allinone",
+		Trigger:      "scrape",
+		URL:          "%s",
 		ReplyCapture: "goop",
 	}
 
-	scraper, err := config.GetScraper()
+	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
 
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Could not extract data from the webpage") {
@@ -298,12 +332,12 @@ func TestBadURL(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := ScraperConfig{
-		Command:      "!scrape",
-		URL:          "https://",
+		Trigger:      "scrape",
+		URL:          "",
 		ReplyCapture: "goop",
 	}
 
-	scraper, err := config.GetScraper()
+	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
 
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
@@ -332,12 +366,12 @@ func TestScraperInvalidReader(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := ScraperConfig{
-		Command:      "!scrape",
+		Trigger:      "scrape",
 		URL:          "https://",
 		ReplyCapture: "goop",
 	}
 
-	scraper, err := GetScraperWithHTMLGetter(config, HTMLReturnErr)
+	scraper, err := config.GetScraperWithHTMLGetter(HTMLReturnErr)
 
 	if err != nil {
 		t.Errorf("An error occured when making a reasonable scraper!")
