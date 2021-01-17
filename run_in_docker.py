@@ -48,7 +48,7 @@ if __name__ == "__main__":
         args=[
             "docker", "build",
             "-t", "{}:{}".format(name, tag),
-            "-f", "dockerfile", project_path],
+            "-f", "dockerfile", str(project_path)],
         check=True
     )
 
