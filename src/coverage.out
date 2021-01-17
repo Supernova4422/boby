@@ -19,11 +19,6 @@ github.com/BKrajancic/FLD-Bot/m/v2/src/bot/bot.go:87.39,91.5 3 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/bot/bot.go:98.81,99.39 1 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/bot/bot.go:99.39,100.46 1 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/bot/bot.go:100.46,102.4 1 1
-github.com/BKrajancic/FLD-Bot/m/v2/src/command/unsetAdmin.go:9.157,10.18 1 1
-github.com/BKrajancic/FLD-Bot/m/v2/src/command/unsetAdmin.go:10.18,18.3 3 1
-github.com/BKrajancic/FLD-Bot/m/v2/src/command/check_admin.go:9.157,15.42 2 1
-github.com/BKrajancic/FLD-Bot/m/v2/src/command/check_admin.go:15.42,17.3 1 1
-github.com/BKrajancic/FLD-Bot/m/v2/src/command/check_admin.go:17.8,19.3 1 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/goquery_scraper.go:44.92,47.41 3 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/goquery_scraper.go:61.2,63.53 2 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/goquery_scraper.go:95.2,95.14 1 1
@@ -103,6 +98,11 @@ github.com/BKrajancic/FLD-Bot/m/v2/src/command/setAdmin.go:9.155,10.18 1 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/setAdmin.go:10.18,18.3 3 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/set_prefix.go:12.156,13.18 1 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/command/set_prefix.go:13.18,25.3 3 1
+github.com/BKrajancic/FLD-Bot/m/v2/src/command/unsetAdmin.go:9.157,10.18 1 1
+github.com/BKrajancic/FLD-Bot/m/v2/src/command/unsetAdmin.go:10.18,18.3 3 1
+github.com/BKrajancic/FLD-Bot/m/v2/src/command/check_admin.go:9.157,15.42 2 1
+github.com/BKrajancic/FLD-Bot/m/v2/src/command/check_admin.go:15.42,17.3 1 1
+github.com/BKrajancic/FLD-Bot/m/v2/src/command/check_admin.go:17.8,19.3 1 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/routine/heartbeat.go:11.143,12.29 1 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/routine/heartbeat.go:12.29,14.3 1 1
 github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice/demo_sender.go:16.93,19.2 2 1
