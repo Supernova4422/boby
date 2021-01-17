@@ -35,7 +35,7 @@ if __name__ == "__main__":
             "docker", "build",
             "--force-rm",
             "-t", "{}:{}".format(name, tag),
-            "--build-arg", "config_path={}".format(mount_dest),
+            "--build-arg", "config_path={}".format(str(mount_dest)),
             "-f", "dockerfile.test", project_path],
         check=True
     )
@@ -44,7 +44,8 @@ if __name__ == "__main__":
         args=[
             "docker", "run",
             "--mount",
-            "type=bind,source={},target={}".format(mount_src, mount_dest),
+            "type=bind,source={},target={}".format(str(mount_src),
+                                                   str(mount_dest)),
             "--rm", "{}:{}".format(name, tag)
         ],
         check=False

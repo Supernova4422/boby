@@ -47,7 +47,7 @@ if __name__ == "__main__":
     subprocess.run(
         args=[
             "docker", "build",
-            "--build-arg", "config_path={}".format(mount_dest),
+            "--build-arg", "config_path={}".format(str(mount_dest)),
             "-t", "{}:{}".format(name, tag),
             "-f", "dockerfile", project_path],
         check=True
@@ -58,7 +58,8 @@ if __name__ == "__main__":
             "docker", "run",
             "--name", "{}".format(name),
             "--restart", "always",
-            "--mount", "type=bind,source={},target={}".format(mount_src, mount_dest),
+            "--mount", "type=bind,source={},target={}".format(str(mount_src),
+                                                              str(mount_dest)),
             "-d", "{}:{}".format(name, tag)],
         check=True
     )
