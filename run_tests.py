@@ -36,7 +36,7 @@ if __name__ == "__main__":
             "--force-rm",
             "-t", "{}:{}".format(name, tag),
             "--build-arg", "config_path={}".format(str(mount_dest)),
-            "-f", "dockerfile.test", project_path],
+            "-f", "dockerfile.test", str(project_path)],
         check=True
     )
 
