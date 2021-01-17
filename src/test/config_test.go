@@ -104,6 +104,8 @@ func TestConfig(t *testing.T) {
 		} else {
 			t.Log("Configuration file was used for this test.")
 			bot, err := config.ConfiguredBot(configDir)
+			bot.SetDefaultPrefix("!")
+
 			tempStorage := storage.TempStorage{}
 			var _storage storage.Storage = &tempStorage
 			bot.SetStorage(&_storage)
@@ -147,7 +149,9 @@ func TestConfig(t *testing.T) {
 			"program (relative to " + here + ")." +
 			"If a file '" + configTests + "' is present, it can be " +
 			"used to ensure that all the configuration files are valid, " +
-			"and produce the expected output")
+			"and produce the expected output.")
+
+		// TODO add information on the format of config_tests.
 
 		t.Log("The argument is not present, but no error will be raised.")
 	}
