@@ -1,6 +1,8 @@
 FROM golang:1.15
 
-ARG project_path=/go/src/github.com/BKrajancic/FLD-Bot
+ARG config_path
+ARG binary_filename=bot
+ARG project_path=${project_path}/src/${binary_filename}
 
 COPY . ${project_path}
 WORKDIR ${project_path}
@@ -9,11 +11,9 @@ RUN go get -d -v ./...
 RUN go install -v ./...
 
 ARG binary_dir=${project_path}/src/main
-ARG binary_filename=fld-bot
-ARG binary_filepath=${binary_dir}/${binary_filename}
+ENV binary_filepath ${binary_dir}/${binary_filename}
 
 RUN go build -o ${binary_filepath} ${binary_dir}
 
-# TODO Need to use variables here instead of full path. 
-WORKDIR ${binary_dir}
-CMD ["./fld-bot"]
+ENV config_filepath ${config_path}
+CMD $binary_filepath $config_filepath

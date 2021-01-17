@@ -11,16 +11,16 @@ import (
 )
 
 // ConfiguredBot uses files in configDir to return a bot ready for usage.
+// This bot is not attached to any storage or services.
 func ConfiguredBot(configDir string) (bot.Bot, error) {
 	bot := bot.Bot{}
-	bot.SetDefaultPrefix("!")
 
 	file, err := os.Open(path.Join(configDir, "scraper_config.json"))
 	if err != nil {
 		return bot, err
 	}
-	scraperConfigs, err := command.GetScraperConfigs(bufio.NewReader(file))
 
+	scraperConfigs, err := command.GetScraperConfigs(bufio.NewReader(file))
 	if err != nil {
 		return bot, err
 	}

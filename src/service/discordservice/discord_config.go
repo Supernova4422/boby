@@ -18,9 +18,9 @@ type DiscordConfig struct {
 	Token string
 }
 
-// getConfig reads a local file, and returns a configuration object to load discord.
-func getConfig() (*DiscordConfig, error) {
-	const filepath = "config.json"
+// getConfig reads a local json file, and returns a configuration object to load discord.
+// If the file doesn't exist at filepath, an error is returned and a message is printed.
+func getConfig(filepath string) (*DiscordConfig, error) {
 	const tokenDefault = "TOKEN"
 
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
@@ -64,9 +64,9 @@ func getConfig() (*DiscordConfig, error) {
 }
 
 // NewDiscords Creates subject and sender service adapters for discord.
-func NewDiscords() (*DiscordSubject, *DiscordSender, *discordgo.Session, error) {
-	// Get token
-	config, err := getConfig()
+// Discord is loaded using information from a file
+func NewDiscords(filepath string) (*DiscordSubject, *DiscordSender, *discordgo.Session, error) {
+	config, err := getConfig(filepath) // Get token
 	if err != nil {
 		return nil, nil, nil, err
 	}
