@@ -44,6 +44,10 @@ func LoadFromBuffer(t TruncatableWriter) (JSONStorage, error) {
 func (j *JSONStorage) SaveToFile() error {
 	bytes, err := json.Marshal(j)
 	j.writer.Truncate(0)
+	_, err = j.writer.Seek(0, io.SeekStart)
+	if err != nil {
+		return err
+	}
 	_, err = j.writer.Write(bytes)
 	if err != nil {
 		return err
