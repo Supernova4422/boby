@@ -1,6 +1,5 @@
 FROM golang:1.15
 
-ARG config_path
 ARG project_path=/src
 
 COPY . ${project_path}
@@ -9,5 +8,4 @@ WORKDIR ${project_path}
 RUN go get -d -v ./...
 RUN go install -v ./...
 
-ENV config_path ${config_path}
 CMD "go" "test" "-v" "./..." "-args" $config_path
