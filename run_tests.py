@@ -43,9 +43,7 @@ if __name__ == "__main__":
         args=[
             "docker", "run",
             "--env", "config_path={}".format(str(mount_dest)),
-            "--mount",
-            "type=bind,source={},target={}".format(str(mount_src),
-                                                   str(mount_dest)),
+            "-v", "{}:{}".format(str(mount_src), str(mount_dest)),
             "--rm", "{}:{}".format(name, tag)
         ],
         check=False

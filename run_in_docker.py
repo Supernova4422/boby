@@ -58,8 +58,7 @@ if __name__ == "__main__":
             "--name", "{}".format(name),
             "--env", "config_path={}".format(str(mount_dest)),
             "--restart", "always",
-            "--mount", "type=bind,source={},target={}".format(str(mount_src),
-                                                              str(mount_dest)),
+            "-v", "{}:{}".format(str(mount_src), str(mount_dest)),
             "-d", "{}:{}".format(name, tag)],
         check=True
     )
