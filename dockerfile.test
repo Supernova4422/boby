@@ -1,6 +1,7 @@
 FROM golang:1.15
 
-ARG project_path=/go/src/github.com/BKrajancic/FLD-Bot
+ARG config_path
+ARG project_path=/src
 
 COPY . ${project_path}
 WORKDIR ${project_path}
@@ -8,5 +9,5 @@ WORKDIR ${project_path}
 RUN go get -d -v ./...
 RUN go install -v ./...
 
-WORKDIR ${project_path}/src
-CMD ["go", "test", "-v", "./..."]
+ENV config_path ${config_path}
+CMD "go" "test" "-v" "./..." "-args" $config_path

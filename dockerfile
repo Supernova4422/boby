@@ -2,7 +2,7 @@ FROM golang:1.15
 
 ARG config_path
 ARG binary_filename=bot
-ARG project_path=${project_path}/src/${binary_filename}
+ARG project_path=/src/${binary_filename}
 
 COPY . ${project_path}
 WORKDIR ${project_path}

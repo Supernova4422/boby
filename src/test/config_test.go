@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"testing"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
@@ -91,45 +92,63 @@ func getDemoBot(filepath string, bot *bot.Bot) *demoservice.DemoSender {
 }
 
 func TestConfig(t *testing.T) {
-	configDir := "./../main"
-	inputFp := configDir + "/config_tests.json"
-	_, err := os.Stat(inputFp)
+	configTests := "config_tests.json"
+	if len(os.Args) > 3 {
+		configDir := os.Args[3]
+		_, err := os.Stat(configDir)
 
-	if err != nil {
-		t.Log("Configuration file was not used for this test.")
-	} else {
-		t.Log("Configuration file was used for this test.")
-		bot, err := config.ConfiguredBot(configDir)
-		tempStorage := storage.TempStorage{}
-		var _storage storage.Storage = &tempStorage
-		bot.SetStorage(&_storage)
+		inputFp := path.Join(configDir, configTests)
+		_, err = os.Stat(inputFp)
+		if err != nil {
+			t.Log("Configuration file was not used for this test.")
+		} else {
+			t.Log("Configuration file was used for this test.")
+			bot, err := config.ConfiguredBot(configDir)
+			tempStorage := storage.TempStorage{}
+			var _storage storage.Storage = &tempStorage
+			bot.SetStorage(&_storage)
 
-		if err == nil {
-			demoSender := demoservice.DemoSender{}
-			bot.AddSender(&demoSender)
+			if err == nil {
+				demoSender := demoservice.DemoSender{}
+				bot.AddSender(&demoSender)
 
-			inputTest, _ := GetTestInputs(inputFp)
+				inputTest, _ := GetTestInputs(inputFp)
 
-			testConversation := service.Conversation{
-				ServiceID:      demoSender.ID(),
-				ConversationID: "0",
-			}
+				testConversation := service.Conversation{
+					ServiceID:      demoSender.ID(),
+					ConversationID: "0",
+				}
 
-			testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
-			for _, input := range inputTest {
-				bot.OnMessage(testConversation, testSender, input.Input)
-				for _, expect := range input.Expect {
-					resultMessage, _ := demoSender.PopMessage()
-					if !MessageInList(resultMessage, expect) {
-						t.Errorf("Failed on msg: %s", input.Input)
+				testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+				for _, input := range inputTest {
+					bot.OnMessage(testConversation, testSender, input.Input)
+					for _, expect := range input.Expect {
+						resultMessage, _ := demoSender.PopMessage()
+						if !MessageInList(resultMessage, expect) {
+							t.Errorf("Failed on msg: %s", input.Input)
+							t.Fail()
+						}
+					}
+					if demoSender.IsEmpty() == false {
+						t.Errorf("Too many responses from: %s", input.Input)
 						t.Fail()
 					}
 				}
-				if demoSender.IsEmpty() == false {
-					t.Errorf("Too many responses from: %s", input.Input)
-					t.Fail()
-				}
 			}
 		}
+	} else {
+		here, err := os.Getwd()
+		if os.IsNotExist(err) {
+			here = "[ERROR, USE ABSOLUTE PATH]"
+		}
+
+		t.Log("When running go test, add arguments: '-args <dir>' where " +
+			"<dir> is the same directory used when running the main " +
+			"program (relative to " + here + ")." +
+			"If a file '" + configTests + "' is present, it can be " +
+			"used to ensure that all the configuration files are valid, " +
+			"and produce the expected output")
+
+		t.Log("The argument is not present, but no error will be raised.")
 	}
 }
