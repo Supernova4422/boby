@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestDemoSender(t *testing.T) {
@@ -22,7 +23,7 @@ func TestDemoSender(t *testing.T) {
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
 	}
-	if resultMessage != testMsg {
+	if cmp.Equal(resultMessage, testMsg) == false {
 		t.Errorf("Message was different!")
 	}
 	if demoSender.IsEmpty() != true {

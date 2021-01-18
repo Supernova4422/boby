@@ -18,12 +18,12 @@ import (
 // htmlGetRemembered returns a HTMLGetteris that returns content on any input.
 func htmlGetRemembered(content string) HTMLGetter {
 	reader := strings.NewReader(content)
-	return func(string) (io.ReadCloser, error) {
-		return ioutil.NopCloser(reader), nil
+	return func(url string) (string, io.ReadCloser, error) {
+		return url, ioutil.NopCloser(reader), nil
 	}
 }
 
-func htmlTestPage(name string) (io.ReadCloser, error) {
+func htmlTestPage(name string) (string, io.ReadCloser, error) {
 	const demoWebpage = `
 <html>
 <h1>Heading One</h1>
@@ -42,12 +42,12 @@ func htmlTestPage(name string) (io.ReadCloser, error) {
 </html>
 `
 	if name == "usual" {
-		return ioutil.NopCloser(strings.NewReader(demoWebpage)), nil
+		return name, ioutil.NopCloser(strings.NewReader(demoWebpage)), nil
 	}
 	if name == "tables" {
-		return ioutil.NopCloser(strings.NewReader(demoWebpageTable)), nil
+		return name, ioutil.NopCloser(strings.NewReader(demoWebpageTable)), nil
 	}
-	return nil, fmt.Errorf("Error")
+	return "", nil, fmt.Errorf("Error")
 }
 
 func TestGoQueryScraperWithCapture(t *testing.T) {
@@ -90,11 +90,11 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
-	if resultMessage.Title != "Heading Two" {
+	if resultMessage.Fields[0].Field != "Heading Two" {
 		t.Errorf("Title was different!")
 	}
 
-	if !strings.HasPrefix(resultMessage.Description, "Heading One") {
+	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Heading One") {
 		t.Errorf("Message was different!")
 	}
 
@@ -104,7 +104,7 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 
 	scraper.Exec(testConversation, testSender, [][]string{{"", "tables"}}, nil, demoSender.SendMessage)
 	resultMessage, resultConversation = demoSender.PopMessage()
-	if !strings.HasPrefix(resultMessage.Description, "Tables Heading One") {
+	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Tables Heading One") {
 		t.Errorf("Message was different!")
 	}
 
@@ -165,11 +165,11 @@ func TestGoQueryScraperWithReplacement(t *testing.T) {
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
-	if resultMessage.Title != "Title Two" {
+	if resultMessage.Fields[0].Field != "Title Two" {
 		t.Errorf("Title was different!")
 	}
 
-	if !strings.HasPrefix(resultMessage.Description, "Heading One") {
+	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Heading One") {
 		t.Errorf("Message was different!")
 	}
 
@@ -179,7 +179,7 @@ func TestGoQueryScraperWithReplacement(t *testing.T) {
 
 	scraper.Exec(testConversation, testSender, [][]string{{"", "tables"}}, nil, demoSender.SendMessage)
 	resultMessage, resultConversation = demoSender.PopMessage()
-	if !strings.HasPrefix(resultMessage.Description, "Tables Heading One") {
+	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Tables Heading One") {
 		t.Errorf("Message was different!")
 	}
 
@@ -232,11 +232,11 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
-	if resultMessage.Title != "Heading Two" {
+	if resultMessage.Fields[0].Field != "Heading Two" {
 		t.Errorf("Title was different!")
 	}
 
-	if !strings.HasPrefix(resultMessage.Description, "Heading Two") {
+	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Heading Two") {
 		t.Errorf("Message was different!")
 	}
 
@@ -287,7 +287,7 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if resultMessage.Title != config.TitleSelector.Template {
+	if resultMessage.Fields[0].Field != config.TitleSelector.Template {
 		t.Errorf("Title was different!")
 	}
 
@@ -338,7 +338,7 @@ func TestGoQueryScraperNoCaptureMissingSub(t *testing.T) {
 	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if resultMessage.Title != "There was an error retrieving information from the webpage." {
+	if resultMessage.Fields[0].Field != "There was an error retrieving information from the webpage." {
 		t.Errorf("Title was different!")
 	}
 
@@ -389,7 +389,7 @@ func TestGoQueryScrapeEscapeUrl(t *testing.T) {
 	scraper.Exec(testConversation, testSender, [][]string{{"", "example space"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if resultMessage.URL != "example%20space" {
+	if resultMessage.Fields[0].URL != "example%20space" {
 		t.Errorf("Url should be escaped.")
 	}
 
@@ -439,7 +439,7 @@ func TestGoQueryScraperNoCapture(t *testing.T) {
 	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if !strings.HasPrefix(resultMessage.Description, "Heading One") {
+	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Heading One") {
 		t.Errorf("Message was different!")
 	}
 
@@ -489,7 +489,7 @@ func TestLast(t *testing.T) {
 	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if !strings.HasPrefix(resultMessage.Description, "Last Heading One") {
+	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Last Heading One") {
 		t.Errorf("Message was different!")
 	}
 
@@ -539,7 +539,7 @@ func TestHtml(t *testing.T) {
 	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if !strings.HasPrefix(resultMessage.Description, "Last Heading One") {
+	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Last Heading One") {
 		t.Errorf("Message was different!")
 	}
 
@@ -589,7 +589,7 @@ func TestGoQueryScraperUnusedCapture(t *testing.T) {
 	scraper.Exec(testConversation, testSender, [][]string{{"", ""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if resultMessage.Description != "An error occurred retrieving the webpage." {
+	if resultMessage.Fields[0].Value != "An error occurred retrieving the webpage." {
 		t.Errorf("An error should be thrown!")
 	}
 
@@ -670,7 +670,7 @@ func TestGoqueryScraperNoSubstitutions(t *testing.T) {
 	scraper.Exec(testConversation, testSender, [][]string{{}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if !strings.HasPrefix(resultMessage.Description, "An error when building the url.") {
+	if !strings.HasPrefix(resultMessage.Description, "An error occured when building the url.") {
 		t.Errorf("Message was different!")
 	}
 
@@ -702,7 +702,11 @@ func TestEmptyPage(t *testing.T) {
 	scraper.Exec(testConversation, testSender, [][]string{{"", ""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if !strings.HasPrefix(resultMessage.Description, "Webpage not found at") {
+	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Webpage not found at") {
+		t.Errorf("Message was different!")
+	}
+
+	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Webpage not found at") {
 		t.Errorf("Message was different!")
 	}
 
@@ -712,8 +716,8 @@ func TestEmptyPage(t *testing.T) {
 }
 
 // htmlReturnErr will use a reader that returns an error.
-var HTMLReturnErr = func(string) (io.ReadCloser, error) {
-	return readerCrashes{}, nil
+var HTMLReturnErr = func(string) (string, io.ReadCloser, error) {
+	return "", readerCrashes{}, nil
 }
 
 func TestReaderCrashes(t *testing.T) {
@@ -746,7 +750,7 @@ func TestInvalidReader(t *testing.T) {
 	scraper.Exec(testConversation, testSender, [][]string{{"", ""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if !strings.HasPrefix(resultMessage.Description, "An error occurred when processing") {
+	if !strings.HasPrefix(resultMessage.Fields[0].Value, "An error occurred when processing") {
 		t.Errorf("Message was different!")
 	}
 

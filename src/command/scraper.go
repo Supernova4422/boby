@@ -87,7 +87,7 @@ func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate st
 		}
 	}
 
-	htmlReader, err := htmlGetter(url)
+	_, htmlReader, err := htmlGetter(url)
 	if err == nil {
 		defer htmlReader.Close()
 		body, err := ioutil.ReadAll(htmlReader)

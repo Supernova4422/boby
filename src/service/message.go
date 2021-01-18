@@ -5,4 +5,12 @@ type Message struct {
 	URL         string
 	Title       string
 	Description string
+	Fields      []MessageField
+}
+
+// A MessageField stores a field and value pair.
+type MessageField struct {
+	Field string
+	Value string
+	URL   string
 }

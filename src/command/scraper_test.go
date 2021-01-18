@@ -27,14 +27,14 @@ func TestMakeScraper(t *testing.T) {
 }
 
 func TestGetBadGetHttp(t *testing.T) {
-	_, err := utils.HTMLGetWithHTTP("")
+	_, _, err := utils.HTMLGetWithHTTP("")
 	if err == nil {
 		t.Fail()
 	}
 }
 
 func TestGetGoodGetHttp(t *testing.T) {
-	_, err := utils.HTMLGetWithHTTP("https://google.com")
+	_, _, err := utils.HTMLGetWithHTTP("https://google.com")
 	if err != nil {
 		t.Fail()
 	}

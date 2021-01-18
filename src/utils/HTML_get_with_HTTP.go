@@ -8,10 +8,11 @@ import (
 )
 
 // HTMLGetWithHTTP retrieves a HTML page from a URL.
-func HTMLGetWithHTTP(url string) (out io.ReadCloser, err error) {
-	res, err := http.Get(url)
+func HTMLGetWithHTTP(url string) (redirect string, out io.ReadCloser, err error) {
+	resp, err := http.Get(url)
 	if err == nil {
-		out = res.Body
+		out = resp.Body
+		redirect = resp.Request.URL.String()
 	}
-	return out, err
+	return redirect, out, err
 }

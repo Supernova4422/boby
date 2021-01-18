@@ -17,6 +17,7 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
+	"github.com/google/go-cmp/cmp"
 )
 
 type ConfigTest struct {
@@ -44,7 +45,7 @@ func MessageInList(msg service.Message, list []service.Message) bool {
 						break
 					}
 				}
-				if good && msg == msg2 {
+				if good && cmp.Equal(msg, msg2) {
 					return true
 				}
 			}
@@ -122,10 +123,12 @@ func TestConfig(t *testing.T) {
 				}
 
 				testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+				results := make([]service.Message, 0)
 				for _, input := range inputTest {
 					bot.OnMessage(testConversation, testSender, input.Input)
 					for _, expect := range input.Expect {
 						resultMessage, _ := demoSender.PopMessage()
+						results = append(results, resultMessage)
 						if !MessageInList(resultMessage, expect) {
 							t.Errorf("Failed on msg: %s", input.Input)
 							t.Fail()
@@ -135,6 +138,8 @@ func TestConfig(t *testing.T) {
 						t.Errorf("Too many responses from: %s", input.Input)
 						t.Fail()
 					}
+					// msg, _ := json.Marshal(results)
+					// t.Log(string(msg))
 				}
 			}
 		}

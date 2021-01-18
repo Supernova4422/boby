@@ -21,6 +21,7 @@ import (
 
 // GoQueryScraperConfig can be turned into a scraper that uses GoQuery.
 type GoQueryScraperConfig struct {
+	Title         string          // When sending a post, what should the title be.
 	Trigger       string          // Word which triggers this command to activate.
 	Capture       string          // How to capture words.
 	TitleSelector SelectorCapture // Regex captures for title replacement.
@@ -37,8 +38,8 @@ type SelectorCapture struct {
 	Replacements   []map[string]string // Replacements for each entry in selectors.
 }
 
-// A HTMLGetter returns a buffer based on a string when err is nil.
-type HTMLGetter = func(string) (out io.ReadCloser, err error)
+// A HTMLGetter returns a url and buffer based on a string when err is nil.
+type HTMLGetter = func(string) (url string, out io.ReadCloser, err error)
 
 // Match all selectors and fill out template. Then using HandleMultiple decide which to use.
 func selectorCaptureToString(doc goquery.Document, selectorCapture SelectorCapture) string {
@@ -131,10 +132,11 @@ func GetGoqueryScraperWithHTMLGetter(config GoQueryScraperConfig, htmlGetter HTM
 func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message), htmlGetter HTMLGetter) {
 	substitutions := strings.Count(goQueryScraperConfig.URL, "%s")
 	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
-		sink(sender, service.Message{Description: "An error when building the url."})
+		sink(sender, service.Message{Description: "An error occured when building the url."})
 		return
 	}
 
+	fields := make([]service.MessageField, 0)
 	for _, capture := range msg {
 		msgURL := goQueryScraperConfig.URL
 
@@ -142,45 +144,45 @@ func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Co
 			msgURL = fmt.Sprintf(msgURL, url.PathEscape(word))
 		}
 
-		htmlReader, err := htmlGetter(msgURL)
+		redirect, htmlReader, err := htmlGetter(msgURL)
 		if err == nil {
 			defer htmlReader.Close()
 			doc, err := goquery.NewDocumentFromReader(htmlReader)
 			if err == nil {
 				if doc.Text() == "" {
-					sink(sender, service.Message{
-						Title:       "Webpage not found.",
-						Description: "Webpage not found at: " + msgURL,
-						URL:         msgURL,
+					fields = append(fields, service.MessageField{
+						Field: msgURL,
+						Value: fmt.Sprintf("Webpage not found at %s", redirect),
+						URL:   "",
 					})
 				} else {
-					title := selectorCaptureToString(
-						*doc,
-						goQueryScraperConfig.TitleSelector,
-					)
-
-					reply := fmt.Sprintf(
-						"%s\n\nRead more at: %s",
-						selectorCaptureToString(*doc, goQueryScraperConfig.ReplySelector),
-						msgURL,
-					)
-
-					sink(sender, service.Message{
-						Title:       title,
-						Description: reply,
-						URL:         msgURL,
+					msgCapture := selectorCaptureToString(*doc, goQueryScraperConfig.ReplySelector)
+					fields = append(fields, service.MessageField{
+						Field: selectorCaptureToString(*doc, goQueryScraperConfig.TitleSelector),
+						Value: msgCapture,
+						URL:   redirect,
 					})
 				}
 			} else {
-				sink(sender, service.Message{Description: "An error occurred when processing the webpage."})
+				fields = append(fields, service.MessageField{
+					Field: msgURL,
+					Value: "An error occurred when processing the webpage.",
+				})
 			}
 		} else {
-			sink(sender, service.Message{
-				Description: "An error occurred retrieving the webpage.",
-				URL:         msgURL,
+			fields = append(fields, service.MessageField{
+				Field: "Error",
+				Value: "An error occurred retrieving the webpage.",
+				URL:   msgURL,
 			})
 		}
 	}
+
+	sink(sender, service.Message{
+		Title:       goQueryScraperConfig.Title,
+		Description: "",
+		Fields:      fields,
+	})
 }
 
 // GetGoqueryScraperConfigs retrieves an array of GoQueryScraperConfig from a json file.
