@@ -60,7 +60,7 @@ func TestScraperWithCapture(t *testing.T) {
 
 	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
 	if err != nil {
-		t.Errorf("An error occured when making a reasonable scraper!")
+		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
 	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
@@ -107,7 +107,7 @@ func TestScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 
 	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
 	if err != nil {
-		t.Errorf("An error occured when making a reasonable scraper!")
+		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
 	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
@@ -144,7 +144,7 @@ func TestScraperWithTitleCapture(t *testing.T) {
 
 	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
 	if err != nil {
-		t.Errorf("An error occured when making a reasonable scraper!")
+		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
 	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
@@ -179,7 +179,7 @@ func TestScraperNoCapture(t *testing.T) {
 
 	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
 	if err != nil {
-		t.Errorf("An error occured when making a reasonable scraper!")
+		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
 	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
@@ -223,7 +223,7 @@ func TestGetScraperConfigs(t *testing.T) {
 	}
 
 	if err != nil {
-		t.Errorf("An error occured when making a reasonable scraper!")
+		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 }
 
@@ -272,7 +272,7 @@ func TestScraperNoSubstitutions(t *testing.T) {
 	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
 
 	if err != nil {
-		t.Errorf("An error occured when making a reasonable scraper!")
+		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
 	scraper.Exec(testConversation, testSender, [][]string{{}}, nil, demoSender.SendMessage)
@@ -306,7 +306,7 @@ func TestScraperNoMatches(t *testing.T) {
 	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
 
 	if err != nil {
-		t.Errorf("An error occured when making a reasonable scraper!")
+		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
 	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
@@ -340,7 +340,7 @@ func TestBadURL(t *testing.T) {
 	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
 
 	if err != nil {
-		t.Errorf("An error occured when making a reasonable scraper!")
+		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
 	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
@@ -374,7 +374,7 @@ func TestScraperInvalidReader(t *testing.T) {
 	scraper, err := config.GetScraperWithHTMLGetter(HTMLReturnErr)
 
 	if err != nil {
-		t.Errorf("An error occured when making a reasonable scraper!")
+		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
 	scraper.Exec(testConversation, testSender, [][]string{{"", ""}}, nil, demoSender.SendMessage)

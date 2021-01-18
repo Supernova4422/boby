@@ -132,7 +132,7 @@ func GetGoqueryScraperWithHTMLGetter(config GoQueryScraperConfig, htmlGetter HTM
 func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message), htmlGetter HTMLGetter) {
 	substitutions := strings.Count(goQueryScraperConfig.URL, "%s")
 	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
-		sink(sender, service.Message{Description: "An error occured when building the url."})
+		sink(sender, service.Message{Description: "An error occurred when building the url."})
 		return
 	}
 

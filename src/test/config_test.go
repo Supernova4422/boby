@@ -96,10 +96,8 @@ func TestConfig(t *testing.T) {
 	configTests := "config_tests.json"
 	if len(os.Args) > 3 {
 		configDir := os.Args[3]
-		_, err := os.Stat(configDir)
-
 		inputFp := path.Join(configDir, configTests)
-		_, err = os.Stat(inputFp)
+		_, err := os.Stat(inputFp)
 		if err != nil {
 			t.Log("Configuration file was not used for this test.")
 		} else {

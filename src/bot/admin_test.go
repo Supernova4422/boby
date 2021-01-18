@@ -200,7 +200,7 @@ func TestIsAdminCmd(t *testing.T) {
 		testSender,
 		isAdmin+" "+testSender.Name,
 	)
-	resultMessage, resultConversation := demoSender.PopMessage()
+	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Description != fmt.Sprintf("%s is not an admin.", testSender.Name) {
 		t.Errorf("Check admin was wrong!")
 	}
@@ -217,8 +217,8 @@ func TestIsAdminCmd(t *testing.T) {
 		isAdmin+" "+testSender.Name,
 	)
 
-	resultMessage, resultConversation = demoSender.PopMessage()
-	resultMessage, resultConversation = demoSender.PopMessage()
+	demoSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Description != fmt.Sprintf("%s is an admin.", testSender.Name) {
 		t.Errorf("Message was different!")
 	}
@@ -272,7 +272,7 @@ func TestImAdminCmdAfterSet(t *testing.T) {
 		testSender,
 		imAdmin,
 	)
-	resultMessage, resultConversation := demoSender.PopMessage()
+	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Description != "You are not an admin." {
 		t.Errorf("Check admin was wrong!")
 	}
@@ -290,8 +290,8 @@ func TestImAdminCmdAfterSet(t *testing.T) {
 		imAdmin,
 	)
 	testConversation.Admin = true
-	resultMessage, resultConversation = demoSender.PopMessage()
-	resultMessage, resultConversation = demoSender.PopMessage()
+	demoSender.PopMessage()
+	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Description != "You are an admin." {
 		t.Errorf("Message was different!")
 	}

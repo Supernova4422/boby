@@ -18,7 +18,7 @@ func (d *DiscordSender) SendMessage(destination service.Conversation, msg servic
 	for _, field := range msg.Fields {
 		value := field.Value
 		if field.URL != "" {
-			value += fmt.Sprintf(" Read more at: %s", field.URL)
+			value += fmt.Sprintf("\nRead more at: %s", field.URL)
 		}
 		fields = append(
 			fields,
