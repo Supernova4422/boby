@@ -131,6 +131,10 @@ func TestConfig(t *testing.T) {
 						results = append(results, resultMessage)
 						if !MessageInList(resultMessage, expect) {
 							t.Errorf("Failed on msg: %s", input.Input)
+							msg, _ := json.Marshal(resultMessage)
+							t.Log(string(msg))
+							msgExpect, _ := json.Marshal(expect)
+							t.Log(string(msgExpect))
 							t.Fail()
 						}
 					}
