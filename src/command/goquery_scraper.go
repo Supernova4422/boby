@@ -41,6 +41,26 @@ type SelectorCapture struct {
 // A HTMLGetter returns a url and buffer based on a string when err is nil.
 type HTMLGetter = func(string) (url string, out io.ReadCloser, err error)
 
+// ToStringWithMap uses a map to fill out the template.
+// HandleMultiple is completely ignored.
+// If a key is missing, it is skipped.
+func (s SelectorCapture) ToStringWithMap(dict map[string]string) (out string, err error) {
+	out = s.Template
+	for i, selector := range s.Selectors {
+		val, ok := dict[selector]
+		if ok {
+			if s.Replacements != nil && i < len(s.Replacements) {
+				for search, replace := range s.Replacements[i] {
+					val = strings.ReplaceAll(val, search, replace)
+				}
+			}
+			out = fmt.Sprintf(out, val)
+		}
+	}
+
+	return out, err
+}
+
 // Match all selectors and fill out template. Then using HandleMultiple decide which to use.
 func selectorCaptureToString(doc goquery.Document, selectorCapture SelectorCapture) string {
 	var maxLength int64 = math.MaxInt64
