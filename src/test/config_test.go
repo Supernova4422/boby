@@ -143,6 +143,8 @@ func TestConfig(t *testing.T) {
 					// msg, _ := json.Marshal(results)
 					// t.Log(string(msg))
 				}
+			} else {
+				t.Fail()
 			}
 		}
 	} else {

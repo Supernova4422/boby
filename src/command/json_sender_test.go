@@ -38,6 +38,13 @@ func jsonExamples(name string) (io.ReadCloser, error) {
 	}
 	return nil, fmt.Errorf("Error")
 }
+
+// Just returns the URL.
+func jsonURLReturn(url string) (io.ReadCloser, error) {
+	json := "{ \"URL\": \"" + url + "\"}"
+	return ioutil.NopCloser(strings.NewReader(json)), nil
+}
+
 func TestSimple(t *testing.T) {
 	demoSender := demoservice.DemoSender{}
 	testConversation := service.Conversation{
@@ -269,6 +276,110 @@ func TestUngrouped(t *testing.T) {
 
 	resultMessage2, _ := demoSender.PopMessage()
 	if resultMessage2.Description != "Value1" {
+		t.Fail()
+	}
+}
+
+func TestToken(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+	testConversation := service.Conversation{
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
+	}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+
+	config := JSONGetterConfig{
+		Grouped: false,
+		Delay:   0,
+		Capture: "(.*)",
+
+		Title: FieldCapture{
+			Template:  "%s",
+			Selectors: []string{"Key1"},
+		},
+
+		Captures: []JSONCapture{
+			{
+				Body: FieldCapture{
+					Template:  "%s",
+					Selectors: []string{"URL"},
+				},
+			},
+		},
+		Token: TokenMaker{
+			Prefix:  "Y",
+			Postfix: "X",
+			Size:    6,
+			Type:    "MD5",
+		},
+		URL: "",
+	}
+
+	getter, err := config.GetWebScraper(jsonURLReturn)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	getter.Exec(
+		testConversation,
+		testSender,
+		[][]string{{"", "Hello World"}},
+		nil,
+		demoSender.SendMessage,
+	)
+
+	resultMessage, _ := demoSender.PopMessage()
+	if resultMessage.Description != "2d115" {
+		t.Fail()
+	}
+}
+
+func TestSpacesInMessage(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+	testConversation := service.Conversation{
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
+	}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+
+	config := JSONGetterConfig{
+		Grouped: false,
+		Delay:   0,
+		Capture: "(.*)",
+
+		Title: FieldCapture{
+			Template:  "%s",
+			Selectors: []string{"Key1"},
+		},
+
+		Captures: []JSONCapture{
+			{
+				Body: FieldCapture{
+					Template:  "%s",
+					Selectors: []string{"URL"},
+				},
+			},
+		},
+		URL: "%s",
+	}
+
+	getter, err := config.GetWebScraper(jsonURLReturn)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	getter.Exec(
+		testConversation,
+		testSender,
+		[][]string{{"", "Hello World Here"}},
+		nil,
+		demoSender.SendMessage,
+	)
+
+	resultMessage, _ := demoSender.PopMessage()
+	if resultMessage.Description != "Hello%20World%20Here" {
 		t.Fail()
 	}
 }

@@ -1,6 +1,7 @@
 package command
 
 import (
+	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -25,6 +26,33 @@ type JSONGetterConfig struct {
 	Description string
 	Grouped     bool
 	Delay       int
+	Token       TokenMaker
+}
+
+// A TokenMaker is useful for creating a token that may be part of an API request.
+type TokenMaker struct {
+	Type    string // Can be MD5
+	Prefix  string // When calculating a token, what should be prepended
+	Postfix string // When calculating a token, what should be appended
+	Size    int    // Take the first 'Size' characters from the result.
+}
+
+// MakeToken will make a token from this token maker.
+// If t.type is "MD5"
+func (t TokenMaker) MakeToken(input string) (out string) {
+	if t.Type == "MD5" {
+		fullString := []byte(t.Prefix + input + t.Postfix)
+		out := ""
+		for i, hex := range md5.Sum(fullString) {
+			if (i * 2) == t.Size {
+				break
+			}
+			out += fmt.Sprintf("%x", hex)
+		}
+		return out
+	} else {
+		return ""
+	}
 }
 
 // A FieldCapture represents a template to be filled out by selectors.
@@ -96,10 +124,16 @@ func jsonGetterFunc(config JSONGetterConfig, sender service.Conversation, user s
 	for _, capture := range msg {
 		msgURL := config.URL
 
-		for _, word := range capture[1:] {
-			msgURL = fmt.Sprintf(msgURL, url.PathEscape(word))
+		replacements := strings.Count(msgURL, "%s")
+
+		for i, word := range capture[1:] {
+			if i == replacements {
+				break
+			}
+			msgURL = strings.Replace(msgURL, "%s", url.PathEscape(word), 1)
 		}
 
+		msgURL += config.Token.MakeToken(strings.Join(capture[1:], ""))
 		jsonReader, err := jsonGetter(msgURL)
 		if err == nil {
 			defer jsonReader.Close()
