@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/url"
 	"regexp"
 	"strings"
@@ -15,11 +16,36 @@ import (
 type JSONGetterConfig struct {
 	Trigger     string
 	Capture     string
-	Title       SelectorCapture
-	Captures    []SelectorCapture
+	Title       FieldCapture
+	Captures    []JSONCapture
 	URL         string
 	Help        string
 	Description string
+	Grouped     bool
+}
+
+type FieldCapture struct {
+	Template  string   // Message template to be filled out.
+	Selectors []string // What captures to use to fill out the template
+}
+
+// ToStringWithMap uses a map to fill out the template.
+// HandleMultiple is completely ignored.
+// If a key is missing, it is skipped.
+func (f FieldCapture) ToStringWithMap(dict map[string]interface{}) (out string, err error) {
+	out = f.Template
+	for _, selector := range f.Selectors {
+		val, ok := dict[selector]
+		if ok {
+			out = fmt.Sprintf(out, val.(string))
+		}
+	}
+	return out, err
+}
+
+type JSONCapture struct {
+	Title FieldCapture
+	Body  FieldCapture
 }
 
 type JSONGetter = func(string) (out io.ReadCloser, err error)
@@ -70,19 +96,22 @@ func jsonGetterFunc(config JSONGetterConfig, sender service.Conversation, user s
 		jsonReader, err := jsonGetter(msgURL)
 		if err == nil {
 			defer jsonReader.Close()
-			buf := new(strings.Builder)
-			_, err := io.Copy(buf, jsonReader)
+			buf, err := ioutil.ReadAll(jsonReader)
 			if err == nil {
-				dict := make(map[string]string)
-				err := json.Unmarshal([]byte(buf.String()), &dict)
+				dict := make(map[string]interface{})
+				err := json.Unmarshal(buf, &dict)
 				if err == nil {
 					for _, capture := range config.Captures {
-						val, err := capture.ToStringWithMap(dict)
-						if err == nil {
-							fields = append(fields,
-								service.MessageField{
-									Value: val,
-								})
+						body, err := capture.Body.ToStringWithMap(dict)
+						if err == nil && strings.Contains(body, "%s") == false {
+							title, err := capture.Title.ToStringWithMap(dict)
+							if err == nil {
+								fields = append(fields,
+									service.MessageField{
+										Field: title,
+										Value: body,
+									})
+							}
 						}
 					}
 

@@ -47,13 +47,18 @@ func TestSimple(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := JSONGetterConfig{
-		Title: SelectorCapture{
+		Title: FieldCapture{
 			Template:  "%s",
 			Selectors: []string{"Key1"},
 		},
 
-		Captures: []SelectorCapture{
-			{Template: "%s", Selectors: []string{"Key2"}},
+		Captures: []JSONCapture{
+			{
+				Body: FieldCapture{
+					Template:  "%s",
+					Selectors: []string{"Key2"},
+				},
+			},
 		},
 		URL:         "%s",
 		Description: "Footer",
@@ -92,17 +97,23 @@ func TestPair(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := JSONGetterConfig{
-		Title: SelectorCapture{
+		Title: FieldCapture{
 			Template:  "%s",
 			Selectors: []string{"Key1"},
 		},
 
-		Captures: []SelectorCapture{
-			{Template: "%s", Selectors: []string{"Key1"}},
+		Captures: []JSONCapture{
 			{
-				Template:     "%s",
-				Selectors:    []string{"Key2"},
-				Replacements: []map[string]string{{"Value2": "Value3"}},
+				Body: FieldCapture{
+					Template:  "%s",
+					Selectors: []string{"Key1"},
+				},
+			},
+			{
+				Body: FieldCapture{
+					Template:  "%s",
+					Selectors: []string{"Key2"},
+				},
 			},
 		},
 		URL: "%s",
@@ -128,7 +139,7 @@ func TestPair(t *testing.T) {
 		t.Fail()
 	}
 
-	if resultMessage.Fields[1].Value != "Value3" {
+	if resultMessage.Fields[1].Value != "Value2" {
 		t.Fail()
 	}
 
@@ -158,14 +169,24 @@ func TestEmptyMsg(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := JSONGetterConfig{
-		Title: SelectorCapture{
+		Title: FieldCapture{
 			Template:  "%s",
-			Selectors: []string{"Key1"},
+			Selectors: []string{"key1"},
 		},
 
-		Captures: []SelectorCapture{
-			{Template: "%s", Selectors: []string{"Key1"}},
-			{Template: "%s", Selectors: []string{"Key2"}},
+		Captures: []JSONCapture{
+			{
+				Body: FieldCapture{
+					Template:  "%s",
+					Selectors: []string{"key2"},
+				},
+			},
+			{
+				Body: FieldCapture{
+					Template:  "%s",
+					Selectors: []string{"key1"},
+				},
+			},
 		},
 		URL: "%s",
 	}
