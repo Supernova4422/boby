@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-// HTMLGetWithHTTP retrieves a HTML page from a URL.
+// JSONGetWithHTTP retrieves a JSON from a URL.
 func JSONGetWithHTTP(url string) (out io.ReadCloser, err error) {
 	resp, err := http.Get(url)
 	if err == nil {

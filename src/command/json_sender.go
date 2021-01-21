@@ -13,6 +13,7 @@ import (
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
 )
 
+// JSONGetterConfig can be used to extract from JSON into a message.
 type JSONGetterConfig struct {
 	Trigger     string
 	Capture     string
@@ -24,6 +25,8 @@ type JSONGetterConfig struct {
 	Grouped     bool
 }
 
+// A FieldCapture represents a template to be filled out by selectors.
+// TODO Improve documentation here.
 type FieldCapture struct {
 	Template  string   // Message template to be filled out.
 	Selectors []string // What captures to use to fill out the template
@@ -43,11 +46,13 @@ func (f FieldCapture) ToStringWithMap(dict map[string]interface{}) (out string, 
 	return out, err
 }
 
+// JSONCapture is a pair of FieldCapture to represent a title, body pair in a message.
 type JSONCapture struct {
 	Title FieldCapture
 	Body  FieldCapture
 }
 
+// JSONGetter will accept a string and provide a reader. This could be a file, a webpage, who cares!
 type JSONGetter = func(string) (out io.ReadCloser, err error)
 
 // GetWebScraper returns a webscraper command from a config.
