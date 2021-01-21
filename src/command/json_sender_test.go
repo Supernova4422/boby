@@ -210,3 +210,63 @@ func TestEmptyMsg(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestUngrouped(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+	testConversation := service.Conversation{
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
+	}
+	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+
+	config := JSONGetterConfig{
+		Grouped: false,
+		Delay:   0,
+
+		Title: FieldCapture{
+			Template:  "%s",
+			Selectors: []string{"Key1"},
+		},
+
+		Captures: []JSONCapture{
+			{
+				Body: FieldCapture{
+					Template:  "%s",
+					Selectors: []string{"Key2"},
+				},
+			},
+			{
+				Body: FieldCapture{
+					Template:  "%s",
+					Selectors: []string{"Key1"},
+				},
+			},
+		},
+		URL: "%s",
+	}
+
+	getter, err := config.GetWebScraper(jsonExamples)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	url := "example1"
+	getter.Exec(
+		testConversation,
+		testSender,
+		[][]string{{"", url}},
+		nil,
+		demoSender.SendMessage,
+	)
+
+	resultMessage1, _ := demoSender.PopMessage()
+	if resultMessage1.Description != "Value2" {
+		t.Fail()
+	}
+
+	resultMessage2, _ := demoSender.PopMessage()
+	if resultMessage2.Description != "Value1" {
+		t.Fail()
+	}
+}
