@@ -47,6 +47,7 @@ func TestSimple(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := JSONGetterConfig{
+		Grouped: true,
 		Title: FieldCapture{
 			Template:  "%s",
 			Selectors: []string{"Key1"},
@@ -97,6 +98,7 @@ func TestPair(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
 
 	config := JSONGetterConfig{
+		Grouped: true,
 		Title: FieldCapture{
 			Template:  "%s",
 			Selectors: []string{"Key1"},
