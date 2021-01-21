@@ -2,12 +2,15 @@ package config
 
 import (
 	"bufio"
+	"encoding/json"
+	"io/ioutil"
 	"os"
 	"path"
 	"regexp"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
+	"github.com/BKrajancic/FLD-Bot/m/v2/src/utils"
 )
 
 // ConfiguredBot uses files in configDir to return a bot ready for usage.
@@ -15,7 +18,33 @@ import (
 func ConfiguredBot(configDir string) (bot.Bot, error) {
 	bot := bot.Bot{}
 
-	file, err := os.Open(path.Join(configDir, "scraper_config.json"))
+	// Get JSON getters.
+	file, err := os.Open(path.Join(configDir, "json_getter_config.json"))
+	if err != nil {
+		return bot, err
+	}
+
+	var jsonGetters []command.JSONGetterConfig
+	bytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		return bot, err
+	}
+
+	if err := json.Unmarshal(bytes, &jsonGetters); err != nil {
+		return bot, err
+	}
+
+	for _, jsonGetter := range jsonGetters {
+		jsonGetterCommand, err := jsonGetter.GetWebScraper(utils.JSONGetWithHTTP)
+		if err == nil {
+			bot.AddCommand(jsonGetterCommand)
+		} else {
+			return bot, err
+		}
+	}
+
+	// Get regex scraper.
+	file, err = os.Open(path.Join(configDir, "scraper_config.json"))
 	if err != nil {
 		return bot, err
 	}

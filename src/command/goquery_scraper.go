@@ -156,10 +156,9 @@ func goqueryScraper(goQueryScraperConfig GoQueryScraperConfig, sender service.Co
 						URL:   "",
 					})
 				} else {
-					msgCapture := selectorCaptureToString(*doc, goQueryScraperConfig.ReplySelector)
 					fields = append(fields, service.MessageField{
 						Field: selectorCaptureToString(*doc, goQueryScraperConfig.TitleSelector),
-						Value: msgCapture,
+						Value: selectorCaptureToString(*doc, goQueryScraperConfig.ReplySelector),
 						URL:   redirect,
 					})
 				}
