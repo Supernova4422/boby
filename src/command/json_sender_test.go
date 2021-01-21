@@ -330,7 +330,7 @@ func TestToken(t *testing.T) {
 	)
 
 	resultMessage, _ := demoSender.PopMessage()
-	if resultMessage.Description != "2d115" {
+	if resultMessage.Description != "2d1105" {
 		t.Fail()
 	}
 }

@@ -42,14 +42,7 @@ type TokenMaker struct {
 func (t TokenMaker) MakeToken(input string) (out string) {
 	if t.Type == "MD5" {
 		fullString := []byte(t.Prefix + input + t.Postfix)
-		out := ""
-		for i, hex := range md5.Sum(fullString) {
-			if (i * 2) == t.Size {
-				break
-			}
-			out += fmt.Sprintf("%x", hex)
-		}
-		return out
+		return fmt.Sprintf("%x", md5.Sum(fullString))[:t.Size]
 	} else {
 		return ""
 	}
@@ -134,6 +127,7 @@ func jsonGetterFunc(config JSONGetterConfig, sender service.Conversation, user s
 		}
 
 		msgURL += config.Token.MakeToken(strings.Join(capture[1:], ""))
+		fmt.Print(msgURL)
 		jsonReader, err := jsonGetter(msgURL)
 		if err == nil {
 			defer jsonReader.Close()
