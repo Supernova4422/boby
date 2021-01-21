@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
@@ -23,6 +24,7 @@ type JSONGetterConfig struct {
 	Help        string
 	Description string
 	Grouped     bool
+	Delay       int
 }
 
 // A FieldCapture represents a template to be filled out by selectors.
@@ -111,22 +113,29 @@ func jsonGetterFunc(config JSONGetterConfig, sender service.Conversation, user s
 						if err == nil && strings.Contains(body, "%s") == false {
 							title, err := capture.Title.ToStringWithMap(dict)
 							if err == nil {
-								fields = append(fields,
-									service.MessageField{
-										Field: title,
-										Value: body,
-									})
+								fields = append(fields, service.MessageField{Field: title, Value: body})
 							}
 						}
 					}
+					if config.Grouped {
+						title, err := config.Title.ToStringWithMap(dict)
+						if err == nil {
+							sink(sender, service.Message{
+								Title:       title,
+								Fields:      fields,
+								Description: config.Description,
+							})
+						}
+					} else {
+						for _, field := range fields {
+							sink(sender, service.Message{
+								Title:       field.Field,
+								Description: field.Value,
+							})
 
-					title, err := config.Title.ToStringWithMap(dict)
-					if err == nil {
-						sink(sender, service.Message{
-							Title:       title,
-							Fields:      fields,
-							Description: config.Description,
-						})
+							time.Sleep(time.Duration(config.Delay) * time.Second)
+						}
+
 					}
 				}
 			}
