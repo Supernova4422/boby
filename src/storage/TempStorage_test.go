@@ -11,8 +11,8 @@ func TestSetGetValue(t *testing.T) {
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
 	key := "key"
 	value := "value"
-	storage.SetValue(guild, key, value)
-	valueOut, err := storage.GetValue(guild, key)
+	storage.SetGuildValue(guild, key, value)
+	valueOut, err := storage.GetGuildValue(guild, key)
 	if err != nil || valueOut != value {
 		t.Fail()
 	}
@@ -22,7 +22,7 @@ func TestGetValue(t *testing.T) {
 	storage := TempStorage{}
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
 	key := "key"
-	_, err := storage.GetValue(guild, key)
+	_, err := storage.GetGuildValue(guild, key)
 	if err == nil {
 		t.Fail()
 	}
@@ -34,8 +34,8 @@ func TestGetValueMissingButHasService(t *testing.T) {
 	key1 := "key1"
 	key2 := "key2"
 	value := "value"
-	storage.SetValue(guild, key1, value)
-	_, err := storage.GetValue(guild, key2)
+	storage.SetGuildValue(guild, key1, value)
+	_, err := storage.GetGuildValue(guild, key2)
 	if err == nil {
 		t.Fail()
 	}
@@ -48,9 +48,9 @@ func TestGetValueDifferentGuilds(t *testing.T) {
 	key1 := "key1"
 	key2 := "key2"
 	value := "value"
-	storage.SetValue(guild1, key1, value)
+	storage.SetGuildValue(guild1, key1, value)
 	guild2 := service.Guild{ServiceID: serviceID, GuildID: "1"}
-	_, err := storage.GetValue(guild2, key2)
+	_, err := storage.GetGuildValue(guild2, key2)
 	if err == nil {
 		t.Fail()
 	}
@@ -118,7 +118,7 @@ func TestSetAdminDifferentGuilds(t *testing.T) {
 	}
 
 	storage.SetAdmin(guild2, user)
-	if storage.IsAdmin(guild2, user) {
+	if storage.IsAdmin(guild2, user) == false {
 		t.Fail()
 	}
 }

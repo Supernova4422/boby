@@ -47,11 +47,16 @@ func (b *Bot) GetPrefix(conversation service.Conversation) string {
 		return b.defaultPrefix
 	}
 
-	prefix, err := (*b.storage).GetValue(guild, "prefix")
+	prefix, err := (*b.storage).GetGuildValue(guild, "prefix")
 	if err != nil {
 		return b.defaultPrefix
 	}
-	return prefix
+
+	if prefixValue, ok := prefix.(string); ok {
+		return prefixValue
+	}
+
+	return b.defaultPrefix
 }
 
 // SetDefaultPrefix sets the bot's prefix when there is no existing one.

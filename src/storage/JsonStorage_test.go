@@ -82,25 +82,25 @@ func TestJSONSetGetValue(t *testing.T) {
 	k2 := "k2"
 	v2 := "v2"
 
-	storage.SetValue(guild, k0, v0)
-	storage.SetValue(guild, k1, v1)
-	storage.SetValue(guild, k2, v2)
+	storage.SetGuildValue(guild, k0, v0)
+	storage.SetGuildValue(guild, k1, v1)
+	storage.SetGuildValue(guild, k2, v2)
 	storage, err := LoadFromBuffer(writer)
 	if err != nil {
 		t.Fail()
 	}
 
-	valueOut, err := storage.GetValue(guild, k0)
+	valueOut, err := storage.GetGuildValue(guild, k0)
 	if err != nil || valueOut != v0 {
 		t.Fail()
 	}
 
-	valueOut, err = storage.GetValue(guild, k1)
+	valueOut, err = storage.GetGuildValue(guild, k1)
 	if err != nil || valueOut != v1 {
 		t.Fail()
 	}
 
-	valueOut, err = storage.GetValue(guild, k2)
+	valueOut, err = storage.GetGuildValue(guild, k2)
 	if err != nil || valueOut != v2 {
 		t.Fail()
 	}
@@ -116,7 +116,7 @@ func TestJSONGetValue(t *testing.T) {
 
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
 	key := "key"
-	_, err := storage.GetValue(guild, key)
+	_, err := storage.GetGuildValue(guild, key)
 	if err == nil {
 		t.Fail()
 	}
@@ -134,8 +134,8 @@ func TestJSONGetValueMissingButHasService(t *testing.T) {
 	key1 := "key1"
 	key2 := "key2"
 	value := "value"
-	storage.SetValue(guild, key1, value)
-	_, err := storage.GetValue(guild, key2)
+	storage.SetGuildValue(guild, key1, value)
+	_, err := storage.GetGuildValue(guild, key2)
 	if err == nil {
 		t.Fail()
 	}
@@ -154,9 +154,9 @@ func TestJSONGetValueDifferentGuilds(t *testing.T) {
 	key1 := "key1"
 	key2 := "key2"
 	value := "value"
-	storage.SetValue(guild1, key1, value)
+	storage.SetGuildValue(guild1, key1, value)
 	guild2 := service.Guild{ServiceID: serviceID, GuildID: "1"}
-	_, err := storage.GetValue(guild2, key2)
+	_, err := storage.GetGuildValue(guild2, key2)
 	if err == nil {
 		t.Fail()
 	}
@@ -243,12 +243,13 @@ func TestJSONSetAdminDifferentGuilds(t *testing.T) {
 	if storage.IsAdmin(guild1, user) == false {
 		t.Fail()
 	}
+
 	if storage.IsAdmin(guild2, user) {
 		t.Fail()
 	}
 
 	storage.SetAdmin(guild2, user)
-	if storage.IsAdmin(guild2, user) {
+	if storage.IsAdmin(guild2, user) == false {
 		t.Fail()
 	}
 }

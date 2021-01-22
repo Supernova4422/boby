@@ -102,7 +102,12 @@ func TestSetAdmin(t *testing.T) {
 		setAdmin+" "+testSender.Name,
 	)
 
-	if tempStorage.Admins[testConversation.ServiceID][testConversation.GuildID][0] != testSender.Name {
+	guild := service.Guild{
+		ServiceID: testConversation.ServiceID,
+		GuildID:   testConversation.GuildID,
+	}
+
+	if tempStorage.IsAdmin(guild, testSender.Name) == false {
 		t.Errorf("Admin wasn't added.")
 	}
 }
@@ -121,9 +126,13 @@ func TestDontSetAdmin(t *testing.T) {
 		setAdmin+" "+testSender.Name,
 	)
 
-	_, ok := tempStorage.Admins[testConversation.ServiceID][testConversation.GuildID]
-	if ok {
-		t.Errorf("Admin was added.")
+	guild := service.Guild{
+		ServiceID: testConversation.ServiceID,
+		GuildID:   testConversation.GuildID,
+	}
+
+	if tempStorage.IsAdmin(guild, testSender.Name) {
+		t.Errorf("Admin was added")
 	}
 }
 
@@ -142,8 +151,13 @@ func TestUnsetAdmin(t *testing.T) {
 		setAdmin+" "+testSender.Name,
 	)
 
-	if tempStorage.Admins[testConversation.ServiceID][testConversation.GuildID][0] != testSender.Name {
-		t.Errorf("Admin was removed.")
+	guild := service.Guild{
+		ServiceID: testConversation.ServiceID,
+		GuildID:   testConversation.GuildID,
+	}
+
+	if tempStorage.IsAdmin(guild, testSender.Name) == false {
+		t.Fail()
 	}
 
 	bot.OnMessage(
@@ -151,9 +165,9 @@ func TestUnsetAdmin(t *testing.T) {
 		testSender,
 		unsetAdmin+" "+testSender.Name,
 	)
-	admins := tempStorage.Admins[testConversation.ServiceID][testConversation.GuildID]
-	if len(admins) != 0 {
-		t.Errorf("Admin wasn't removed.")
+
+	if tempStorage.IsAdmin(guild, testSender.Name) {
+		t.Fail()
 	}
 }
 
@@ -171,8 +185,12 @@ func TestDontUnsetAdmin(t *testing.T) {
 		setAdmin+" "+testSender.Name,
 	)
 
-	if tempStorage.Admins[testConversation.ServiceID][testConversation.GuildID][0] != testSender.Name {
-		t.Errorf("Message was different!")
+	guild := service.Guild{
+		ServiceID: testConversation.ServiceID,
+		GuildID:   testConversation.GuildID,
+	}
+	if tempStorage.IsAdmin(guild, testSender.Name) {
+		t.Fail()
 	}
 
 	testConversation.Admin = false
@@ -181,8 +199,9 @@ func TestDontUnsetAdmin(t *testing.T) {
 		testSender,
 		unsetAdmin+" "+testSender.Name,
 	)
-	if tempStorage.Admins[testConversation.ServiceID][testConversation.GuildID][0] != testSender.Name {
-		t.Errorf("Admin was removed.")
+
+	if tempStorage.IsAdmin(guild, testSender.Name) {
+		t.Fail()
 	}
 }
 

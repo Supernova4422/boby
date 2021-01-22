@@ -15,7 +15,7 @@ func SetPrefix(sender service.Conversation, user service.User, msg [][]string, s
 			ServiceID: sender.ServiceID,
 			GuildID:   sender.GuildID,
 		}
-		(*storage).SetValue(guild, "prefix", msg[0][1])
+		(*storage).SetGuildValue(guild, "prefix", msg[0][1])
 		sink(
 			sender,
 			service.Message{
