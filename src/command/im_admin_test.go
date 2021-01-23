@@ -10,7 +10,7 @@ import (
 func TestIsAdmin(t *testing.T) {
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	testConversation := service.Conversation{
 		ServiceID:      demoSender.ID(),
 		ConversationID: "0",
@@ -27,7 +27,7 @@ func TestIsAdmin(t *testing.T) {
 func TestIsNotAdmin(t *testing.T) {
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	testConversation := service.Conversation{
 		ServiceID:      demoSender.ID(),
 		ConversationID: "0",

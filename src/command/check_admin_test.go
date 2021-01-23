@@ -13,7 +13,7 @@ func TestCheckAdmin(t *testing.T) {
 	tempStorage := storage.TempStorage{}
 	var _storage storage.Storage = &tempStorage
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	guild := service.Guild{ServiceID: demoSender.ID(), GuildID: "0"}
 	userID := "0"
 	tempStorage.SetAdmin(guild, userID)
@@ -37,7 +37,7 @@ func TestCheckNotAdmin(t *testing.T) {
 	tempStorage := storage.TempStorage{}
 	var _storage storage.Storage = &tempStorage
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	guild := service.Guild{ServiceID: demoSender.ID(), GuildID: "0"}
 	userID := "0"
 	testConversation := service.Conversation{

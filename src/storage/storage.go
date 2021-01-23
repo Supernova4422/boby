@@ -8,8 +8,8 @@ import "github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 type Storage interface {
 	GetGuildValue(guild service.Guild, key string) (interface{}, error)
 	SetGuildValue(guild service.Guild, key string, value interface{})
-	GetUserValue(serviceID string, user string, key string) (val interface{}, err error)
-	SetUserValue(serviceID string, user string, key string, value interface{})
+	GetUserValue(user service.User, key string) (val interface{}, err error)
+	SetUserValue(user service.User, key string, value interface{})
 	IsAdmin(guild service.Guild, UserID string) bool
 	SetAdmin(guild service.Guild, UserID string)
 	UnsetAdmin(guild service.Guild, UserID string)

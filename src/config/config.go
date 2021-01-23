@@ -37,7 +37,7 @@ func ConfiguredBot(configDir string) (bot.Bot, error) {
 	for _, jsonGetter := range jsonGetters {
 		jsonGetterCommand, err := jsonGetter.GetWebScraper(utils.JSONGetWithHTTP)
 		if err == nil {
-			bot.AddCommand(jsonGetterCommand)
+			bot.AddCommand(jsonGetter.RateLimit.GetRateLimitedCommand(jsonGetterCommand))
 		} else {
 			return bot, err
 		}

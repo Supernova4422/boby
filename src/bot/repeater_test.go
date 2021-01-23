@@ -43,7 +43,7 @@ func TestParseWithoutPrefix(t *testing.T) {
 		ServiceID:      demoServiceSubject.ID(),
 		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", ID: demoServiceSubject.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoServiceSubject.ID()}
 	testMsg := "Test1"
 	testMsgSent := fmt.Sprintf("%s%s %s", prefix, testCmd, testMsg)
 	demoServiceSubject.AddMessage(testConversation, testSender, testMsgSent) // Message to repeat
@@ -83,7 +83,7 @@ func TestParseWithPrefix(t *testing.T) {
 		ServiceID:      demoServiceSubject.ID(),
 		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", ID: demoServiceSubject.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoServiceSubject.ID()}
 	testMsg := "Test1"
 	testMsgSent := fmt.Sprintf("%s%s %s", prefix, testCmd, testMsg)
 	demoServiceSubject.AddMessage(testConversation, testSender, testMsgSent) // Message to repeat
@@ -121,7 +121,7 @@ func TestParseWithoutSpace(t *testing.T) {
 		ServiceID:      demoServiceSubject.ID(),
 		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", ID: demoServiceSubject.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoServiceSubject.ID()}
 	testMsg := "Test1"
 
 	// There are no spaces, however it was neverspecified in testCmd.
@@ -164,7 +164,7 @@ func TestEmpty(t *testing.T) {
 		ServiceID:      demoServiceSubject.ID(),
 		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", ID: demoServiceSubject.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoServiceSubject.ID()}
 
 	// All should not return a thing.
 

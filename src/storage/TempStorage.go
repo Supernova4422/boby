@@ -10,7 +10,7 @@ const adminKey = "Admin"
 
 // TempStorage implements the Storage interface, but data is lost on destruction.
 type TempStorage struct {
-	UserValues  map[string]map[string]interface{}
+	UserValues  map[string]map[string]map[string]interface{}
 	GuildValues map[string]map[string]map[string]interface{}
 }
 
@@ -18,9 +18,9 @@ type TempStorage struct {
 // Returns an error if the key doesn't exist or can't be retrieved.
 func (t *TempStorage) GetGuildValue(guild service.Guild, key string) (val interface{}, err error) {
 	err = fmt.Errorf("No value for key %s", key)
-	if _, ok := t.GuildValues[guild.ServiceID]; ok == true {
-		if _, ok = t.GuildValues[guild.ServiceID][guild.GuildID]; ok {
-			val, ok = t.GuildValues[guild.ServiceID][guild.GuildID][key]
+	if serviceMap, ok := t.GuildValues[guild.ServiceID]; ok == true {
+		if guildMap, ok := serviceMap[guild.GuildID]; ok {
+			val, ok = guildMap[key]
 			if ok {
 				err = nil
 			}
@@ -48,11 +48,11 @@ func (t *TempStorage) SetGuildValue(guild service.Guild, key string, val interfa
 
 // GetUserValue retrieves the value for key, for a User.
 // Returns an error if the key doesn't exist or can't be retrieved.
-func (t *TempStorage) GetUserValue(serviceID string, user string, key string) (val interface{}, err error) {
+func (t *TempStorage) GetUserValue(user service.User, key string) (val interface{}, err error) {
 	err = fmt.Errorf("No value for key %s", key)
-	if _, ok := t.GuildValues[serviceID]; ok == true {
-		if _, ok = t.GuildValues[serviceID][user]; ok {
-			val, ok = t.GuildValues[serviceID][user][key]
+	if serviceMap, ok := t.UserValues[user.ServiceID]; ok {
+		if userMap, ok := serviceMap[user.Name]; ok {
+			val, ok = userMap[key]
 			if ok {
 				err = nil
 			}
@@ -62,20 +62,20 @@ func (t *TempStorage) GetUserValue(serviceID string, user string, key string) (v
 }
 
 // SetUserValue sets the value for key, for a Guild.
-func (t *TempStorage) SetUserValue(serviceID string, user string, key string, val interface{}) {
-	if _, ok := t.GuildValues[serviceID]; ok == false {
-		t.GuildValues = make(map[string]map[string]map[string]interface{})
+func (t *TempStorage) SetUserValue(user service.User, key string, val interface{}) {
+	if _, ok := t.UserValues[user.ServiceID]; ok == false {
+		t.UserValues = make(map[string]map[string]map[string]interface{})
 	}
 
-	if _, ok := t.GuildValues[serviceID][user]; ok == false {
-		t.GuildValues[serviceID] = make(map[string]map[string]interface{})
+	if _, ok := t.UserValues[user.ServiceID][user.Name]; ok == false {
+		t.UserValues[user.ServiceID] = make(map[string]map[string]interface{})
 	}
 
-	if _, ok := t.GuildValues[serviceID][user][key]; ok == false {
-		t.GuildValues[serviceID][user] = make(map[string]interface{})
+	if _, ok := t.UserValues[user.ServiceID][user.Name][key]; ok == false {
+		t.UserValues[user.ServiceID][user.Name] = make(map[string]interface{})
 	}
 
-	t.GuildValues[serviceID][user][key] = val
+	t.UserValues[user.ServiceID][user.Name][key] = val
 }
 
 // IsAdmin returns true if ID is an admin.

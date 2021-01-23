@@ -104,7 +104,7 @@ func TestRateLimitedCommand(t *testing.T) {
 		ServiceID:      "0",
 		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	testCmd := "repeat"
 
 	replyCommand := Command{
@@ -119,12 +119,13 @@ func TestRateLimitedCommand(t *testing.T) {
 		TimesPerInterval:   2,
 		SecondsPerInterval: 2,
 		Body:               limitMsg,
+		ID:                 "cmd",
 	}
 
 	tempStorage := storage.TempStorage{}
 	var _storage storage.Storage = &tempStorage
 
-	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand, "cmd")
+	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
 	replyMsg := "Hello"
 	msg := [][]string{{"", replyMsg}}
 
@@ -158,7 +159,7 @@ func TestRateLimitedCommandDisaster(t *testing.T) {
 		ServiceID:      "0",
 		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	testCmd := "repeat"
 
 	replyCommand := Command{
@@ -169,18 +170,19 @@ func TestRateLimitedCommandDisaster(t *testing.T) {
 	}
 
 	limitMsg := "You hit the limit"
+	rateLimitID := "cmd"
 	rateLimitConfig := RateLimitConfig{
 		TimesPerInterval:   2,
 		SecondsPerInterval: 2,
 		Body:               limitMsg,
+		ID:                 rateLimitID,
 	}
 
-	rateLimitID := "cmd"
 	tempStorage := storage.TempStorage{}
 	var _storage storage.Storage = &tempStorage
-	_storage.SetUserValue(testConversation.ServiceID, testSender.ID, rateLimitID, 0)
+	_storage.SetUserValue(testSender, rateLimitID, 0)
 
-	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand, rateLimitID)
+	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
 	replyMsg := "Hello"
 	msg := [][]string{{"", replyMsg}}
 

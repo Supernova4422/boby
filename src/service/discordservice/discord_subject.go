@@ -51,8 +51,8 @@ func (d *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.Messag
 	}
 
 	user := service.User{
-		Name: m.Author.ID,
-		ID:   d.ID(),
+		Name:      m.Author.ID,
+		ServiceID: d.ID(),
 	}
 
 	guild := service.Guild{

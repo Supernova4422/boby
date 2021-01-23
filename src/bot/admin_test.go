@@ -75,7 +75,7 @@ func TestIsAdmin(t *testing.T) {
 		ConversationID: "0",
 		Admin:          true,
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	bot.OnMessage(
 		testConversation,
 		testSender,
@@ -95,7 +95,7 @@ func TestSetAdmin(t *testing.T) {
 		ConversationID: "0",
 		Admin:          true,
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	bot.OnMessage(
 		testConversation,
 		testSender,
@@ -119,7 +119,7 @@ func TestDontSetAdmin(t *testing.T) {
 		ConversationID: "0",
 		Admin:          false, // Can't add admin if you're not an admin.
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	bot.OnMessage(
 		testConversation,
 		testSender,
@@ -144,7 +144,7 @@ func TestUnsetAdmin(t *testing.T) {
 		GuildID:        "0",
 		Admin:          true, // Can't add admin if you're not an admin.
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	bot.OnMessage(
 		testConversation,
 		testSender,
@@ -178,7 +178,7 @@ func TestDontUnsetAdmin(t *testing.T) {
 		ConversationID: "0",
 		Admin:          true, // Can't add admin if you're not an admin.
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	bot.OnMessage(
 		testConversation,
 		testSender,
@@ -212,7 +212,7 @@ func TestIsAdminCmd(t *testing.T) {
 		ConversationID: "0",
 		Admin:          true,
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	bot.OnMessage(
 		testConversation,
@@ -253,7 +253,7 @@ func TestImAdminCmd(t *testing.T) {
 		ConversationID: "0",
 		Admin:          true,
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	bot.OnMessage(
 		testConversation,
 		testSender,
@@ -284,7 +284,7 @@ func TestImAdminCmdAfterSet(t *testing.T) {
 		ConversationID: "0",
 		Admin:          false,
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	bot.OnMessage(
 		testConversation,

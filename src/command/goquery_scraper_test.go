@@ -58,7 +58,7 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
 		Trigger: "",
@@ -132,7 +132,7 @@ func TestGoQueryScraperWithReplacement(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
 		Trigger: "",
@@ -200,7 +200,7 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
 		Trigger: "",
@@ -257,7 +257,7 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
 		Trigger: "",
@@ -308,7 +308,7 @@ func TestGoQueryScraperNoCaptureMissingSub(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
 		Trigger: "",
@@ -359,7 +359,7 @@ func TestGoQueryScrapeEscapeUrl(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
 		Trigger: "",
@@ -410,7 +410,7 @@ func TestGoQueryScraperNoCapture(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
 		Trigger: "",
@@ -460,7 +460,7 @@ func TestLast(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
 		Trigger: "",
@@ -510,7 +510,7 @@ func TestHtml(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
 		Trigger: "",
@@ -560,7 +560,7 @@ func TestGoQueryScraperUnusedCapture(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
 		Trigger: "",
@@ -650,7 +650,7 @@ func TestGoqueryScraperNoSubstitutions(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
 		URL: "e-commerce/%s",
@@ -687,7 +687,7 @@ func TestEmptyPage(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
 		Capture: "(.*)", // This is a bad idea.
@@ -735,7 +735,7 @@ func TestInvalidReader(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
 		Capture: "(.*)", // This is a bad idea.

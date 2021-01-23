@@ -35,6 +35,9 @@ func (d *DiscordSender) SendMessage(destination service.Conversation, msg servic
 		Description: msg.Description,
 		Fields:      fields,
 	}
+	if msg.Footer != "" {
+		embed.Footer = &discordgo.MessageEmbedFooter{Text: msg.Footer}
+	}
 
 	d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
 }

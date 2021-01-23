@@ -50,7 +50,7 @@ func TestSetPrefix(t *testing.T) {
 		ConversationID: "0",
 		Admin:          true,
 	}
-	testSender := service.User{Name: "Test_User", ID: demoServiceSubject.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoServiceSubject.ID()}
 	testMsg := "Test1"
 
 	testMsgSent := fmt.Sprintf("%s%s %s", prefix0, testCmd, testMsg)
@@ -139,7 +139,7 @@ func TestIgnoreSetPrefix(t *testing.T) {
 		ConversationID: "0",
 		Admin:          true,
 	}
-	testSender := service.User{Name: "Test_User", ID: demoServiceSubject.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoServiceSubject.ID()}
 	testMsg := "Test1"
 
 	testMsgSent := fmt.Sprintf("%s%s %s", prefix0, testCmd, testMsg)

@@ -62,7 +62,7 @@ func TestOnMessage(t *testing.T) {
 		ServiceID:      demoSender.ID(),
 		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	testMsg := "Test1"
 	testCmd := "repeat"
 
@@ -100,7 +100,7 @@ func TestOnMessageRequireCommand(t *testing.T) {
 		ServiceID:      demoSender.ID(),
 		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	bot.OnMessage(testConversation, testSender, "Test1")
 	if demoSender.IsEmpty() == false {
 		t.Errorf("Nothing should have happened!")
@@ -128,7 +128,7 @@ func TestHelp(t *testing.T) {
 	}
 
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	prefix := "!"
 	bot.SetDefaultPrefix(prefix)
 
