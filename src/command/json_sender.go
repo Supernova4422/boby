@@ -27,6 +27,7 @@ type JSONGetterConfig struct {
 	Grouped     bool
 	Delay       int
 	Token       TokenMaker
+	RateLimit   RateLimitConfig
 }
 
 // A TokenMaker is useful for creating a token that may be part of an API request.
@@ -43,9 +44,8 @@ func (t TokenMaker) MakeToken(input string) (out string) {
 	if t.Type == "MD5" {
 		fullString := []byte(t.Prefix + input + t.Postfix)
 		return fmt.Sprintf("%x", md5.Sum(fullString))[:t.Size]
-	} else {
-		return ""
 	}
+	return ""
 }
 
 // A FieldCapture represents a template to be filled out by selectors.

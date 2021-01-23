@@ -13,7 +13,7 @@ func TestDemoService(t *testing.T) {
 		ServiceID:      demoService.ID(),
 		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", ID: demoService.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoService.ID()}
 	testMsg := "hello world"
 	o := observerDemo{}
 	demoService.Register(&o)

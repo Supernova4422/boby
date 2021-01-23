@@ -48,7 +48,7 @@ func TestScraperWithCapture(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	testCmd := "!scrape"
 
 	config := ScraperConfig{
@@ -94,7 +94,7 @@ func TestScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	testCmd := "!scrape"
 
 	config := ScraperConfig{
@@ -130,7 +130,7 @@ func TestScraperWithTitleCapture(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	testCmd := "!scrape"
 
 	config := ScraperConfig{
@@ -167,7 +167,7 @@ func TestScraperNoCapture(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	testCmd := "scrape"
 
 	config := ScraperConfig{
@@ -261,7 +261,7 @@ func TestScraperNoSubstitutions(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := ScraperConfig{
 		Trigger:      "!scrape",
@@ -295,7 +295,7 @@ func TestScraperNoMatches(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := ScraperConfig{
 		Trigger:      "scrape",
@@ -329,7 +329,7 @@ func TestBadURL(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := ScraperConfig{
 		Trigger:      "scrape",
@@ -363,7 +363,7 @@ func TestScraperInvalidReader(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := ScraperConfig{
 		Trigger:      "scrape",

@@ -51,7 +51,7 @@ func TestSimple(t *testing.T) {
 		ServiceID:      demoSender.ID(),
 		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := JSONGetterConfig{
 		Grouped: true,
@@ -102,7 +102,7 @@ func TestPair(t *testing.T) {
 		ServiceID:      demoSender.ID(),
 		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := JSONGetterConfig{
 		Grouped: true,
@@ -175,7 +175,7 @@ func TestEmptyMsg(t *testing.T) {
 		ServiceID:      demoSender.ID(),
 		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := JSONGetterConfig{
 		Title: FieldCapture{
@@ -226,7 +226,7 @@ func TestUngrouped(t *testing.T) {
 		ServiceID:      demoSender.ID(),
 		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := JSONGetterConfig{
 		Grouped: false,
@@ -286,7 +286,7 @@ func TestToken(t *testing.T) {
 		ServiceID:      demoSender.ID(),
 		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := JSONGetterConfig{
 		Grouped: false,
@@ -341,7 +341,7 @@ func TestSpacesInMessage(t *testing.T) {
 		ServiceID:      demoSender.ID(),
 		ConversationID: "0",
 	}
-	testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := JSONGetterConfig{
 		Grouped: false,

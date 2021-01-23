@@ -120,7 +120,7 @@ func TestConfig(t *testing.T) {
 					ConversationID: "0",
 				}
 
-				testSender := service.User{Name: "Test_User", ID: demoSender.ID()}
+				testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 				results := make([]service.Message, 0)
 				for _, input := range inputTest {
 					bot.OnMessage(testConversation, testSender, input.Input)

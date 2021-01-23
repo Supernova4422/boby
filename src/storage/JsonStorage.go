@@ -62,22 +62,42 @@ func (j *JSONStorage) SaveToFile() error {
 	return j.writer.Sync()
 }
 
-// GetValue retrieves the value for key, for a Guild.
+// GetGuildValue retrieves the value for key, for a Guild.
 // Returns an error if the key doesn't exist or can't be retrieved.
-func (j *JSONStorage) GetValue(guild service.Guild, key string) (string, error) {
-	return j.TempStorage.GetValue(guild, key)
-}
-
-// SetValue sets the value for key, for a Guild.
-func (j *JSONStorage) SetValue(guild service.Guild, key string, value string) {
+func (j *JSONStorage) GetGuildValue(guild service.Guild, key string) (interface{}, error) {
 	j.mutex.Lock()
 	defer j.mutex.Unlock()
-	j.TempStorage.SetValue(guild, key, value)
+	return j.TempStorage.GetGuildValue(guild, key)
+}
+
+// SetGuildValue sets the value for key, for a Guild.
+func (j *JSONStorage) SetGuildValue(guild service.Guild, key string, value interface{}) {
+	j.mutex.Lock()
+	defer j.mutex.Unlock()
+	j.TempStorage.SetGuildValue(guild, key, value)
+	j.SaveToFile()
+}
+
+// GetUserValue retrieves the value for key, for a Guild.
+// Returns an error if the key doesn't exist or can't be retrieved.
+func (j *JSONStorage) GetUserValue(user service.User, key string) (interface{}, error) {
+	j.mutex.Lock()
+	defer j.mutex.Unlock()
+	return j.TempStorage.GetUserValue(user, key)
+}
+
+// SetUserValue sets the value for key, for a Guild.
+func (j *JSONStorage) SetUserValue(user service.User, key string, val interface{}) {
+	j.mutex.Lock()
+	defer j.mutex.Unlock()
+	j.TempStorage.SetUserValue(user, key, val)
 	j.SaveToFile()
 }
 
 // IsAdmin returns true if userID has been set using SetAdmin.
 func (j *JSONStorage) IsAdmin(guild service.Guild, userID string) bool {
+	j.mutex.Lock()
+	defer j.mutex.Unlock()
 	return j.TempStorage.IsAdmin(guild, userID)
 }
 
