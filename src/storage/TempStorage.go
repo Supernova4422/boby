@@ -2,6 +2,7 @@ package storage
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
 )
@@ -12,11 +13,15 @@ const adminKey = "Admin"
 type TempStorage struct {
 	UserValues  map[string]map[string]map[string]interface{}
 	GuildValues map[string]map[string]map[string]interface{}
+	mutex       sync.Mutex
 }
 
 // GetGuildValue retrieves the value for key, for a Guild.
 // Returns an error if the key doesn't exist or can't be retrieved.
 func (t *TempStorage) GetGuildValue(guild service.Guild, key string) (val interface{}, err error) {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+
 	err = fmt.Errorf("No value for key %s", key)
 	if serviceMap, ok := t.GuildValues[guild.ServiceID]; ok == true {
 		if guildMap, ok := serviceMap[guild.GuildID]; ok {
@@ -31,6 +36,9 @@ func (t *TempStorage) GetGuildValue(guild service.Guild, key string) (val interf
 
 // SetGuildValue sets the value for key, for a Guild.
 func (t *TempStorage) SetGuildValue(guild service.Guild, key string, val interface{}) {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+
 	if t.GuildValues == nil {
 		t.GuildValues = make(map[string]map[string]map[string]interface{})
 	}
@@ -49,6 +57,9 @@ func (t *TempStorage) SetGuildValue(guild service.Guild, key string, val interfa
 // GetUserValue retrieves the value for key, for a User.
 // Returns an error if the key doesn't exist or can't be retrieved.
 func (t *TempStorage) GetUserValue(user service.User, key string) (val interface{}, err error) {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+
 	err = fmt.Errorf("No value for key %s", key)
 	if serviceMap, ok := t.UserValues[user.ServiceID]; ok {
 		if userMap, ok := serviceMap[user.Name]; ok {
@@ -63,6 +74,9 @@ func (t *TempStorage) GetUserValue(user service.User, key string) (val interface
 
 // SetUserValue sets the value for key, for a Guild.
 func (t *TempStorage) SetUserValue(user service.User, key string, val interface{}) {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+
 	if t.UserValues == nil {
 		t.UserValues = make(map[string]map[string]map[string]interface{})
 	}
