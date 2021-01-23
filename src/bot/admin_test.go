@@ -189,7 +189,7 @@ func TestDontUnsetAdmin(t *testing.T) {
 		ServiceID: testConversation.ServiceID,
 		GuildID:   testConversation.GuildID,
 	}
-	if tempStorage.IsAdmin(guild, testSender.Name) {
+	if tempStorage.IsAdmin(guild, testSender.Name) == false {
 		t.Fail()
 	}
 
@@ -200,7 +200,7 @@ func TestDontUnsetAdmin(t *testing.T) {
 		unsetAdmin+" "+testSender.Name,
 	)
 
-	if tempStorage.IsAdmin(guild, testSender.Name) {
+	if tempStorage.IsAdmin(guild, testSender.Name) == false {
 		t.Fail()
 	}
 }

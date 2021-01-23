@@ -52,11 +52,7 @@ func (b *Bot) GetPrefix(conversation service.Conversation) string {
 		return b.defaultPrefix
 	}
 
-	if prefixValue, ok := prefix.(string); ok {
-		return prefixValue
-	}
-
-	return b.defaultPrefix
+	return prefix.(string) // TODO: Put a check here.
 }
 
 // SetDefaultPrefix sets the bot's prefix when there is no existing one.
