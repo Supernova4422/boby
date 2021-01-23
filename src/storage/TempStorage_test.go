@@ -122,3 +122,35 @@ func TestSetAdminDifferentGuilds(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestUnsetAdminDisaster(t *testing.T) {
+	guild := service.Guild{ServiceID: "0", GuildID: "0"}
+	storage := TempStorage{}
+	storage.SetAdmin(guild, "Test")
+	storage.UnsetAdmin(guild, "Test")
+
+	storage.GuildValues[guild.ServiceID][guild.GuildID]["Admin"] = 0
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fail()
+		}
+	}()
+
+	storage.UnsetAdmin(guild, "Test")
+}
+
+func TestSetAdminDisaster(t *testing.T) {
+	guild := service.Guild{ServiceID: "0", GuildID: "0"}
+	storage := TempStorage{}
+	storage.SetAdmin(guild, "Test")
+	storage.UnsetAdmin(guild, "Test")
+
+	storage.GuildValues[guild.ServiceID][guild.GuildID]["Admin"] = 0
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fail()
+		}
+	}()
+
+	storage.SetAdmin(guild, "Test")
+}

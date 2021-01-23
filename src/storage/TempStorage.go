@@ -63,15 +63,15 @@ func (t *TempStorage) GetUserValue(user service.User, key string) (val interface
 
 // SetUserValue sets the value for key, for a Guild.
 func (t *TempStorage) SetUserValue(user service.User, key string, val interface{}) {
-	if _, ok := t.UserValues[user.ServiceID]; ok == false {
+	if t.UserValues == nil {
 		t.UserValues = make(map[string]map[string]map[string]interface{})
 	}
 
-	if _, ok := t.UserValues[user.ServiceID][user.Name]; ok == false {
+	if t.UserValues[user.ServiceID] == nil {
 		t.UserValues[user.ServiceID] = make(map[string]map[string]interface{})
 	}
 
-	if _, ok := t.UserValues[user.ServiceID][user.Name][key]; ok == false {
+	if t.UserValues[user.ServiceID][user.Name] == nil {
 		t.UserValues[user.ServiceID][user.Name] = make(map[string]interface{})
 	}
 

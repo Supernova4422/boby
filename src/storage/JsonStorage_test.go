@@ -66,7 +66,7 @@ func (TruncatableBufferErrorProne) Sync() (err error) {
 	return fmt.Errorf("Expecting an error")
 }
 
-func TestJSONSetGetValue(t *testing.T) {
+func TestJSONSetGetGuildValue(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
 	storage := JSONStorage{
@@ -106,7 +106,47 @@ func TestJSONSetGetValue(t *testing.T) {
 	}
 }
 
-func TestJSONGetValue(t *testing.T) {
+func TestJSONSetGetUserValue(t *testing.T) {
+	bytesOut := bytes.NewBuffer([]byte{})
+	writer := TruncatableBuffer{bytesOut}
+	storage := JSONStorage{
+		writer: writer,
+		mutex:  &sync.Mutex{},
+	}
+
+	user := service.User{ServiceID: "0", Name: "0"}
+	k0 := "k0"
+	v0 := "v0"
+	k1 := "k1"
+	v1 := "v1"
+	k2 := "k2"
+	v2 := "v2"
+
+	storage.SetUserValue(user, k0, v0)
+	storage.SetUserValue(user, k1, v1)
+	storage.SetUserValue(user, k2, v2)
+	storage, err := LoadFromBuffer(writer)
+	if err != nil {
+		t.Fail()
+	}
+
+	valueOut, err := storage.GetUserValue(user, k0)
+	if err != nil || valueOut != v0 {
+		t.Fail()
+	}
+
+	valueOut, err = storage.GetUserValue(user, k1)
+	if err != nil || valueOut != v1 {
+		t.Fail()
+	}
+
+	valueOut, err = storage.GetUserValue(user, k2)
+	if err != nil || valueOut != v2 {
+		t.Fail()
+	}
+}
+
+func TestJSONGetUserValue(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
 	storage := JSONStorage{

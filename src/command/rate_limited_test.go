@@ -197,5 +197,59 @@ func TestRateLimitedCommandDisaster(t *testing.T) {
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+}
 
+func TestRateLimitedCommandWithJsonStorage(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+	// Message to repeat.
+	testConversation := service.Conversation{
+		ServiceID:      "0",
+		ConversationID: "0",
+	}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+	testCmd := "repeat"
+
+	replyCommand := Command{
+		Trigger: testCmd,
+		Pattern: regexp.MustCompile("(.*)"),
+		Exec:    Repeater,
+		Help:    "Help",
+	}
+
+	limitMsg := "You hit the limit"
+	rateLimitConfig := RateLimitConfig{
+		TimesPerInterval:   2,
+		SecondsPerInterval: 2,
+		Body:               limitMsg,
+		ID:                 "cmd",
+	}
+
+	tempStorage := storage.TempStorage{}
+	var _storage storage.Storage = &tempStorage
+
+	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
+	replyMsg := "Hello"
+	msg := [][]string{{"", replyMsg}}
+
+	rateLimitedCommand.Exec(
+		testConversation, testSender,
+		msg, &_storage, demoSender.SendMessage,
+	)
+
+	resultMessage, _ := demoSender.PopMessage()
+	if resultMessage.Description != replyMsg {
+		t.Fail()
+	}
+
+	for i := 0; i < 20; i++ {
+		rateLimitedCommand.Exec(
+			testConversation, testSender,
+			msg, &_storage, demoSender.SendMessage,
+		)
+	}
+
+	resultMessage, _ = demoSender.PopMessage()
+	if resultMessage.Description == limitMsg {
+		t.Fail()
+	}
 }

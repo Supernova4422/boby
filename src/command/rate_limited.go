@@ -69,17 +69,10 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 			switch val.(type) {
 			case []int64:
 				history, ok = val.([]int64)
-			case []float64:
-				for _, number := range val.([]float64) {
-					history = append(history, int64(number))
-				}
-				ok = true
 			case []interface{}:
 				ok = true
 				for _, number := range val.([]interface{}) {
 					switch number.(type) {
-					case int64:
-						history = append(history, number.(int64))
 					case float64:
 						history = append(history, int64(number.(float64)))
 					default:
