@@ -147,11 +147,15 @@ func TestHelp(t *testing.T) {
 	bot.OnMessage(testConversation, testSender, prefix+bot.HelpTrigger())
 	msg, _ := demoSender.PopMessage()
 
-	if strings.Contains(msg.Description, expectedTrigger) == false {
-		t.Errorf("The help message should include the trigger")
+	fail := true
+	for _, field := range msg.Fields {
+		if strings.Contains(field.Field, expectedTrigger) {
+			fail = false
+			break
+		}
+	}
+	if fail {
+		t.Fail()
 	}
 
-	if strings.Contains(msg.Description, helpMsg) == false {
-		t.Errorf("The help message should include the trigger")
-	}
 }
