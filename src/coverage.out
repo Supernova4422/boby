@@ -129,8 +129,6 @@ github.com/BKrajancic/boby/m/v2/src/command/scraper.go:114.31,116.9 1 1
 github.com/BKrajancic/boby/m/v2/src/command/scraper.go:128.10,130.5 1 1
 github.com/BKrajancic/boby/m/v2/src/command/scraper.go:131.9,133.4 1 1
 github.com/BKrajancic/boby/m/v2/src/command/scraper.go:134.8,139.3 1 1
-github.com/BKrajancic/boby/m/v2/src/command/set_prefix.go:12.156,13.18 1 1
-github.com/BKrajancic/boby/m/v2/src/command/set_prefix.go:13.18,25.3 3 1
 github.com/BKrajancic/boby/m/v2/src/command/unsetAdmin.go:9.157,10.18 1 1
 github.com/BKrajancic/boby/m/v2/src/command/unsetAdmin.go:10.18,18.3 3 1
 github.com/BKrajancic/boby/m/v2/src/command/rate_limited.go:22.71,24.2 1 1
@@ -166,12 +164,10 @@ github.com/BKrajancic/boby/m/v2/src/command/rate_limited.go:101.10,103.5 1 0
 github.com/BKrajancic/boby/m/v2/src/command/rate_limited.go:113.9,116.4 2 1
 github.com/BKrajancic/boby/m/v2/src/command/setAdmin.go:9.155,10.18 1 1
 github.com/BKrajancic/boby/m/v2/src/command/setAdmin.go:10.18,18.3 3 1
+github.com/BKrajancic/boby/m/v2/src/command/set_prefix.go:12.156,13.18 1 1
+github.com/BKrajancic/boby/m/v2/src/command/set_prefix.go:13.18,25.3 3 1
 github.com/BKrajancic/boby/m/v2/src/routine/heartbeat.go:11.143,12.29 1 1
 github.com/BKrajancic/boby/m/v2/src/routine/heartbeat.go:12.29,14.3 1 1
-github.com/BKrajancic/boby/m/v2/src/service/demoservice/demo_sender.go:20.93,25.2 4 1
-github.com/BKrajancic/boby/m/v2/src/service/demoservice/demo_sender.go:28.37,32.2 3 1
-github.com/BKrajancic/boby/m/v2/src/service/demoservice/demo_sender.go:35.96,43.2 7 1
-github.com/BKrajancic/boby/m/v2/src/service/demoservice/demo_sender.go:46.34,48.2 1 1
 github.com/BKrajancic/boby/m/v2/src/service/demoservice/demo_service.go:17.59,19.2 1 1
 github.com/BKrajancic/boby/m/v2/src/service/demoservice/demo_service.go:22.35,24.2 1 1
 github.com/BKrajancic/boby/m/v2/src/service/demoservice/demo_service.go:27.104,31.2 3 1
@@ -179,6 +175,10 @@ github.com/BKrajancic/boby/m/v2/src/service/demoservice/demo_service.go:34.29,35
 github.com/BKrajancic/boby/m/v2/src/service/demoservice/demo_service.go:43.2,45.35 3 1
 github.com/BKrajancic/boby/m/v2/src/service/demoservice/demo_service.go:35.39,39.39 4 1
 github.com/BKrajancic/boby/m/v2/src/service/demoservice/demo_service.go:39.39,41.4 1 1
+github.com/BKrajancic/boby/m/v2/src/service/demoservice/demo_sender.go:20.93,25.2 4 1
+github.com/BKrajancic/boby/m/v2/src/service/demoservice/demo_sender.go:28.37,32.2 3 1
+github.com/BKrajancic/boby/m/v2/src/service/demoservice/demo_sender.go:35.96,43.2 7 1
+github.com/BKrajancic/boby/m/v2/src/service/demoservice/demo_sender.go:46.34,48.2 1 1
 github.com/BKrajancic/boby/m/v2/src/storage/JsonStorage.go:31.63,35.16 3 1
 github.com/BKrajancic/boby/m/v2/src/storage/JsonStorage.go:39.2,40.20 2 1
 github.com/BKrajancic/boby/m/v2/src/storage/JsonStorage.go:35.16,37.3 1 1
