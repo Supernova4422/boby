@@ -71,16 +71,20 @@ func (b *Bot) HelpTrigger() string {
 func (b *Bot) OnMessage(conversation service.Conversation, sender service.User, msg string) {
 	prefix := b.GetPrefix(conversation)
 	if msg == prefix+b.HelpTrigger() {
-		helpMsg := "Commands: \n"
+		fields := make([]service.MessageField, 0)
 		for i, command := range b.commands {
-			helpMsg += fmt.Sprintf("%s. %s%s %s\n", strconv.Itoa(i+1), prefix, command.Trigger, command.Help)
+			fields = append(fields, service.MessageField{
+				Field: fmt.Sprintf("%s. %s%s", strconv.Itoa(i+1), prefix, command.Trigger),
+				Value: command.Help,
+			})
 		}
 		b.RouteByID(
 			conversation,
 			service.Message{
-				Title:       "Help",
-				Description: helpMsg,
-				URL:         "https://github.com/BKrajancic/boby",
+				Title:  "Help",
+				Fields: fields,
+				URL:    "https://github.com/BKrajancic/boby",
+				Footer: "Contribute to this project at: https://github.com/BKrajancic/boby",
 			})
 	} else {
 		for _, command := range b.commands {
