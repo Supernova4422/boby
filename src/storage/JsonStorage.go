@@ -29,7 +29,11 @@ type JSONStorage struct {
 
 // LoadFromBuffer will load a JSON from a filepath.
 func LoadFromBuffer(t TruncatableWriter) (JSONStorage, error) {
-	config := JSONStorage{writer: t, mutex: &sync.Mutex{}}
+	config := JSONStorage{
+		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+		writer:      t,
+		mutex:       &sync.Mutex{},
+	}
 
 	bytes, err := ioutil.ReadAll(t)
 	if err != nil {

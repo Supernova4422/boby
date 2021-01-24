@@ -70,8 +70,9 @@ func TestJSONSetGetGuildValue(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
 	storage := JSONStorage{
-		writer: writer,
-		mutex:  &sync.Mutex{},
+		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+		writer:      writer,
+		mutex:       &sync.Mutex{},
 	}
 
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
@@ -110,8 +111,9 @@ func TestJSONSetGetUserValue(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
 	storage := JSONStorage{
-		writer: writer,
-		mutex:  &sync.Mutex{},
+		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+		writer:      writer,
+		mutex:       &sync.Mutex{},
 	}
 
 	user := service.User{ServiceID: "0", Name: "0"}
@@ -150,8 +152,9 @@ func TestJSONGetUserValue(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
 	storage := JSONStorage{
-		writer: writer,
-		mutex:  &sync.Mutex{},
+		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+		writer:      writer,
+		mutex:       &sync.Mutex{},
 	}
 
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
@@ -166,8 +169,9 @@ func TestJSONGetValueMissingButHasService(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
 	storage := JSONStorage{
-		writer: writer,
-		mutex:  &sync.Mutex{},
+		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+		writer:      writer,
+		mutex:       &sync.Mutex{},
 	}
 
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
@@ -185,8 +189,9 @@ func TestJSONGetValueDifferentGuilds(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
 	storage := JSONStorage{
-		writer: writer,
-		mutex:  &sync.Mutex{},
+		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+		writer:      writer,
+		mutex:       &sync.Mutex{},
 	}
 
 	serviceID := "0"
@@ -206,8 +211,9 @@ func TestJSONSetAdmin(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
 	storage := JSONStorage{
-		writer: writer,
-		mutex:  &sync.Mutex{},
+		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+		writer:      writer,
+		mutex:       &sync.Mutex{},
 	}
 
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
@@ -222,8 +228,9 @@ func TestJSONUnsetAdmin(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
 	storage := JSONStorage{
-		writer: writer,
-		mutex:  &sync.Mutex{},
+		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+		writer:      writer,
+		mutex:       &sync.Mutex{},
 	}
 
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
@@ -243,8 +250,9 @@ func TestJSONUnsetAdminWhenMultipleAdmins(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
 	storage := JSONStorage{
-		writer: writer,
-		mutex:  &sync.Mutex{},
+		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+		writer:      writer,
+		mutex:       &sync.Mutex{},
 	}
 
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
@@ -270,8 +278,9 @@ func TestJSONSetAdminDifferentGuilds(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
 	storage := JSONStorage{
-		writer: writer,
-		mutex:  &sync.Mutex{},
+		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+		writer:      writer,
+		mutex:       &sync.Mutex{},
 	}
 
 	serviceID := "0"
@@ -304,8 +313,9 @@ func TestBadLoad(t *testing.T) {
 
 func TestBadSave(t *testing.T) {
 	storage := JSONStorage{
-		writer: TruncatableBufferErrorProne{},
-		mutex:  &sync.Mutex{},
+		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+		writer:      TruncatableBufferErrorProne{},
+		mutex:       &sync.Mutex{},
 	}
 
 	if storage.SaveToFile() == nil {
@@ -338,8 +348,9 @@ func (TruncatableBufferErrorOnWrite) Sync() (err error) {
 
 func TestBadWrite(t *testing.T) {
 	storage := JSONStorage{
-		writer: TruncatableBufferErrorOnWrite{},
-		mutex:  &sync.Mutex{},
+		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+		writer:      TruncatableBufferErrorOnWrite{},
+		mutex:       &sync.Mutex{},
 	}
 
 	if storage.SaveToFile() == nil {
@@ -372,8 +383,9 @@ func (TruncatableBufferErrorOnSeek) Sync() (err error) {
 
 func TestBadSeek(t *testing.T) {
 	storage := JSONStorage{
-		writer: TruncatableBufferErrorOnSeek{},
-		mutex:  &sync.Mutex{},
+		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+		writer:      TruncatableBufferErrorOnSeek{},
+		mutex:       &sync.Mutex{},
 	}
 
 	if storage.SaveToFile() == nil {
