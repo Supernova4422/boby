@@ -1,9 +1,9 @@
 package storage
 
 import (
-	"encoding/json"
+	"bytes"
+	"encoding/gob"
 	"io"
-	"io/ioutil"
 	"sync"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
@@ -20,46 +20,50 @@ type TruncatableWriter interface {
 	Sync() (err error)
 }
 
-// JSONStorage is an implementation of Storage that uses json and files for data storage.
-type JSONStorage struct {
+// GobStorage is an implementation of Storage that uses Gob and files for data storage.
+type GobStorage struct {
 	TempStorage TempStorage
 	writer      TruncatableWriter
 	mutex       *sync.Mutex // Lock when calling any public function.
 }
 
-// LoadFromBuffer will load a JSON from a filepath.
-func LoadFromBuffer(t TruncatableWriter) (JSONStorage, error) {
-	config := JSONStorage{
-		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
-		writer:      t,
-		mutex:       &sync.Mutex{},
-	}
-
-	bytes, err := ioutil.ReadAll(t)
-	if err != nil {
+// LoadFromBuffer will load a Gob from a filepath.
+func LoadFromBuffer(t TruncatableWriter) (config GobStorage, err error) {
+	enc := gob.NewDecoder(t)
+	if err := enc.Decode(&config); err != nil {
 		return config, err
 	}
 
-	err = json.Unmarshal(bytes, &config)
-	return config, err
+	config.mutex = &sync.Mutex{}
+	config.writer = t
+
+	config.TempStorage.mutex = &sync.Mutex{}
+	return config, nil
 }
 
-// SaveToFile saves JSONStorage's state to a file, which can be reloaded later using LoadFromFile.
-func (j *JSONStorage) SaveToFile() error {
-	bytes, _ := json.Marshal(j) // Unlikely to be an error, ignore return value to make test coverage 100%.
+// SetWriter sets the writer of a gobstorage to t.
+func (g *GobStorage) SetWriter(t TruncatableWriter) {
+	g.writer = t
+}
 
-	err := j.writer.Truncate(0)
-	if err != nil {
+// SaveToFile saves GobStorage's state to a file, which can be reloaded later using LoadFromFile.
+func (j *GobStorage) SaveToFile() error {
+	var buffer bytes.Buffer
+	enc := gob.NewEncoder(&buffer)
+
+	if err := enc.Encode(j); err != nil {
 		return err
 	}
 
-	_, err = j.writer.Seek(0, io.SeekStart)
-	if err != nil {
+	if err := j.writer.Truncate(0); err != nil {
 		return err
 	}
 
-	_, err = j.writer.Write(bytes)
-	if err != nil {
+	if _, err := j.writer.Seek(0, io.SeekStart); err != nil {
+		return err
+	}
+
+	if _, err := j.writer.Write(buffer.Bytes()); err != nil {
 		return err
 	}
 
@@ -68,14 +72,14 @@ func (j *JSONStorage) SaveToFile() error {
 
 // GetGuildValue retrieves the value for key, for a Guild.
 // Returns an error if the key doesn't exist or can't be retrieved.
-func (j *JSONStorage) GetGuildValue(guild service.Guild, key string) (interface{}, error) {
+func (j *GobStorage) GetGuildValue(guild service.Guild, key string) (interface{}, error) {
 	j.mutex.Lock()
 	defer j.mutex.Unlock()
 	return j.TempStorage.GetGuildValue(guild, key)
 }
 
 // SetGuildValue sets the value for key, for a Guild.
-func (j *JSONStorage) SetGuildValue(guild service.Guild, key string, value interface{}) {
+func (j *GobStorage) SetGuildValue(guild service.Guild, key string, value interface{}) {
 	j.mutex.Lock()
 	defer j.mutex.Unlock()
 	j.TempStorage.SetGuildValue(guild, key, value)
@@ -84,14 +88,14 @@ func (j *JSONStorage) SetGuildValue(guild service.Guild, key string, value inter
 
 // GetUserValue retrieves the value for key, for a Guild.
 // Returns an error if the key doesn't exist or can't be retrieved.
-func (j *JSONStorage) GetUserValue(user service.User, key string) (interface{}, error) {
+func (j *GobStorage) GetUserValue(user service.User, key string) (interface{}, error) {
 	j.mutex.Lock()
 	defer j.mutex.Unlock()
 	return j.TempStorage.GetUserValue(user, key)
 }
 
 // SetUserValue sets the value for key, for a Guild.
-func (j *JSONStorage) SetUserValue(user service.User, key string, val interface{}) {
+func (j *GobStorage) SetUserValue(user service.User, key string, val interface{}) {
 	j.mutex.Lock()
 	defer j.mutex.Unlock()
 	j.TempStorage.SetUserValue(user, key, val)
@@ -99,14 +103,14 @@ func (j *JSONStorage) SetUserValue(user service.User, key string, val interface{
 }
 
 // IsAdmin returns true if userID has been set using SetAdmin.
-func (j *JSONStorage) IsAdmin(guild service.Guild, userID string) bool {
+func (j *GobStorage) IsAdmin(guild service.Guild, userID string) bool {
 	j.mutex.Lock()
 	defer j.mutex.Unlock()
 	return j.TempStorage.IsAdmin(guild, userID)
 }
 
 // SetAdmin sets a userID as an admin for a guild.
-func (j *JSONStorage) SetAdmin(guild service.Guild, userID string) {
+func (j *GobStorage) SetAdmin(guild service.Guild, userID string) {
 	j.mutex.Lock()
 	defer j.mutex.Unlock()
 	j.TempStorage.SetAdmin(guild, userID)
@@ -114,7 +118,7 @@ func (j *JSONStorage) SetAdmin(guild service.Guild, userID string) {
 }
 
 // UnsetAdmin removes userID as an admin for a guild.
-func (j *JSONStorage) UnsetAdmin(guild service.Guild, userID string) {
+func (j *GobStorage) UnsetAdmin(guild service.Guild, userID string) {
 	j.mutex.Lock()
 	defer j.mutex.Unlock()
 	j.TempStorage.UnsetAdmin(guild, userID)

@@ -63,7 +63,7 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 		if err == nil {
 			var ok bool = false
 
-			// (HACK) JSONStorage has a nasty side effect that large numbers get
+			// (HACK) GobStorage has a nasty side effect that large numbers get
 			// unmarshalled as float64. In the future, this should be received
 			// from storage as int64.
 			switch val.(type) {

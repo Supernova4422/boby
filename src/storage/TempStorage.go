@@ -13,14 +13,19 @@ const adminKey = "Admin"
 type TempStorage struct {
 	UserValues  map[string]map[string]map[string]interface{}
 	GuildValues map[string]map[string]map[string]interface{}
-	Mutex       *sync.Mutex
+	mutex       *sync.Mutex
+}
+
+// GetTempStorage returns a TempStorage.
+func GetTempStorage() TempStorage {
+	return TempStorage{mutex: &sync.Mutex{}}
 }
 
 // GetGuildValue retrieves the value for key, for a Guild.
 // Returns an error if the key doesn't exist or can't be retrieved.
 func (t *TempStorage) GetGuildValue(guild service.Guild, key string) (val interface{}, err error) {
-	t.Mutex.Lock()
-	defer t.Mutex.Unlock()
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
 
 	err = fmt.Errorf("no value for key %s", key)
 	if serviceMap, ok := t.GuildValues[guild.ServiceID]; ok == true {
@@ -36,8 +41,8 @@ func (t *TempStorage) GetGuildValue(guild service.Guild, key string) (val interf
 
 // SetGuildValue sets the value for key, for a Guild.
 func (t *TempStorage) SetGuildValue(guild service.Guild, key string, val interface{}) {
-	t.Mutex.Lock()
-	defer t.Mutex.Unlock()
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
 
 	if t.GuildValues == nil {
 		t.GuildValues = make(map[string]map[string]map[string]interface{})
@@ -57,8 +62,8 @@ func (t *TempStorage) SetGuildValue(guild service.Guild, key string, val interfa
 // GetUserValue retrieves the value for key, for a User.
 // Returns an error if the key doesn't exist or can't be retrieved.
 func (t *TempStorage) GetUserValue(user service.User, key string) (val interface{}, err error) {
-	t.Mutex.Lock()
-	defer t.Mutex.Unlock()
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
 
 	err = fmt.Errorf("no value for key %s", key)
 	if serviceMap, ok := t.UserValues[user.ServiceID]; ok {
@@ -74,8 +79,8 @@ func (t *TempStorage) GetUserValue(user service.User, key string) (val interface
 
 // SetUserValue sets the value for key, for a Guild.
 func (t *TempStorage) SetUserValue(user service.User, key string, val interface{}) {
-	t.Mutex.Lock()
-	defer t.Mutex.Unlock()
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
 
 	if t.UserValues == nil {
 		t.UserValues = make(map[string]map[string]map[string]interface{})

@@ -33,7 +33,7 @@ func (t TruncatableBuffer) Sync() error {
 
 // Seek is supposed to set the offset for following read/write, but here it does nothing.
 //
-// In JsonStorage's usage, we expect that only seek(0, 0) is ever used, this is how
+// In GobStorage's usage, we expect that only seek(0, 0) is ever used, this is how
 // a byte buffer typically works, so we just do nothing.
 func (t TruncatableBuffer) Seek(offset int64, whence int) (n int64, err error) {
 	if offset != 0 || whence != 0 {
@@ -66,11 +66,11 @@ func (TruncatableBufferErrorProne) Sync() (err error) {
 	return fmt.Errorf("expecting an error")
 }
 
-func TestJSONSetGetGuildValue(t *testing.T) {
+func TestGobSetGetGuildValue(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
-	storage := JSONStorage{
-		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
 		writer:      writer,
 		mutex:       &sync.Mutex{},
 	}
@@ -107,11 +107,11 @@ func TestJSONSetGetGuildValue(t *testing.T) {
 	}
 }
 
-func TestJSONSetGetUserValue(t *testing.T) {
+func TestGobSetGetUserValue(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
-	storage := JSONStorage{
-		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
 		writer:      writer,
 		mutex:       &sync.Mutex{},
 	}
@@ -148,11 +148,11 @@ func TestJSONSetGetUserValue(t *testing.T) {
 	}
 }
 
-func TestJSONGetUserValue(t *testing.T) {
+func TestGobGetUserValue(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
-	storage := JSONStorage{
-		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
 		writer:      writer,
 		mutex:       &sync.Mutex{},
 	}
@@ -165,11 +165,11 @@ func TestJSONGetUserValue(t *testing.T) {
 	}
 }
 
-func TestJSONGetValueMissingButHasService(t *testing.T) {
+func TestGobGetValueMissingButHasService(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
-	storage := JSONStorage{
-		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
 		writer:      writer,
 		mutex:       &sync.Mutex{},
 	}
@@ -185,11 +185,11 @@ func TestJSONGetValueMissingButHasService(t *testing.T) {
 	}
 }
 
-func TestJSONGetValueDifferentGuilds(t *testing.T) {
+func TestGobGetValueDifferentGuilds(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
-	storage := JSONStorage{
-		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
 		writer:      writer,
 		mutex:       &sync.Mutex{},
 	}
@@ -207,11 +207,11 @@ func TestJSONGetValueDifferentGuilds(t *testing.T) {
 	}
 }
 
-func TestJSONSetAdmin(t *testing.T) {
+func TestGobSetAdmin(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
-	storage := JSONStorage{
-		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
 		writer:      writer,
 		mutex:       &sync.Mutex{},
 	}
@@ -224,11 +224,11 @@ func TestJSONSetAdmin(t *testing.T) {
 	}
 }
 
-func TestJSONUnsetAdmin(t *testing.T) {
+func TestGobUnsetAdmin(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
-	storage := JSONStorage{
-		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
 		writer:      writer,
 		mutex:       &sync.Mutex{},
 	}
@@ -246,11 +246,11 @@ func TestJSONUnsetAdmin(t *testing.T) {
 	}
 }
 
-func TestJSONUnsetAdminWhenMultipleAdmins(t *testing.T) {
+func TestGobUnsetAdminWhenMultipleAdmins(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
-	storage := JSONStorage{
-		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
 		writer:      writer,
 		mutex:       &sync.Mutex{},
 	}
@@ -274,11 +274,11 @@ func TestJSONUnsetAdminWhenMultipleAdmins(t *testing.T) {
 	}
 }
 
-func TestJSONSetAdminDifferentGuilds(t *testing.T) {
+func TestGobSetAdminDifferentGuilds(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
-	storage := JSONStorage{
-		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
 		writer:      writer,
 		mutex:       &sync.Mutex{},
 	}
@@ -312,8 +312,8 @@ func TestBadLoad(t *testing.T) {
 }
 
 func TestBadSave(t *testing.T) {
-	storage := JSONStorage{
-		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
 		writer:      TruncatableBufferErrorProne{},
 		mutex:       &sync.Mutex{},
 	}
@@ -347,8 +347,8 @@ func (TruncatableBufferErrorOnWrite) Sync() (err error) {
 }
 
 func TestBadWrite(t *testing.T) {
-	storage := JSONStorage{
-		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
 		writer:      TruncatableBufferErrorOnWrite{},
 		mutex:       &sync.Mutex{},
 	}
@@ -382,13 +382,42 @@ func (TruncatableBufferErrorOnSeek) Sync() (err error) {
 }
 
 func TestBadSeek(t *testing.T) {
-	storage := JSONStorage{
-		TempStorage: TempStorage{Mutex: &sync.Mutex{}},
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
 		writer:      TruncatableBufferErrorOnSeek{},
 		mutex:       &sync.Mutex{},
 	}
 
 	if storage.SaveToFile() == nil {
+		t.Fail()
+	}
+}
+
+func TestGobTypeChange(t *testing.T) {
+	bytesOut := bytes.NewBuffer([]byte{})
+	writer := TruncatableBuffer{bytesOut}
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
+		writer:      writer,
+		mutex:       &sync.Mutex{},
+	}
+
+	user := service.User{ServiceID: "0", Name: "0"}
+	k0 := "k0"
+	var v0 int64 = 1000000000000000000
+	storage.SetUserValue(user, k0, v0)
+	storage, err := LoadFromBuffer(writer)
+	if err != nil {
+		t.Fail()
+	}
+
+	valueOut, err := storage.GetUserValue(user, k0)
+	switch valueOut.(type) {
+	case int64:
+		break
+	case float64:
+		t.Fail() // Usually happens.
+	default:
 		t.Fail()
 	}
 }

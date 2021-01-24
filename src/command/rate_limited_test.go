@@ -2,7 +2,6 @@ package command
 
 import (
 	"regexp"
-	"sync"
 	"testing"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
@@ -123,7 +122,7 @@ func TestRateLimitedCommand(t *testing.T) {
 		ID:                 "cmd",
 	}
 
-	tempStorage := storage.TempStorage{Mutex: &sync.Mutex{}}
+	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
@@ -179,7 +178,7 @@ func TestRateLimitedCommandDisaster(t *testing.T) {
 		ID:                 rateLimitID,
 	}
 
-	tempStorage := storage.TempStorage{Mutex: &sync.Mutex{}}
+	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
 	_storage.SetUserValue(testSender, rateLimitID, 0)
 
@@ -200,7 +199,7 @@ func TestRateLimitedCommandDisaster(t *testing.T) {
 	)
 }
 
-func TestRateLimitedCommandWithJsonStorage(t *testing.T) {
+func TestRateLimitedCommandWithGobStorage(t *testing.T) {
 	demoSender := demoservice.DemoSender{}
 	// Message to repeat.
 	testConversation := service.Conversation{
@@ -225,7 +224,7 @@ func TestRateLimitedCommandWithJsonStorage(t *testing.T) {
 		ID:                 "cmd",
 	}
 
-	tempStorage := storage.TempStorage{Mutex: &sync.Mutex{}}
+	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)

@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"sync"
 	"testing"
 
 	"github.com/BKrajancic/boby/m/v2/src/bot"
@@ -106,7 +105,7 @@ func TestConfig(t *testing.T) {
 			bot, err := config.ConfiguredBot(configDir)
 			bot.SetDefaultPrefix("!")
 
-			tempStorage := storage.TempStorage{Mutex: &sync.Mutex{}}
+			tempStorage := storage.GetTempStorage()
 			var _storage storage.Storage = &tempStorage
 			bot.SetStorage(&_storage)
 

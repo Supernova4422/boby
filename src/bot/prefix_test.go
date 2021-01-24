@@ -3,7 +3,6 @@ package bot
 import (
 	"fmt"
 	"regexp"
-	"sync"
 	"testing"
 
 	"github.com/BKrajancic/boby/m/v2/src/command"
@@ -15,7 +14,7 @@ import (
 func TestSetPrefix(t *testing.T) {
 	// Prepare context.
 	bot := Bot{}
-	tempStorage := storage.TempStorage{Mutex: &sync.Mutex{}}
+	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
 	bot.SetStorage(&_storage)
 	prefix0 := "!"
@@ -104,7 +103,7 @@ func TestSetPrefix(t *testing.T) {
 func TestIgnoreSetPrefix(t *testing.T) {
 	// Prepare context.
 	bot := Bot{}
-	tempStorage := storage.TempStorage{Mutex: &sync.Mutex{}}
+	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
 	bot.SetStorage(&_storage)
 	prefix0 := "!"

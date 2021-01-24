@@ -3,7 +3,6 @@ package bot
 import (
 	"fmt"
 	"regexp"
-	"sync"
 	"testing"
 
 	"github.com/BKrajancic/boby/m/v2/src/command"
@@ -61,7 +60,7 @@ func getBot() (*Bot, *demoservice.DemoSender, *storage.TempStorage) {
 
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
 	bot.AddSender(&demoSender)
-	tempStorage := storage.TempStorage{Mutex: &sync.Mutex{}}
+	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
 	bot.SetStorage(&_storage)
 	bot.SetDefaultPrefix(prefix)

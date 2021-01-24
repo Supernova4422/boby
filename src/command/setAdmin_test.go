@@ -1,7 +1,6 @@
 package command
 
 import (
-	"sync"
 	"testing"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
@@ -11,7 +10,7 @@ import (
 
 func TestSetAdmin(t *testing.T) {
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
-	tempStorage := storage.TempStorage{Mutex: &sync.Mutex{}}
+	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
 
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
@@ -33,7 +32,7 @@ func TestSetAdmin(t *testing.T) {
 
 func TestDontSetAdmin(t *testing.T) {
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
-	tempStorage := storage.TempStorage{Mutex: &sync.Mutex{}}
+	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
 
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}

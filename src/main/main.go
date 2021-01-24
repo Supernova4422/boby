@@ -3,7 +3,8 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"os"
 	"os/signal"
@@ -44,7 +45,7 @@ func main() {
 	help := bot.HelpTrigger()
 	discord.UpdateStatus(0, prefix+help)
 
-	storage, err := loadJSONStorage(path.Join(folder, "storage.json"))
+	storage, err := loadGobStorage(path.Join(folder, "storage.gob"))
 	if err != nil {
 		panic(err)
 	}
@@ -63,22 +64,30 @@ func main() {
 	<-sc
 }
 
-// loadJSONStorage loads a file used for a storage.
+// loadGobStorage loads a file used for a storage.
 // If the file doesn't exist, a file is created and used.
-func loadJSONStorage(filepath string) (storage.Storage, error) {
+func loadGobStorage(filepath string) (storage.Storage, error) {
 	_, err := os.Stat(filepath)
 	if os.IsNotExist(err) {
-		example := storage.JSONStorage{}
-		str, err := json.Marshal(example)
-		if err != nil {
+		example := storage.GobStorage{
+			TempStorage: storage.GetTempStorage(),
+		}
+		var buffer bytes.Buffer
+		enc := gob.NewEncoder(&buffer)
+
+		if err := enc.Encode(example); err != nil {
 			return nil, err
 		}
+
 		file, err := os.Create(filepath)
 		if err != nil {
 			return nil, err
 		}
+
+		example.SetWriter(file)
 		writer := bufio.NewWriter(file)
-		writer.WriteString(string(str))
+		example.SaveToFile()
+		writer.WriteString(buffer.String())
 		if writer.Flush() != nil {
 			return nil, err
 		}
@@ -89,11 +98,11 @@ func loadJSONStorage(filepath string) (storage.Storage, error) {
 		return nil, err
 	}
 
-	_jsonStorage, err := storage.LoadFromBuffer(fileBuffer)
+	_GobStorage, err := storage.LoadFromBuffer(fileBuffer)
 	if err != nil {
 		return nil, err
 	}
 
-	var jsonStorage storage.Storage = &_jsonStorage
-	return jsonStorage, nil
+	var GobStorage storage.Storage = &_GobStorage
+	return GobStorage, nil
 }
