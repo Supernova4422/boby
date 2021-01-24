@@ -62,26 +62,7 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 		val, err := (*storage).GetUserValue(user, r.ID)
 		if err == nil {
 			var ok bool = false
-
-			// (HACK) GobStorage has a nasty side effect that large numbers get
-			// unmarshalled as float64. In the future, this should be received
-			// from storage as int64.
-			switch val.(type) {
-			case []int64:
-				history, ok = val.([]int64)
-			case []interface{}:
-				ok = true
-				for _, number := range val.([]interface{}) {
-					switch number.(type) {
-					case float64:
-						history = append(history, int64(number.(float64)))
-					default:
-						ok = false
-						break
-					}
-				}
-			}
-
+			history, ok = val.([]int64)
 			if ok == false {
 				panic(fmt.Errorf("interface type wasn't usable"))
 			}
