@@ -1,6 +1,7 @@
 package command
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
@@ -9,7 +10,7 @@ import (
 )
 
 func TestSetPrefix(t *testing.T) {
-	tempStorage := storage.TempStorage{}
+	tempStorage := storage.TempStorage{Mutex: &sync.Mutex{}}
 	var _storage storage.Storage = &tempStorage
 	newPrefix := "#"
 
@@ -32,7 +33,7 @@ func TestSetPrefix(t *testing.T) {
 }
 
 func TestDontSetPrefix(t *testing.T) {
-	tempStorage := storage.TempStorage{}
+	tempStorage := storage.TempStorage{Mutex: &sync.Mutex{}}
 	var _storage storage.Storage = &tempStorage
 	newPrefix := "#"
 

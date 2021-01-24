@@ -36,7 +36,7 @@ func jsonExamples(name string) (io.ReadCloser, error) {
 	if name == "example2" {
 		return ioutil.NopCloser(strings.NewReader(example2)), nil
 	}
-	return nil, fmt.Errorf("Error")
+	return nil, fmt.Errorf("error")
 }
 
 // Just returns the URL.

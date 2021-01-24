@@ -2,6 +2,7 @@ package command
 
 import (
 	"regexp"
+	"sync"
 	"testing"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
@@ -122,7 +123,7 @@ func TestRateLimitedCommand(t *testing.T) {
 		ID:                 "cmd",
 	}
 
-	tempStorage := storage.TempStorage{}
+	tempStorage := storage.TempStorage{Mutex: &sync.Mutex{}}
 	var _storage storage.Storage = &tempStorage
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
@@ -178,7 +179,7 @@ func TestRateLimitedCommandDisaster(t *testing.T) {
 		ID:                 rateLimitID,
 	}
 
-	tempStorage := storage.TempStorage{}
+	tempStorage := storage.TempStorage{Mutex: &sync.Mutex{}}
 	var _storage storage.Storage = &tempStorage
 	_storage.SetUserValue(testSender, rateLimitID, 0)
 
@@ -224,7 +225,7 @@ func TestRateLimitedCommandWithJsonStorage(t *testing.T) {
 		ID:                 "cmd",
 	}
 
-	tempStorage := storage.TempStorage{}
+	tempStorage := storage.TempStorage{Mutex: &sync.Mutex{}}
 	var _storage storage.Storage = &tempStorage
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)

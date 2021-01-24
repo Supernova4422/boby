@@ -1,13 +1,14 @@
 package storage
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
 )
 
 func TestSetGetValue(t *testing.T) {
-	storage := TempStorage{}
+	storage := TempStorage{Mutex: &sync.Mutex{}}
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
 	key := "key"
 	value := "value"
@@ -19,7 +20,7 @@ func TestSetGetValue(t *testing.T) {
 }
 
 func TestGetValue(t *testing.T) {
-	storage := TempStorage{}
+	storage := TempStorage{Mutex: &sync.Mutex{}}
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
 	key := "key"
 	_, err := storage.GetGuildValue(guild, key)
@@ -29,7 +30,7 @@ func TestGetValue(t *testing.T) {
 }
 
 func TestGetValueMissingButHasService(t *testing.T) {
-	storage := TempStorage{}
+	storage := TempStorage{Mutex: &sync.Mutex{}}
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
 	key1 := "key1"
 	key2 := "key2"
@@ -42,7 +43,7 @@ func TestGetValueMissingButHasService(t *testing.T) {
 }
 
 func TestGetValueDifferentGuilds(t *testing.T) {
-	storage := TempStorage{}
+	storage := TempStorage{Mutex: &sync.Mutex{}}
 	serviceID := "0"
 	guild1 := service.Guild{ServiceID: serviceID, GuildID: "0"}
 	key1 := "key1"
@@ -57,7 +58,7 @@ func TestGetValueDifferentGuilds(t *testing.T) {
 }
 
 func TestSetAdmin(t *testing.T) {
-	storage := TempStorage{}
+	storage := TempStorage{Mutex: &sync.Mutex{}}
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
 	user := "20"
 	storage.SetAdmin(guild, user)
@@ -67,7 +68,7 @@ func TestSetAdmin(t *testing.T) {
 }
 
 func TestUnsetAdmin(t *testing.T) {
-	storage := TempStorage{}
+	storage := TempStorage{Mutex: &sync.Mutex{}}
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
 	user := "20"
 	storage.SetAdmin(guild, user)
@@ -82,7 +83,7 @@ func TestUnsetAdmin(t *testing.T) {
 }
 
 func TestUnsetAdminWhenMultipleAdmins(t *testing.T) {
-	storage := TempStorage{}
+	storage := TempStorage{Mutex: &sync.Mutex{}}
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
 	user1 := "20"
 	user2 := "21"
@@ -103,7 +104,7 @@ func TestUnsetAdminWhenMultipleAdmins(t *testing.T) {
 }
 
 func TestSetAdminDifferentGuilds(t *testing.T) {
-	storage := TempStorage{}
+	storage := TempStorage{Mutex: &sync.Mutex{}}
 	serviceID := "0"
 	guild1 := service.Guild{ServiceID: serviceID, GuildID: "0"}
 	guild2 := service.Guild{ServiceID: serviceID, GuildID: "1"}
@@ -125,7 +126,7 @@ func TestSetAdminDifferentGuilds(t *testing.T) {
 
 func TestUnsetAdminDisaster(t *testing.T) {
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
-	storage := TempStorage{}
+	storage := TempStorage{Mutex: &sync.Mutex{}}
 	storage.SetAdmin(guild, "Test")
 	storage.UnsetAdmin(guild, "Test")
 
@@ -141,7 +142,7 @@ func TestUnsetAdminDisaster(t *testing.T) {
 
 func TestSetAdminDisaster(t *testing.T) {
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
-	storage := TempStorage{}
+	storage := TempStorage{Mutex: &sync.Mutex{}}
 	storage.SetAdmin(guild, "Test")
 	storage.UnsetAdmin(guild, "Test")
 

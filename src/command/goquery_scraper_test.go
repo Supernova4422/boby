@@ -47,7 +47,7 @@ func htmlTestPage(name string) (string, io.ReadCloser, error) {
 	if name == "tables" {
 		return name, ioutil.NopCloser(strings.NewReader(demoWebpageTable)), nil
 	}
-	return "", nil, fmt.Errorf("Error")
+	return "", nil, fmt.Errorf("error")
 }
 
 func TestGoQueryScraperWithCapture(t *testing.T) {
@@ -635,7 +635,7 @@ func TestGetGoqueryScraperConfigs(t *testing.T) {
 type readerCrashes struct{}
 
 func (r readerCrashes) Read(p []byte) (int, error) {
-	return 0, fmt.Errorf("As expected")
+	return 0, fmt.Errorf("as expected")
 }
 
 func (r readerCrashes) Close() (err error) {

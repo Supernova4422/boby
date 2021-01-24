@@ -83,7 +83,7 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 			}
 
 			if ok == false {
-				panic(fmt.Errorf("Interface type wasn't usable"))
+				panic(fmt.Errorf("interface type wasn't usable"))
 			}
 		}
 

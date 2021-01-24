@@ -244,7 +244,7 @@ func TestInvalidRegexp(t *testing.T) {
 type ReaderErrorProne struct{}
 
 func (r ReaderErrorProne) Read(p []byte) (int, error) {
-	return 0, fmt.Errorf("Expecting an error")
+	return 0, fmt.Errorf("expecting an error")
 }
 
 func TestScraperBadReader(t *testing.T) {

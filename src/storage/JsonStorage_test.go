@@ -37,7 +37,7 @@ func (t TruncatableBuffer) Sync() error {
 // a byte buffer typically works, so we just do nothing.
 func (t TruncatableBuffer) Seek(offset int64, whence int) (n int64, err error) {
 	if offset != 0 || whence != 0 {
-		return 0, fmt.Errorf("Byte buffers have no use for a seek method")
+		return 0, fmt.Errorf("byte buffers have no use for a seek method")
 	}
 
 	return 0, nil
@@ -47,23 +47,23 @@ func (t TruncatableBuffer) Seek(offset int64, whence int) (n int64, err error) {
 type TruncatableBufferErrorProne struct{}
 
 func (t TruncatableBufferErrorProne) Truncate(n int64) error {
-	return fmt.Errorf("Expecting an error")
+	return fmt.Errorf("expecting an error")
 }
 
 func (t TruncatableBufferErrorProne) Read(p []byte) (int, error) {
-	return 0, fmt.Errorf("Expecting an error")
+	return 0, fmt.Errorf("expecting an error")
 }
 
 func (t TruncatableBufferErrorProne) Write(b []byte) (n int, err error) {
-	return 0, fmt.Errorf("Expecting an error")
+	return 0, fmt.Errorf("expecting an error")
 }
 
 func (TruncatableBufferErrorProne) Seek(offset int64, whence int) (n int64, err error) {
-	return 0, fmt.Errorf("Expecting an error")
+	return 0, fmt.Errorf("expecting an error")
 }
 
 func (TruncatableBufferErrorProne) Sync() (err error) {
-	return fmt.Errorf("Expecting an error")
+	return fmt.Errorf("expecting an error")
 }
 
 func TestJSONSetGetGuildValue(t *testing.T) {
@@ -325,7 +325,7 @@ func (t TruncatableBufferErrorOnWrite) Read(p []byte) (int, error) {
 }
 
 func (t TruncatableBufferErrorOnWrite) Write(b []byte) (n int, err error) {
-	return 0, fmt.Errorf("Expecting an error")
+	return 0, fmt.Errorf("expecting an error")
 }
 
 func (TruncatableBufferErrorOnWrite) Seek(offset int64, whence int) (n int64, err error) {
@@ -363,7 +363,7 @@ func (t TruncatableBufferErrorOnSeek) Write(b []byte) (n int, err error) {
 }
 
 func (TruncatableBufferErrorOnSeek) Seek(offset int64, whence int) (n int64, err error) {
-	return 0, fmt.Errorf("Expecting an error")
+	return 0, fmt.Errorf("expecting an error")
 }
 
 func (TruncatableBufferErrorOnSeek) Sync() (err error) {

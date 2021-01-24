@@ -1,3 +1,4 @@
+// Package command includes actions that users can trigger by prefixing a message with a string.
 package command
 
 import (

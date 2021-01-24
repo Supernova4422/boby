@@ -1,3 +1,4 @@
+// package main runs a bot.
 package main
 
 import (
@@ -16,7 +17,7 @@ import (
 
 func main() {
 	if len(os.Args) == 1 {
-		panic(fmt.Errorf("The path to a folder must be passed as an argument when running this program"))
+		panic(fmt.Errorf("the path to a folder must be passed as an argument when running this program"))
 	}
 
 	folder := os.Args[1]
