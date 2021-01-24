@@ -10,7 +10,7 @@
 A configurable and flexible bot that can be used to make a unique bot with! What seperates two bots using this project is nothing more than some configuration files. 
 
 # Servers this bot is used in
-The primary implementation of this bot is known as FLD-bot, which has been added to the following discord channels: 
+The primary implementation of this bot is known as FLD-Bot, which has been added to the following discord channels: 
 1. Filipino learning and discussion
 2. Tagalog.com
 
