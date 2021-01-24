@@ -8,9 +8,9 @@ import (
 	"path"
 	"regexp"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/utils"
+	"github.com/BKrajancic/boby/m/v2/src/bot"
+	"github.com/BKrajancic/boby/m/v2/src/command"
+	"github.com/BKrajancic/boby/m/v2/src/utils"
 )
 
 // ConfiguredBot uses files in configDir to return a bot ready for usage.

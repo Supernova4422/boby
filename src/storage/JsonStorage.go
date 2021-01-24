@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"sync"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
+	"github.com/BKrajancic/boby/m/v2/src/service"
 )
 
 // A TruncatableWriter is a buffer that supports flexible operations.

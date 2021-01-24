@@ -3,7 +3,7 @@ package storage
 import (
 	"testing"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
+	"github.com/BKrajancic/boby/m/v2/src/service"
 )
 
 func TestSetGetValue(t *testing.T) {

@@ -9,9 +9,9 @@ import (
 
 	"regexp"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/utils"
+	"github.com/BKrajancic/boby/m/v2/src/service"
+	"github.com/BKrajancic/boby/m/v2/src/storage"
+	"github.com/BKrajancic/boby/m/v2/src/utils"
 )
 
 // ScraperConfig is a struct that can be turned into a usable scraper.

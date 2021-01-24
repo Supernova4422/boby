@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export tag=latest
-export name=fld-bot-lint
+export name=boby-lint
 docker build --force-rm -t ${name}:${tag} -f dockerfile.lint .
 docker run --rm ${name}:${tag}
 result=$?

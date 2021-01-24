@@ -3,8 +3,8 @@ package command
 import (
 	"fmt"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
+	"github.com/BKrajancic/boby/m/v2/src/service"
+	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
 // SetPrefix will set the prefix all messages are to be preceded by, for a guild.

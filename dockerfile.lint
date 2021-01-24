@@ -1,6 +1,6 @@
 FROM golang:1.15
 
-ARG project_path=/go/src/github.com/BKrajancic/FLD-Bot
+ARG project_path=/go/src/github.com/BKrajancic/boby
 
 COPY . ${project_path}
 WORKDIR ${project_path}

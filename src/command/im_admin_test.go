@@ -3,8 +3,8 @@ package command
 import (
 	"testing"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
+	"github.com/BKrajancic/boby/m/v2/src/service"
+	"github.com/BKrajancic/boby/m/v2/src/service/demoservice"
 )
 
 func TestIsAdmin(t *testing.T) {

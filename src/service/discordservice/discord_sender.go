@@ -3,7 +3,7 @@ package discordservice
 import (
 	"fmt"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
+	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/bwmarrin/discordgo"
 )
 

@@ -1,6 +1,6 @@
 package demoservice
 
-import "github.com/BKrajancic/FLD-Bot/m/v2/src/service"
+import "github.com/BKrajancic/boby/m/v2/src/service"
 
 // DemoService implements the service interface, and is useful for testing purposes.
 type DemoService struct {

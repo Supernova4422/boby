@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
+	"github.com/BKrajancic/boby/m/v2/src/command"
+	"github.com/BKrajancic/boby/m/v2/src/service"
+	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
 // Bot immediately routes all messages from a service.
@@ -80,7 +80,7 @@ func (b *Bot) OnMessage(conversation service.Conversation, sender service.User, 
 			service.Message{
 				Title:       "Help",
 				Description: helpMsg,
-				URL:         "https://github.com/BKrajancic/FLD-Bot",
+				URL:         "https://github.com/BKrajancic/boby",
 			})
 	} else {
 		for _, command := range b.commands {

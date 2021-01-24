@@ -3,7 +3,7 @@ package demoservice
 import (
 	"sync"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
+	"github.com/BKrajancic/boby/m/v2/src/service"
 )
 
 // DemoSender implements the Sender interface, and is useful for testing.

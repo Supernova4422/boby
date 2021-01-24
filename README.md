@@ -1,16 +1,16 @@
-![Build](https://github.com/BKrajancic/FLD-Bot/workflows/Build/badge.svg)
-![Test](https://github.com/BKrajancic/FLD-Bot/workflows/Test/badge.svg)
-![Lint](https://github.com/BKrajancic/FLD-Bot/workflows/Lint/badge.svg)
-![Vet](https://github.com/BKrajancic/FLD-Bot/workflows/Vet/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/BKrajancic/FLD-Bot/internal)](https://goreportcard.com/report/github.com/BKrajancic/FLD-Bot/internal)
+![Build](https://github.com/BKrajancic/boby/workflows/Build/badge.svg)
+![Test](https://github.com/BKrajancic/boby/workflows/Test/badge.svg)
+![Lint](https://github.com/BKrajancic/boby/workflows/Lint/badge.svg)
+![Vet](https://github.com/BKrajancic/boby/workflows/Vet/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/BKrajancic/boby/internal)](https://goreportcard.com/report/github.com/BKrajancic/boby/internal)
 
 <a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-96%25-brightgreen.svg?longCache=true&style=flat)</a>
 
-# FLD-Bot
+# boby
 A configurable and flexible bot that can be used to make a unique bot with! What seperates two bots using this project is nothing more than some configuration files. 
 
 # Servers this bot is used in
-The primary implementation of this bot is known as FLD-Bot, which has been added to the following discord channels: 
+The primary implementation of this bot is known as boby, which has been added to the following discord channels: 
 1. Filipino learning and discussion
 2. Tagalog.com
 

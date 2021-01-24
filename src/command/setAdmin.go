@@ -1,8 +1,8 @@
 package command
 
 import (
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
+	"github.com/BKrajancic/boby/m/v2/src/service"
+	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
 // SetAdmin will set the value to be an admin. This is AS-IS, it is up to a service to handle it.

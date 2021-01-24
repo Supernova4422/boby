@@ -3,7 +3,7 @@ package routine
 import (
 	"time"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
+	"github.com/BKrajancic/boby/m/v2/src/service"
 )
 
 // Heartbeat sends a message every now and again using parameter route.

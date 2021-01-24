@@ -1,6 +1,6 @@
 package storage
 
-import "github.com/BKrajancic/FLD-Bot/m/v2/src/service"
+import "github.com/BKrajancic/boby/m/v2/src/service"
 
 // A Storage implementation can be used to store and load data.
 // Each implementation must be thread safe, that is multiple threads can call multiple

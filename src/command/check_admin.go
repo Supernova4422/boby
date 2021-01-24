@@ -1,8 +1,8 @@
 package command
 
 import (
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
+	"github.com/BKrajancic/boby/m/v2/src/service"
+	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
 // CheckAdmin will let you know if you're an admin.

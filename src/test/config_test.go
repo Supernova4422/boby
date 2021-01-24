@@ -11,12 +11,12 @@ import (
 	"path"
 	"testing"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/bot"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/command"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/config"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
+	"github.com/BKrajancic/boby/m/v2/src/bot"
+	"github.com/BKrajancic/boby/m/v2/src/command"
+	"github.com/BKrajancic/boby/m/v2/src/config"
+	"github.com/BKrajancic/boby/m/v2/src/service"
+	"github.com/BKrajancic/boby/m/v2/src/service/demoservice"
+	"github.com/BKrajancic/boby/m/v2/src/storage"
 	"github.com/google/go-cmp/cmp"
 )
 

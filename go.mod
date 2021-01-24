@@ -1,4 +1,4 @@
-module github.com/BKrajancic/FLD-Bot/m/v2
+module github.com/BKrajancic/boby/m/v2
 
 go 1.15
 

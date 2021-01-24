@@ -5,8 +5,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
+	"github.com/BKrajancic/boby/m/v2/src/service"
+	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
 // RateLimitConfig can be used to ensure a command is not used excessively.

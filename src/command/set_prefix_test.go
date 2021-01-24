@@ -3,9 +3,9 @@ package command
 import (
 	"testing"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/demoservice"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
+	"github.com/BKrajancic/boby/m/v2/src/service"
+	"github.com/BKrajancic/boby/m/v2/src/service/demoservice"
+	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
 func TestSetPrefix(t *testing.T) {

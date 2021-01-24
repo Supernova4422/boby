@@ -9,9 +9,9 @@ import (
 	"path"
 	"syscall"
 
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/config"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/service/discordservice"
-	"github.com/BKrajancic/FLD-Bot/m/v2/src/storage"
+	"github.com/BKrajancic/boby/m/v2/src/config"
+	"github.com/BKrajancic/boby/m/v2/src/service/discordservice"
+	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
 func main() {
