@@ -11,7 +11,7 @@ import (
 )
 
 func Repeater(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
-	sink(sender, service.Message{Description: msg[0][1]})
+	sink(sender, service.Message{Description: msg[0][0]})
 }
 
 func TestCleanHistory(t *testing.T) {
@@ -127,7 +127,7 @@ func TestRateLimitedCommand(t *testing.T) {
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
 	replyMsg := "Hello"
-	msg := [][]string{{"", replyMsg}}
+	msg := [][]string{{replyMsg}}
 
 	rateLimitedCommand.Exec(
 		testConversation, testSender,
@@ -184,7 +184,7 @@ func TestRateLimitedCommandDisaster(t *testing.T) {
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
 	replyMsg := "Hello"
-	msg := [][]string{{"", replyMsg}}
+	msg := [][]string{{replyMsg}}
 
 	defer func() {
 		if r := recover(); r == nil {
@@ -229,7 +229,7 @@ func TestRateLimitedCommandWithGobStorage(t *testing.T) {
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
 	replyMsg := "Hello"
-	msg := [][]string{{"", replyMsg}}
+	msg := [][]string{{replyMsg}}
 
 	rateLimitedCommand.Exec(
 		testConversation, testSender,
@@ -284,7 +284,7 @@ func TestRateLimitedCommandMinute(t *testing.T) {
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
 	replyMsg := "Hello"
-	msg := [][]string{{"", replyMsg}}
+	msg := [][]string{{replyMsg}}
 
 	rateLimitedCommand.Exec(
 		testConversation, testSender,
@@ -339,7 +339,7 @@ func TestRateLimitedCommandHour(t *testing.T) {
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
 	replyMsg := "Hello"
-	msg := [][]string{{"", replyMsg}}
+	msg := [][]string{{replyMsg}}
 
 	rateLimitedCommand.Exec(
 		testConversation, testSender,

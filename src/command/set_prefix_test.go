@@ -24,7 +24,7 @@ func TestSetPrefix(t *testing.T) {
 	}
 
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
-	SetPrefix(testConversation, testSender, [][]string{{"", newPrefix}}, &_storage, demoSender.SendMessage)
+	SetPrefix(testConversation, testSender, [][]string{{newPrefix}}, &_storage, demoSender.SendMessage)
 	prefixResult, err := _storage.GetGuildValue(guild, "prefix")
 	if err != nil || prefixResult != newPrefix {
 		t.Fail()
@@ -47,7 +47,7 @@ func TestDontSetPrefix(t *testing.T) {
 	}
 
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
-	SetPrefix(testConversation, testSender, [][]string{{"", newPrefix}}, &_storage, demoSender.SendMessage)
+	SetPrefix(testConversation, testSender, [][]string{{newPrefix}}, &_storage, demoSender.SendMessage)
 	prefixResult, err := _storage.GetGuildValue(guild, "prefix")
 	if err == nil && prefixResult == newPrefix {
 		t.Fail()

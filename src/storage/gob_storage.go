@@ -9,25 +9,14 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/service"
 )
 
-// A TruncatableWriter is a buffer that supports flexible operations.
-//
-// The behaviour of all functions is that of os.File (os.file fulfills this interface)
-type TruncatableWriter interface {
-	Truncate(n int64) error
-	Write(b []byte) (n int, err error)
-	Read(p []byte) (n int, err error)
-	Seek(offset int64, whence int) (ret int64, err error)
-	Sync() (err error)
-}
-
-// GobStorage is an implementation of Storage that uses Gob and files for data storage.
+// GobStorage is an implementation of Storage, saveing to a file using the Gob format.
 type GobStorage struct {
 	TempStorage TempStorage
 	writer      TruncatableWriter
 	mutex       *sync.Mutex // Lock when calling any public function.
 }
 
-// LoadFromBuffer will load a Gob from a filepath.
+// LoadFromBuffer will load a Gob from a buffer.
 func LoadFromBuffer(t TruncatableWriter) (config GobStorage, err error) {
 	enc := gob.NewDecoder(t)
 	if err := enc.Decode(&config); err != nil {
@@ -47,27 +36,27 @@ func (g *GobStorage) SetWriter(t TruncatableWriter) {
 }
 
 // SaveToFile saves GobStorage's state to a file, which can be reloaded later using LoadFromFile.
-func (j *GobStorage) SaveToFile() error {
+func (g *GobStorage) SaveToFile() error {
 	var buffer bytes.Buffer
 	enc := gob.NewEncoder(&buffer)
 
-	if err := enc.Encode(j); err != nil {
+	if err := enc.Encode(g); err != nil {
 		return err
 	}
 
-	if err := j.writer.Truncate(0); err != nil {
+	if err := g.writer.Truncate(0); err != nil {
 		return err
 	}
 
-	if _, err := j.writer.Seek(0, io.SeekStart); err != nil {
+	if _, err := g.writer.Seek(0, io.SeekStart); err != nil {
 		return err
 	}
 
-	if _, err := j.writer.Write(buffer.Bytes()); err != nil {
+	if _, err := g.writer.Write(buffer.Bytes()); err != nil {
 		return err
 	}
 
-	return j.writer.Sync()
+	return g.writer.Sync()
 }
 
 // GetGuildValue retrieves the value for key, for a Guild.

@@ -9,7 +9,7 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
-// RateLimitConfig can be used to ensure a command is not used excessively.
+// RateLimitConfig is a wrapper around a Command, that ensures a command is not used excessively.
 type RateLimitConfig struct {
 	TimesPerInterval   int    // How many times can it be used per interval?
 	SecondsPerInterval int64  // How long is an interval, in seconds.
@@ -18,7 +18,7 @@ type RateLimitConfig struct {
 }
 
 // rateLimited returns true if a message should be rate limited.
-// now and History are expected to be in unix time.
+// now and history are expected to be in unix time.
 func (r RateLimitConfig) rateLimited(now int64, history []int64) bool {
 	return r.timeRemaining(now, r.cleanHistory(now, history)) > 0
 }
@@ -32,7 +32,6 @@ func (r RateLimitConfig) cleanHistory(now int64, history []int64) []int64 {
 			newHistory = append(newHistory, timestamp)
 		}
 	}
-
 	return newHistory
 }
 
@@ -43,7 +42,6 @@ func (r RateLimitConfig) timeRemaining(now int64, history []int64) int64 {
 	if historyLen < r.TimesPerInterval {
 		return 0
 	}
-
 	sort.Slice(history, func(i, j int) bool { return history[i] < history[j] })
 	return (history[historyLen-r.TimesPerInterval] + r.SecondsPerInterval) - now
 }

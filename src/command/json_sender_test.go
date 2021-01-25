@@ -72,7 +72,7 @@ func TestSimple(t *testing.T) {
 		Description: "Footer",
 	}
 
-	getter, err := config.GetWebScraper(jsonExamples)
+	getter, err := config.Command(jsonExamples)
 
 	if err != nil {
 		t.Fail()
@@ -81,7 +81,7 @@ func TestSimple(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{"", "example1"}},
+		[][]string{{"example1"}},
 		nil,
 		demoSender.SendMessage,
 	)
@@ -128,7 +128,7 @@ func TestPair(t *testing.T) {
 		URL: "%s",
 	}
 
-	getter, err := config.GetWebScraper(jsonExamples)
+	getter, err := config.Command(jsonExamples)
 
 	if err != nil {
 		t.Fail()
@@ -138,7 +138,7 @@ func TestPair(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{"", url}},
+		[][]string{{url}},
 		nil,
 		demoSender.SendMessage,
 	)
@@ -163,7 +163,7 @@ func TestPair(t *testing.T) {
 
 func TestBadRegex(t *testing.T) {
 	config := JSONGetterConfig{Capture: "("}
-	_, err := config.GetWebScraper(jsonExamples)
+	_, err := config.Command(jsonExamples)
 	if err == nil {
 		t.Fail()
 	}
@@ -200,7 +200,7 @@ func TestEmptyMsg(t *testing.T) {
 		URL: "%s",
 	}
 
-	getter, err := config.GetWebScraper(jsonExamples)
+	getter, err := config.Command(jsonExamples)
 
 	if err != nil {
 		t.Fail()
@@ -254,7 +254,7 @@ func TestUngrouped(t *testing.T) {
 		URL: "%s",
 	}
 
-	getter, err := config.GetWebScraper(jsonExamples)
+	getter, err := config.Command(jsonExamples)
 
 	if err != nil {
 		t.Fail()
@@ -264,7 +264,7 @@ func TestUngrouped(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{"", url}},
+		[][]string{{url}},
 		nil,
 		demoSender.SendMessage,
 	)
@@ -315,7 +315,7 @@ func TestToken(t *testing.T) {
 		URL: "",
 	}
 
-	getter, err := config.GetWebScraper(jsonURLReturn)
+	getter, err := config.Command(jsonURLReturn)
 
 	if err != nil {
 		t.Fail()
@@ -324,7 +324,7 @@ func TestToken(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{"", "Hello World"}},
+		[][]string{{"Hello World"}},
 		nil,
 		demoSender.SendMessage,
 	)
@@ -364,7 +364,7 @@ func TestSpacesInMessage(t *testing.T) {
 		URL: "%s",
 	}
 
-	getter, err := config.GetWebScraper(jsonURLReturn)
+	getter, err := config.Command(jsonURLReturn)
 
 	if err != nil {
 		t.Fail()
@@ -373,7 +373,7 @@ func TestSpacesInMessage(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{"", "Hello World Here"}},
+		[][]string{{"Hello World Here"}},
 		nil,
 		demoSender.SendMessage,
 	)

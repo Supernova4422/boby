@@ -14,13 +14,13 @@ import (
 )
 
 func TestMakeScraper(t *testing.T) {
-	config := ScraperConfig{
+	config := RegexpScraperConfig{
 		Trigger:      "!",
 		Capture:      "(.*)",
 		URL:          "%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
-	_, err := config.GetScraper()
+	_, err := config.Command()
 	if err != nil {
 		t.Fail()
 	}
@@ -51,19 +51,19 @@ func TestScraperWithCapture(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	testCmd := "!scrape"
 
-	config := ScraperConfig{
+	config := RegexpScraperConfig{
 		Trigger:      testCmd,
 		Capture:      "(.*)",
 		URL:          "%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
 
-	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Heading One") {
@@ -74,7 +74,7 @@ func TestScraperWithCapture(t *testing.T) {
 		t.Errorf("Sender was different!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "tables"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"tables"}}, nil, demoSender.SendMessage)
 	resultMessage, resultConversation = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Tables") {
 		t.Errorf("Message was different!")
@@ -97,7 +97,7 @@ func TestScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	testCmd := "!scrape"
 
-	config := ScraperConfig{
+	config := RegexpScraperConfig{
 		Trigger:       testCmd,
 		Capture:       "(.*)",
 		URL:           "%s",
@@ -105,12 +105,12 @@ func TestScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 		TitleTemplate: "Title",
 	}
 
-	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Title != config.TitleTemplate {
@@ -133,7 +133,7 @@ func TestScraperWithTitleCapture(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	testCmd := "!scrape"
 
-	config := ScraperConfig{
+	config := RegexpScraperConfig{
 		Trigger:       testCmd,
 		Capture:       "(.*)",
 		URL:           "%s",
@@ -142,12 +142,12 @@ func TestScraperWithTitleCapture(t *testing.T) {
 		TitleCapture:  "<h2>([^<]*)</h2>",
 	}
 
-	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Title != "Heading Two 2nd Heading Two" {
@@ -170,14 +170,14 @@ func TestScraperNoCapture(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	testCmd := "scrape"
 
-	config := ScraperConfig{
+	config := RegexpScraperConfig{
 		Trigger:      testCmd,
 		Capture:      "(.*)",
 		URL:          "usual",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
 
-	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
@@ -194,8 +194,8 @@ func TestScraperNoCapture(t *testing.T) {
 	}
 }
 
-func TestGetScraperConfigs(t *testing.T) {
-	configIn := []ScraperConfig{{
+func TestGetRegexScraperConfigs(t *testing.T) {
+	configIn := []RegexpScraperConfig{{
 		Trigger:      "test",
 		Capture:      "(.*)",
 		URL:          "%s",
@@ -207,7 +207,7 @@ func TestGetScraperConfigs(t *testing.T) {
 		t.Fail()
 	}
 
-	configOut, err := GetScraperConfigs(bufio.NewReader(bytes.NewBuffer(marshal)))
+	configOut, err := GetRegexpScraperConfigs(bufio.NewReader(bytes.NewBuffer(marshal)))
 	if err != nil {
 		t.Fail()
 	}
@@ -228,13 +228,13 @@ func TestGetScraperConfigs(t *testing.T) {
 }
 
 func TestInvalidRegexp(t *testing.T) {
-	config := ScraperConfig{
+	config := RegexpScraperConfig{
 		Trigger:      "test",
 		Capture:      "(",
 		URL:          "%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
-	_, err := config.GetScraperWithHTMLGetter(htmlGetRemembered(""))
+	_, err := config.CommandWithHTMLGetter(htmlGetRemembered(""))
 
 	if err == nil {
 		t.Fail()
@@ -248,7 +248,7 @@ func (r ReaderErrorProne) Read(p []byte) (int, error) {
 }
 
 func TestScraperBadReader(t *testing.T) {
-	if _, err := GetScraperConfigs(ReaderErrorProne{}); err == nil {
+	if _, err := GetRegexpScraperConfigs(ReaderErrorProne{}); err == nil {
 		t.Fail()
 	}
 }
@@ -263,13 +263,13 @@ func TestScraperNoSubstitutions(t *testing.T) {
 
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
-	config := ScraperConfig{
+	config := RegexpScraperConfig{
 		Trigger:      "!scrape",
 		URL:          "https://webscraper.io/test-sites/e-commerce/%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
 
-	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
@@ -297,19 +297,19 @@ func TestScraperNoMatches(t *testing.T) {
 
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
-	config := ScraperConfig{
+	config := RegexpScraperConfig{
 		Trigger:      "scrape",
 		URL:          "%s",
 		ReplyCapture: "goop",
 	}
 
-	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Could not extract data from the webpage") {
@@ -331,13 +331,13 @@ func TestBadURL(t *testing.T) {
 
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
-	config := ScraperConfig{
+	config := RegexpScraperConfig{
 		Trigger:      "scrape",
 		URL:          "",
 		ReplyCapture: "goop",
 	}
 
-	scraper, err := config.GetScraperWithHTMLGetter(htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
@@ -365,19 +365,19 @@ func TestScraperInvalidReader(t *testing.T) {
 
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
-	config := ScraperConfig{
+	config := RegexpScraperConfig{
 		Trigger:      "scrape",
 		URL:          "https://",
 		ReplyCapture: "goop",
 	}
 
-	scraper, err := config.GetScraperWithHTMLGetter(HTMLReturnErr)
+	scraper, err := config.CommandWithHTMLGetter(HTMLReturnErr)
 
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", ""}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "An error occurred when processing") {

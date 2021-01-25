@@ -12,7 +12,7 @@ import (
 )
 
 func Repeater(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
-	sink(sender, service.Message{Description: msg[0][1]})
+	sink(sender, service.Message{Description: msg[0][0]})
 }
 
 // This is able to test

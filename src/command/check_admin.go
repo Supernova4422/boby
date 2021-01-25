@@ -12,9 +12,9 @@ func CheckAdmin(sender service.Conversation, user service.User, msg [][]string, 
 		GuildID:   sender.GuildID,
 	}
 
-	if (*storage).IsAdmin(guild, msg[0][1]) {
-		sink(sender, service.Message{Description: msg[0][1] + " is an admin."})
+	if (*storage).IsAdmin(guild, msg[0][0]) {
+		sink(sender, service.Message{Description: msg[0][0] + " is an admin."})
 	} else {
-		sink(sender, service.Message{Description: msg[0][1] + " is not an admin."})
+		sink(sender, service.Message{Description: msg[0][0] + " is not an admin."})
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
-// UnsetAdmin will set a user to not be an admin.
+// UnsetAdmin will set a user to not be an admin (CheckAdmin will return false).
 func UnsetAdmin(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 	if sender.Admin {
 		guild := service.Guild{
@@ -13,7 +13,7 @@ func UnsetAdmin(sender service.Conversation, user service.User, msg [][]string, 
 			GuildID:   sender.GuildID,
 		}
 
-		(*storage).UnsetAdmin(guild, msg[0][1])
+		(*storage).UnsetAdmin(guild, msg[0][0])
 		sink(sender, service.Message{Description: "Admin has been unset."})
 	}
 }

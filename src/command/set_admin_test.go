@@ -8,7 +8,7 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
-func TestUnsetAdmin(t *testing.T) {
+func TestSetAdmin(t *testing.T) {
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
 	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
@@ -16,7 +16,6 @@ func TestUnsetAdmin(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	guild := service.Guild{ServiceID: demoSender.ID(), GuildID: "0"}
 	userID := "0"
-	tempStorage.SetAdmin(guild, userID)
 	testConversation := service.Conversation{
 		ServiceID:      demoSender.ID(),
 		ConversationID: "0",
@@ -24,14 +23,14 @@ func TestUnsetAdmin(t *testing.T) {
 		Admin:          true,
 	}
 
-	UnsetAdmin(testConversation, testSender, [][]string{{"", userID}}, &_storage, demoSender.SendMessage)
+	SetAdmin(testConversation, testSender, [][]string{{userID}}, &_storage, demoSender.SendMessage)
 
-	if _storage.IsAdmin(guild, userID) {
-		t.Errorf("Admin should be able to unset admins")
+	if _storage.IsAdmin(guild, userID) == false {
+		t.Errorf("Message was different!")
 	}
 }
 
-func TestDontUnsetAdmin(t *testing.T) {
+func TestDontSetAdmin(t *testing.T) {
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
 	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
@@ -39,7 +38,6 @@ func TestDontUnsetAdmin(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	guild := service.Guild{ServiceID: demoSender.ID(), GuildID: "0"}
 	userID := "0"
-	tempStorage.SetAdmin(guild, userID)
 	testConversation := service.Conversation{
 		ServiceID:      demoSender.ID(),
 		ConversationID: "0",
@@ -47,9 +45,9 @@ func TestDontUnsetAdmin(t *testing.T) {
 		Admin:          false,
 	}
 
-	UnsetAdmin(testConversation, testSender, [][]string{}, &_storage, demoSender.SendMessage)
+	SetAdmin(testConversation, testSender, [][]string{{userID}}, &_storage, demoSender.SendMessage)
 
-	if _storage.IsAdmin(guild, userID) == false {
-		t.Errorf("Non-Admin should not be able to unset")
+	if _storage.IsAdmin(guild, userID) {
+		t.Errorf("Message was different!")
 	}
 }

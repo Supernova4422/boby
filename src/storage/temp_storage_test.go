@@ -130,7 +130,7 @@ func TestUnsetAdminDisaster(t *testing.T) {
 	storage.SetAdmin(guild, "Test")
 	storage.UnsetAdmin(guild, "Test")
 
-	storage.GuildValues[guild.ServiceID][guild.GuildID]["Admin"] = 0
+	storage.GuildValues[guild.ServiceID][guild.GuildID][AdminKey] = 0
 	defer func() {
 		if r := recover(); r == nil {
 			t.Fail()
@@ -146,7 +146,7 @@ func TestSetAdminDisaster(t *testing.T) {
 	storage.SetAdmin(guild, "Test")
 	storage.UnsetAdmin(guild, "Test")
 
-	storage.GuildValues[guild.ServiceID][guild.GuildID]["Admin"] = 0
+	storage.GuildValues[guild.ServiceID][guild.GuildID][AdminKey] = 0
 	defer func() {
 		if r := recover(); r == nil {
 			t.Fail()

@@ -18,113 +18,109 @@ import (
 func ConfiguredBot(configDir string) (bot.Bot, error) {
 	bot := bot.Bot{}
 
-	// Get JSON getters.
-	file, err := os.Open(path.Join(configDir, "json_getter_config.json"))
-	if err != nil {
-		return bot, err
-	}
-
 	var jsonGetters []command.JSONGetterConfig
-	bytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		return bot, err
-	}
-
-	if err := json.Unmarshal(bytes, &jsonGetters); err != nil {
-		return bot, err
-	}
-
-	for _, jsonGetter := range jsonGetters {
-		jsonGetterCommand, err := jsonGetter.GetWebScraper(utils.JSONGetWithHTTP)
-		if err == nil {
-			bot.AddCommand(jsonGetter.RateLimit.GetRateLimitedCommand(jsonGetterCommand))
+	// Get JSON getters.
+	if file, err := os.Open(path.Join(configDir, "json_getter_config.json")); err == nil {
+		if bytes, err := ioutil.ReadAll(file); err == nil {
+			if err := json.Unmarshal(bytes, &jsonGetters); err == nil {
+				for _, jsonGetter := range jsonGetters {
+					if command, err := jsonGetter.Command(utils.JSONGetWithHTTP); err == nil {
+						bot.AddCommand(jsonGetter.RateLimit.GetRateLimitedCommand(command))
+					} else {
+						return bot, err
+					}
+				}
+			} else {
+				return bot, err
+			}
 		} else {
 			return bot, err
 		}
+	} else {
+		return bot, err
 	}
 
 	// Get regex scraper.
-	file, err = os.Open(path.Join(configDir, "scraper_config.json"))
-	if err != nil {
-		return bot, err
-	}
-
-	scraperConfigs, err := command.GetScraperConfigs(bufio.NewReader(file))
-	if err != nil {
-		return bot, err
-	}
-
-	for _, scraperConfig := range scraperConfigs {
-		scraperCommand, err := scraperConfig.GetScraper()
-		if err == nil {
-			bot.AddCommand(scraperCommand)
+	if file, err := os.Open(path.Join(configDir, "regexp_scraper_config.json")); err == nil {
+		if regexScraperConfigs, err := command.GetRegexpScraperConfigs(bufio.NewReader(file)); err == nil {
+			for _, regexScraperConfig := range regexScraperConfigs {
+				if command, err := regexScraperConfig.Command(); err == nil {
+					bot.AddCommand(command)
+				} else {
+					return bot, err
+				}
+			}
 		} else {
 			return bot, err
 		}
-	}
-
-	file, err = os.Open(path.Join(configDir, "goquery_scraper_config.json"))
-	if err != nil {
+	} else {
 		return bot, err
 	}
 
-	goqueryScraperConfigs, err := command.GetGoqueryScraperConfigs(bufio.NewReader(file))
-	if err != nil {
-		return bot, err
-	}
-
-	for _, goqueryScraperConfig := range goqueryScraperConfigs {
-		scraperCommand, err := goqueryScraperConfig.GetWebScraper()
-		if err == nil {
-			bot.AddCommand(scraperCommand)
+	if file, err := os.Open(path.Join(configDir, "goquery_scraper_config.json")); err == nil {
+		if goqueryScraperConfigs, err := command.GetGoqueryScraperConfigs(bufio.NewReader(file)); err == nil {
+			for _, goqueryScraperConfig := range goqueryScraperConfigs {
+				if scraperCommand, err := goqueryScraperConfig.Command(); err == nil {
+					bot.AddCommand(scraperCommand)
+				} else {
+					return bot, err
+				}
+			}
 		} else {
 			return bot, err
 		}
+	} else {
+		return bot, err
 	}
 
 	// TODO: Helptext is hardcoded for discord, and is therefore a leaky abstraction.
 	bot.AddCommand(
 		command.Command{
-			Trigger: "imadmin",
-			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    command.ImAdmin,
-			Help:    "[@role or @user] | Check if the sender is an admin.",
+			Trigger:   "imadmin",
+			Pattern:   regexp.MustCompile("(.*)"),
+			Exec:      command.ImAdmin,
+			Help:      "Check if the sender is an admin.",
+			HelpInput: "[@role or @user]",
 		},
 	)
 
 	bot.AddCommand(
 		command.Command{
-			Trigger: "isadmin",
-			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    command.CheckAdmin,
-			Help:    " | Check if the sender is an admin.",
+			Trigger:   "isadmin",
+			Pattern:   regexp.MustCompile("(.*)"),
+			Exec:      command.CheckAdmin,
+			Help:      "Check if a role or user is an admin.",
+			HelpInput: "[@role or @user]",
 		},
 	)
 
 	bot.AddCommand(
 		command.Command{
-			Trigger: "setadmin",
-			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    command.SetAdmin,
-			Help:    "[@role or @user] | set a role or user as an admin, therefore giving them all permissions for this bot. Users/Roles with any of the following server permissions are automatically treated as admin: 'Administrator', 'Manage Server', 'Manage Webhooks.'",
+			Trigger:   "setadmin",
+			Pattern:   regexp.MustCompile("(.*)"),
+			Exec:      command.SetAdmin,
+			Help:      "Set a role or user as an admin, therefore giving them all permissions for this bot. Users/Roles with any of the following server permissions are automatically treated as admin: 'Administrator', 'Manage Server', 'Manage Webhooks.'",
+			HelpInput: "[@role or @user]",
 		},
 	)
 
 	bot.AddCommand(
 		command.Command{
-			Trigger: "unsetAdmin",
-			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    command.UnsetAdmin,
-			Help:    "[@role or @user] | unset a role or user as an admin, therefore giving them usual permissions.",
+			Trigger:   "unsetAdmin",
+			Pattern:   regexp.MustCompile("(.*)"),
+			Exec:      command.UnsetAdmin,
+			Help:      "unset a role or user as an admin, therefore giving them usual permissions.",
+			HelpInput: "[@role or @user]",
 		},
 	)
 
 	bot.AddCommand(
 		command.Command{
-			Trigger: "setprefix",
-			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    command.SetPrefix,
-			Help:    "[word] | Set the prefix of all commands of this bot, for this server.",
+			Trigger:   "setprefix",
+			Pattern:   regexp.MustCompile("(.*)"),
+			Exec:      command.SetPrefix,
+			Help:      "Set the prefix of all commands of this bot, for this server.",
+			HelpInput: "[word]",
 		},
 	)
 

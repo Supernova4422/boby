@@ -10,7 +10,9 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
-// Bot immediately routes all messages from a service.
+// Bot implements the service.Observer interface.
+// A Bot routes all messages to a set of commands, as along as the message
+// begins with the defaultPrefix (or guild's prefix) + the command's trigger.
 type Bot struct {
 	observers     []service.Sender
 	commands      []command.Command
@@ -19,25 +21,25 @@ type Bot struct {
 }
 
 // SetStorage sets the interface used for storing and retrieving data.
-// Commands are still free to use their own storage methods, however a storage object
-// can be used to share data between commands.
+// Commands are still free to use their own storage methods, however a storage
+// object can be used to share data throughout this program.
 func (b *Bot) SetStorage(storage *storage.Storage) {
 	b.storage = storage
 }
 
-// AddSender will Append a sender that messages may be routed to.
+// AddSender will append a sender that output messages are routed to.
 func (b *Bot) AddSender(sender service.Sender) {
 	b.observers = append(b.observers, sender)
 }
 
-// AddCommand adds a command that this bot executes.
+// AddCommand adds a command that input messages are routed to.
 func (b *Bot) AddCommand(cmd command.Command) {
 	b.commands = append(b.commands, cmd)
 }
 
 // GetPrefix returns the prefix for a conversation.
-// A prefix at the start of the message identifies the message is a command for the bot
-// to act upon.
+// A prefix at the start of the message identifies the message is a command for
+// this bot to act upon.
 func (b *Bot) GetPrefix(conversation service.Conversation) string {
 	guild := service.Guild{
 		ServiceID: conversation.ServiceID,
@@ -47,7 +49,7 @@ func (b *Bot) GetPrefix(conversation service.Conversation) string {
 		return b.defaultPrefix
 	}
 
-	prefix, err := (*b.storage).GetGuildValue(guild, "prefix")
+	prefix, err := (*b.storage).GetGuildValue(guild, command.PrefixKey)
 	if err != nil {
 		return b.defaultPrefix
 	}
@@ -66,15 +68,16 @@ func (b *Bot) HelpTrigger() string {
 	return "help"
 }
 
-// OnMessage runs any command where the message starts with the conversation's
-// prefix + the command's trigger.
+// OnMessage runs any command's 'exec' where msg starts with the conversation's prefix + the
+// command's trigger. The msg passed into a command's exec is by parsing the
+// msg following the trigger with the command's pattern.
 func (b *Bot) OnMessage(conversation service.Conversation, sender service.User, msg string) {
 	prefix := b.GetPrefix(conversation)
 	if msg == prefix+b.HelpTrigger() {
 		fields := make([]service.MessageField, 0)
 		for i, command := range b.commands {
 			fields = append(fields, service.MessageField{
-				Field: fmt.Sprintf("%s. %s%s", strconv.Itoa(i+1), prefix, command.Trigger),
+				Field: fmt.Sprintf("%s. %s%s %s", strconv.Itoa(i+1), prefix, command.Trigger, command.HelpInput),
 				Value: command.Help,
 			})
 		}
@@ -83,7 +86,6 @@ func (b *Bot) OnMessage(conversation service.Conversation, sender service.User, 
 			service.Message{
 				Title:  "Help",
 				Fields: fields,
-				URL:    "https://github.com/BKrajancic/boby",
 				Footer: "Contribute to this project at: https://github.com/BKrajancic/boby",
 			})
 	} else {
@@ -91,8 +93,13 @@ func (b *Bot) OnMessage(conversation service.Conversation, sender service.User, 
 			trigger := fmt.Sprintf("%s%s", prefix, command.Trigger)
 			if strings.HasPrefix(msg, trigger) {
 				content := strings.TrimSpace(msg[len(trigger):])
-				matches := command.Pattern.FindAllStringSubmatch(content, -1)
-				command.Exec(conversation, sender, matches, b.storage, b.RouteByID)
+				newMatches := make([][]string, 0)
+				for _, match := range command.Pattern.FindAllStringSubmatch(content, -1) {
+					if len(match) > 1 {
+						newMatches = append(newMatches, match[1:])
+					}
+				}
+				command.Exec(conversation, sender, newMatches, b.storage, b.RouteByID)
 			}
 		}
 	}

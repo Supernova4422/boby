@@ -7,7 +7,7 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/service"
 )
 
-const adminKey = "Admin"
+const AdminKey = "Admin"
 
 // TempStorage implements the Storage interface, but data is lost on destruction.
 type TempStorage struct {
@@ -99,7 +99,7 @@ func (t *TempStorage) SetUserValue(user service.User, key string, val interface{
 
 // IsAdmin returns true if ID is an admin.
 func (t *TempStorage) IsAdmin(guild service.Guild, ID string) bool {
-	if val, err := t.GetGuildValue(guild, adminKey); err == nil {
+	if val, err := t.GetGuildValue(guild, AdminKey); err == nil {
 		if admins, ok := val.([]string); ok {
 			for _, adminID := range admins {
 				if adminID == ID {
@@ -113,22 +113,22 @@ func (t *TempStorage) IsAdmin(guild service.Guild, ID string) bool {
 
 // SetAdmin sets a userID as an admin for a guild.
 func (t *TempStorage) SetAdmin(guild service.Guild, ID string) {
-	if val, err := t.GetGuildValue(guild, adminKey); err == nil {
+	if val, err := t.GetGuildValue(guild, AdminKey); err == nil {
 		currentAdmins, ok := val.([]string)
 		if ok {
-			t.SetGuildValue(guild, adminKey, append(currentAdmins, ID))
+			t.SetGuildValue(guild, AdminKey, append(currentAdmins, ID))
 		} else {
 			panic(ok)
 		}
 	} else {
-		t.SetGuildValue(guild, adminKey, []string{ID})
+		t.SetGuildValue(guild, AdminKey, []string{ID})
 	}
 }
 
 // UnsetAdmin removes userID as an admin for a guild.
 func (t *TempStorage) UnsetAdmin(guild service.Guild, ID string) {
 	newAdmins := []string{}
-	if val, err := t.GetGuildValue(guild, adminKey); err == nil {
+	if val, err := t.GetGuildValue(guild, AdminKey); err == nil {
 		currentAdmins, ok := val.([]string)
 		if ok == false {
 			panic(ok)
@@ -139,5 +139,5 @@ func (t *TempStorage) UnsetAdmin(guild service.Guild, ID string) {
 			}
 		}
 	}
-	t.SetGuildValue(guild, adminKey, newAdmins)
+	t.SetGuildValue(guild, AdminKey, newAdmins)
 }

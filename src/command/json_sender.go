@@ -23,6 +23,7 @@ type JSONGetterConfig struct {
 	Captures    []JSONCapture
 	URL         string
 	Help        string
+	HelpInput   string
 	Description string
 	Grouped     bool
 	Delay       int
@@ -39,7 +40,8 @@ type TokenMaker struct {
 }
 
 // MakeToken will make a token from this token maker.
-// If t.type is "MD5"
+// If t.type is "MD5", prefixes 'prefix' to the input, postfixes 'postfix' to the input,
+// takes the 'size' number of characters from the MD5 sum.
 func (t TokenMaker) MakeToken(input string) (out string) {
 	if t.Type == "MD5" {
 		fullString := []byte(t.Prefix + input + t.Postfix)
@@ -78,11 +80,10 @@ type JSONCapture struct {
 // JSONGetter will accept a string and provide a reader. This could be a file, a webpage, who cares!
 type JSONGetter = func(string) (out io.ReadCloser, err error)
 
-// GetWebScraper returns a webscraper command from a config.
-func (j JSONGetterConfig) GetWebScraper(jsonGetter JSONGetter) (Command, error) {
+// Command uses the config to make a Command that processes messages.
+func (j JSONGetterConfig) Command(jsonGetter JSONGetter) (Command, error) {
 	curry := func(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
-		jsonGetterFunc(
-			j,
+		j.jsonGetterFunc(
 			sender,
 			user,
 			msg,
@@ -105,9 +106,9 @@ func (j JSONGetterConfig) GetWebScraper(jsonGetter JSONGetter) (Command, error) 
 	}, nil
 }
 
-// Return the received message
-func jsonGetterFunc(config JSONGetterConfig, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message), jsonGetter JSONGetter) {
-	substitutions := strings.Count(config.URL, "%s")
+// jsonGetterFunc processes a message.
+func (j JSONGetterConfig) jsonGetterFunc(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message), jsonGetter JSONGetter) {
+	substitutions := strings.Count(j.URL, "%s")
 	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
 		sink(sender, service.Message{Description: "An error occurred when building the url."})
 		return
@@ -115,18 +116,18 @@ func jsonGetterFunc(config JSONGetterConfig, sender service.Conversation, user s
 
 	fields := make([]service.MessageField, 0)
 	for _, capture := range msg {
-		msgURL := config.URL
+		msgURL := j.URL
 
 		replacements := strings.Count(msgURL, "%s")
 
-		for i, word := range capture[1:] {
+		for i, word := range capture {
 			if i == replacements {
 				break
 			}
 			msgURL = strings.Replace(msgURL, "%s", url.PathEscape(word), 1)
 		}
 
-		msgURL += config.Token.MakeToken(strings.Join(capture[1:], ""))
+		msgURL += j.Token.MakeToken(strings.Join(capture, ""))
 		fmt.Print(msgURL)
 		jsonReader, err := jsonGetter(msgURL)
 		if err == nil {
@@ -136,7 +137,7 @@ func jsonGetterFunc(config JSONGetterConfig, sender service.Conversation, user s
 				dict := make(map[string]interface{})
 				err := json.Unmarshal(buf, &dict)
 				if err == nil {
-					for _, capture := range config.Captures {
+					for _, capture := range j.Captures {
 						body, err := capture.Body.ToStringWithMap(dict)
 						if err == nil && strings.Contains(body, "%s") == false {
 							title, err := capture.Title.ToStringWithMap(dict)
@@ -145,13 +146,13 @@ func jsonGetterFunc(config JSONGetterConfig, sender service.Conversation, user s
 							}
 						}
 					}
-					if config.Grouped {
-						title, err := config.Title.ToStringWithMap(dict)
+					if j.Grouped {
+						title, err := j.Title.ToStringWithMap(dict)
 						if err == nil {
 							sink(sender, service.Message{
 								Title:       title,
 								Fields:      fields,
-								Description: config.Description,
+								Description: j.Description,
 							})
 						}
 					} else {
@@ -161,13 +162,11 @@ func jsonGetterFunc(config JSONGetterConfig, sender service.Conversation, user s
 								Description: field.Value,
 							})
 
-							time.Sleep(time.Duration(config.Delay) * time.Second)
+							time.Sleep(time.Duration(j.Delay) * time.Second)
 						}
-
 					}
 				}
 			}
 		}
 	}
-
 }

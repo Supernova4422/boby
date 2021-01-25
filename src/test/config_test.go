@@ -75,13 +75,13 @@ func getDemoBot(filepath string, bot *bot.Bot) *demoservice.DemoSender {
 		panic(err)
 	}
 
-	scraperConfigs, err := command.GetScraperConfigs(bufio.NewReader(file))
+	RegexScraperConfigs, err := command.GetRegexpScraperConfigs(bufio.NewReader(file))
 	if err != nil {
 		panic(err)
 	}
 
-	for _, scraperConfig := range scraperConfigs {
-		scraperCommand, err := scraperConfig.GetScraper()
+	for _, RegexScraperConfig := range RegexScraperConfigs {
+		scraperCommand, err := RegexScraperConfig.Command()
 		if err == nil {
 			bot.AddCommand(scraperCommand)
 		} else {

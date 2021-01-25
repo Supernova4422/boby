@@ -64,7 +64,7 @@ func main() {
 	<-sc
 }
 
-// loadGobStorage loads a file used for a storage.
+// loadGobStorage loads a file used for storage.
 // If the file doesn't exist, a file is created and used.
 func loadGobStorage(filepath string) (storage.Storage, error) {
 	_, err := os.Stat(filepath)

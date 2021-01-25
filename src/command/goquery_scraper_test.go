@@ -81,12 +81,12 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := GetGoqueryScraperWithHTMLGetter(config, htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
@@ -102,7 +102,7 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 		t.Errorf("Sender was different!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "tables"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"tables"}}, nil, demoSender.SendMessage)
 	resultMessage, resultConversation = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Tables Heading One") {
 		t.Errorf("Message was different!")
@@ -119,7 +119,7 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 
 func TestGoQueryScraperBadRegex(t *testing.T) {
 	config := GoQueryScraperConfig{Capture: "("}
-	if _, err := config.GetWebScraper(); err == nil {
+	if _, err := config.Command(); err == nil {
 		t.Fail()
 	}
 }
@@ -156,12 +156,12 @@ func TestGoQueryScraperWithReplacement(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := GetGoqueryScraperWithHTMLGetter(config, htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
@@ -177,7 +177,7 @@ func TestGoQueryScraperWithReplacement(t *testing.T) {
 		t.Errorf("Sender was different!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "tables"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"tables"}}, nil, demoSender.SendMessage)
 	resultMessage, resultConversation = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Tables Heading One") {
 		t.Errorf("Message was different!")
@@ -223,12 +223,12 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := GetGoqueryScraperWithHTMLGetter(config, htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
@@ -278,13 +278,13 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := GetGoqueryScraperWithHTMLGetter(config, htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Fields[0].Field != config.TitleSelector.Template {
@@ -329,13 +329,13 @@ func TestGoQueryScraperNoCaptureMissingSub(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := GetGoqueryScraperWithHTMLGetter(config, htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "usual"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Fields[0].Field != "There was an error retrieving information from the webpage." {
@@ -380,13 +380,13 @@ func TestGoQueryScrapeEscapeUrl(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := GetGoqueryScraperWithHTMLGetter(config, htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", "example space"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{"example space"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Fields[0].URL != "example%20space" {
@@ -431,12 +431,12 @@ func TestGoQueryScraperNoCapture(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := GetGoqueryScraperWithHTMLGetter(config, htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Heading One") {
@@ -481,12 +481,12 @@ func TestLast(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := GetGoqueryScraperWithHTMLGetter(config, htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Last Heading One") {
@@ -531,12 +531,12 @@ func TestHtml(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := GetGoqueryScraperWithHTMLGetter(config, htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Last Heading One") {
@@ -581,12 +581,12 @@ func TestGoQueryScraperUnusedCapture(t *testing.T) {
 		Help: "This is just a test!",
 	}
 
-	scraper, err := GetGoqueryScraperWithHTMLGetter(config, htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", ""}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Fields[0].Value != "An error occurred retrieving the webpage." {
@@ -662,7 +662,7 @@ func TestGoqueryScraperNoSubstitutions(t *testing.T) {
 		},
 	}
 
-	scraper, err := GetGoqueryScraperWithHTMLGetter(config, htmlTestPage)
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
@@ -694,12 +694,12 @@ func TestEmptyPage(t *testing.T) {
 		URL:     "e-commerce/",
 	}
 
-	scraper, err := GetGoqueryScraperWithHTMLGetter(config, htmlGetRemembered(""))
+	scraper, err := config.CommandWithHTMLGetter(htmlGetRemembered(""))
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", ""}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Fields[0].Value, "Webpage not found at") {
@@ -742,12 +742,12 @@ func TestInvalidReader(t *testing.T) {
 		URL:     "e-commerce/",
 	}
 
-	scraper, err := GetGoqueryScraperWithHTMLGetter(config, HTMLReturnErr)
+	scraper, err := config.CommandWithHTMLGetter(HTMLReturnErr)
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"", ""}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Fields[0].Value, "An error occurred when processing") {

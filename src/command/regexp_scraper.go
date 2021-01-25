@@ -14,8 +14,9 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/utils"
 )
 
-// ScraperConfig is a struct that can be turned into a usable scraper.
-type ScraperConfig struct {
+// RegexpScraperConfig is a struct that can be made into a command.
+// That Command will process a HTML based on a regexp, to send responses.
+type RegexpScraperConfig struct {
 	Trigger       string
 	Capture       string
 	TitleTemplate string // Title template that will be replaced by regex captures (using %s).
@@ -23,35 +24,36 @@ type ScraperConfig struct {
 	URL           string // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
 	ReplyCapture  string // Regular expression used to parse a webpage.
 	Help          string // Help message to display
+	HelpInput     string // Help message to display for input following command
 }
 
-// GetScraperConfigs returns a set of ScraperConfig by reading a file.
+// GetRegexpScraperConfigs returns a set of RegexScraperConfig by reading a file.
 // If a file doesn't exist at the given filepath, an example is made in its place,
 // and an error is returned.
-func GetScraperConfigs(reader io.Reader) ([]ScraperConfig, error) {
+func GetRegexpScraperConfigs(reader io.Reader) ([]RegexpScraperConfig, error) {
 	bytes, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
 
-	var config []ScraperConfig
+	var config []RegexpScraperConfig
 	return config, json.Unmarshal(bytes, &config)
 }
 
-// GetScraper returns a webscraper command from a config, using HTTP to get a html.
-func (config ScraperConfig) GetScraper() (Command, error) {
-	return config.GetScraperWithHTMLGetter(utils.HTMLGetWithHTTP)
+// Command returns a webscraper command from a config, using HTTP to get a html.
+func (r RegexpScraperConfig) Command() (Command, error) {
+	return r.CommandWithHTMLGetter(utils.HTMLGetWithHTTP)
 }
 
-// GetScraperWithHTMLGetter makes a scraper from a config.
-func (config ScraperConfig) GetScraperWithHTMLGetter(htmlGetter HTMLGetter) (Command, error) {
-	webpageCapture := regexp.MustCompile(config.ReplyCapture)
-	titleCapture := regexp.MustCompile(config.TitleCapture)
+// CommandWithHTMLGetter makes a scraper from a config.
+func (r RegexpScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Command, error) {
+	webpageCapture := regexp.MustCompile(r.ReplyCapture)
+	titleCapture := regexp.MustCompile(r.TitleCapture)
 
 	curry := func(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
-		scraper(config.URL,
+		scraper(r.URL,
 			webpageCapture,
-			config.TitleTemplate,
+			r.TitleTemplate,
 			titleCapture,
 			sender,
 			user,
@@ -61,19 +63,21 @@ func (config ScraperConfig) GetScraperWithHTMLGetter(htmlGetter HTMLGetter) (Com
 			htmlGetter,
 		)
 	}
-	regex, err := regexp.Compile(config.Capture)
+
+	regex, err := regexp.Compile(r.Capture)
 	if err != nil {
 		return Command{}, err
 	}
+
 	return Command{
-		Trigger: config.Trigger,
+		Trigger: r.Trigger,
 		Pattern: regex,
 		Exec:    curry,
-		Help:    config.Help,
+		Help:    r.Help,
 	}, nil
 }
 
-// Return the received message
+// scraper returns the received message
 func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate string, titleCapture *regexp.Regexp, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message), htmlGetter HTMLGetter) {
 	substitutions := strings.Count(urlTemplate, "%s")
 	url := urlTemplate
@@ -82,7 +86,7 @@ func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate st
 			sink(sender, service.Message{Description: "An error when building the url."})
 			return
 		}
-		for _, capture := range msg[0][1:] {
+		for _, capture := range msg[0] {
 			url = fmt.Sprintf(url, capture)
 		}
 	}
