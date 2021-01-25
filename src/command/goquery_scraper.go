@@ -122,10 +122,11 @@ func (g GoQueryScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Comm
 	}
 
 	return Command{
-		Trigger: g.Trigger,
-		Pattern: regex,
-		Exec:    curry,
-		Help:    g.Help,
+		Trigger:   g.Trigger,
+		Pattern:   regex,
+		Exec:      curry,
+		Help:      g.Help,
+		HelpInput: g.HelpInput,
 	}, nil
 }
 

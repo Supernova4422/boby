@@ -70,10 +70,11 @@ func (r RegexpScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Comma
 	}
 
 	return Command{
-		Trigger: r.Trigger,
-		Pattern: regex,
-		Exec:    curry,
-		Help:    r.Help,
+		Trigger:   r.Trigger,
+		Pattern:   regex,
+		Exec:      curry,
+		Help:      r.Help,
+		HelpInput: r.HelpInput,
 	}, nil
 }
 

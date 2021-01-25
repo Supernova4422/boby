@@ -99,10 +99,11 @@ func (j JSONGetterConfig) Command(jsonGetter JSONGetter) (Command, error) {
 	}
 
 	return Command{
-		Trigger: j.Trigger,
-		Pattern: regex,
-		Exec:    curry,
-		Help:    j.Help,
+		Trigger:   j.Trigger,
+		Pattern:   regex,
+		Exec:      curry,
+		Help:      j.Help,
+		HelpInput: j.HelpInput,
 	}, nil
 }
 
