@@ -304,7 +304,7 @@ func TestRateLimitedCommandMinute(t *testing.T) {
 	}
 
 	resultMessage, _ = demoSender.PopMessage()
-	if resultMessage.Description == limitMsg {
+	if resultMessage.Description != limitMsg {
 		t.Fail()
 	}
 }
@@ -359,7 +359,7 @@ func TestRateLimitedCommandHour(t *testing.T) {
 	}
 
 	resultMessage, _ = demoSender.PopMessage()
-	if resultMessage.Description == limitMsg {
+	if resultMessage.Description != limitMsg {
 		t.Fail()
 	}
 }

@@ -49,6 +49,10 @@ func (r RateLimitConfig) timeRemaining(now int64, history []int64) int64 {
 // GetRateLimitedCommand wraps around a command to make it rate limited.
 // If SecondsPerInterval and TimesPerInterval are both 0, this function returns
 // the given command.
+//
+// TODO: This function is not thread safe, calling it twice from two threads will get two
+// versions of history, then writing the new history will only include on message. This is
+// ignored for now since it hasn't been an issue yet.
 func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 	if r.SecondsPerInterval == 0 && r.TimesPerInterval == 0 {
 		return command
@@ -57,8 +61,8 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 	curry := func(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 		now := time.Now().Unix()
 		history := []int64{}
-		val, err := (*storage).GetUserValue(user, r.ID)
-		if err == nil {
+
+		if val, err := (*storage).GetUserValue(user, r.ID); err == nil {
 			var ok bool = false
 			history, ok = val.([]int64)
 			if ok == false {
@@ -90,7 +94,7 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 				},
 			)
 		} else {
-			go (*storage).SetUserValue(user, r.ID, append(history, now))
+			(*storage).SetUserValue(user, r.ID, append(history, now))
 			command.Exec(sender, user, msg, storage, sink)
 		}
 	}
