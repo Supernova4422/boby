@@ -24,17 +24,17 @@ type GoQueryScraperConfig struct {
 	Title         string          // When sending a post, what should the title be.
 	Trigger       string          // Word which triggers this command to activate.
 	Capture       string          // How to capture words.
-	TitleSelector SelectorCapture // Regex captures for title replacement.
+	TitleSelector SelectorCapture // The output message's title.
 	URL           string          // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
-	ReplySelector SelectorCapture
+	ReplySelector SelectorCapture // The output message's body text.
 	Help          string // Help message to display
 	HelpInput     string // Help message to display for input following command
 }
 
-// SelectorCapture is a method to capture from a webpage.
+// SelectorCapture will fill out a template string using webpage content selected with goquery.
 type SelectorCapture struct {
 	Template       string              // Message template to be filled out. Every %s in a template is replaced with results of selectors.
-	Selectors      []string            // What captures to use to fill out the template
+	Selectors      []string            // What goquery captures are used to fill out the template.
 	Replacements   []map[string]string // String replacements for each entry in selectors.
 	HandleMultiple string              // How to handle multiple captures. "Random" or "First."
 }
