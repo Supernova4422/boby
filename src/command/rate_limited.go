@@ -109,5 +109,6 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 			r.TimesPerInterval,
 			r.SecondsPerInterval,
 		),
+		HelpInput: command.HelpInput,
 	}
 }
