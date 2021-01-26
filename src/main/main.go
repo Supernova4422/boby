@@ -21,7 +21,7 @@ func main() {
 	if len(os.Args) == 1 {
 		fmt.Println("When running this program, an argument must be given, which is a directory containing configuration files.")
 		config.MakeExampleDir(exampleDir)
-		panic(fmt.Errorf("Missing argument."))
+		panic(fmt.Errorf("missing argument"))
 
 	}
 

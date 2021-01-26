@@ -36,13 +36,13 @@ func (j JSONGetterConfig) MessagesFromJSON(dict map[string]interface{}) (message
 
 	fields := make([]service.MessageField, 0)
 	for _, field := range j.Fields {
-		if err, field := field.MessageField(dict); err == nil {
+		if field, err := field.MessageField(dict); err == nil {
 			fields = append(fields, field)
 		}
 	}
 
 	if j.Grouped {
-		if err, body := j.Message.MessageField(dict); err == nil {
+		if body, err := j.Message.MessageField(dict); err == nil {
 			messages = append(messages, service.Message{
 				Title:       body.Field,
 				Description: body.Value,
@@ -50,7 +50,7 @@ func (j JSONGetterConfig) MessagesFromJSON(dict map[string]interface{}) (message
 			})
 		}
 	} else {
-		if err, body := j.Message.MessageField(dict); err == nil {
+		if body, err := j.Message.MessageField(dict); err == nil {
 			messages = append(messages, service.Message{
 				Title:       body.Field,
 				Description: body.Value,
@@ -75,9 +75,9 @@ type JSONCapture struct {
 }
 
 // MessageField uses a dict (which is a usually a reading of a JSON file), to create a MessageField.
-// Returns an error if %s is present in either the title or description even after replacmenets are made.
-func (j JSONCapture) MessageField(dict map[string]interface{}) (err error, field service.MessageField) {
-	err = fmt.Errorf("there were missing fields in the json.")
+// Returns an error if %s is present in either the title or description even after replacements are made.
+func (j JSONCapture) MessageField(dict map[string]interface{}) (field service.MessageField, err error) {
+	err = fmt.Errorf("there were missing fields in the json")
 	body := j.Body.ToStringWithMap(dict)
 	if strings.Contains(body, "%s") == false {
 		title := j.Title.ToStringWithMap(dict)

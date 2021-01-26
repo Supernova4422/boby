@@ -11,7 +11,7 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/service/demoservice"
 )
 
-// htmlGetRemembered returns a HTMLGetteris that returns content on any input.
+// htmlGetRemembered returns a HTMLGetter that returns content on any input.
 func jsonGetRemembered(content string) JSONGetter {
 	reader := strings.NewReader(content)
 	return func(url string) (io.ReadCloser, error) {

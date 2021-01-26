@@ -15,7 +15,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-// htmlGetRemembered returns a HTMLGetteris that returns content on any input.
+// htmlGetRemembered returns a HTMLGetter that returns content on any input.
 func htmlGetRemembered(content string) HTMLGetter {
 	reader := strings.NewReader(content)
 	return func(url string) (string, io.ReadCloser, error) {

@@ -10,6 +10,7 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
+// Repo is a URL to this project's repository. Useful for showing with help information.
 const Repo = "https://github.com/BKrajancic/boby"
 
 // Bot implements the service.Observer interface.

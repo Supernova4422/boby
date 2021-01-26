@@ -186,7 +186,7 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 	})
 }
 
-// GetGoqueryScraperConfigs retrieves an array of GoQueryScraperConfig by unmarshalling a buffer.
+// GetGoqueryScraperConfigs retrieves an array of GoQueryScraperConfig by parsing JSON from a buffer.
 // If a file doesn't exist, an example is made in its place, and an error is returned.
 func GetGoqueryScraperConfigs(reader io.Reader) ([]GoQueryScraperConfig, error) {
 	bytes, err := ioutil.ReadAll(reader)

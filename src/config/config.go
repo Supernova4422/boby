@@ -18,6 +18,7 @@ const jsonFilepath = "json_getter_config.json"
 const regexpFilepath = "regexp_scraper_config.json"
 const goqueryFilepath = "goquery_scraper_config.json"
 
+// MakeExampleDir makes an example folder with example config files.
 func MakeExampleDir(dir string) error {
 	fmt.Printf(
 		"A Folder \"%s\" will be created, which contains example configuration files.\n",

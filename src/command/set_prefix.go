@@ -7,6 +7,7 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
+// PrefixKey is the key used in storage when storing a prefix.
 const PrefixKey = "prefix"
 
 // SetPrefix will set the prefix all messages are to be preceded by, for a guild.
