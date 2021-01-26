@@ -17,8 +17,12 @@ import (
 )
 
 func main() {
+	exampleDir := "example"
 	if len(os.Args) == 1 {
-		panic(fmt.Errorf("the path to a folder must be passed as an argument when running this program"))
+		fmt.Println("When running this program, an argument must be given, which is a directory containing configuration files.")
+		config.MakeExampleDir(exampleDir)
+		panic(fmt.Errorf("Missing argument."))
+
 	}
 
 	folder := os.Args[1]
@@ -29,7 +33,8 @@ func main() {
 
 	bot, err := config.ConfiguredBot(folder)
 	if err != nil {
-		fmt.Print(err.Error())
+		fmt.Println("An error occurred when loading the configuration files.")
+		config.MakeExampleDir(exampleDir)
 		panic(err)
 	}
 

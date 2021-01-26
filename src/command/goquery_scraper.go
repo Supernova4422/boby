@@ -33,9 +33,9 @@ type GoQueryScraperConfig struct {
 
 // SelectorCapture is a method to capture from a webpage.
 type SelectorCapture struct {
-	Template       string              // Message template to be filled out.
+	Template       string              // Message template to be filled out. Every %s in a template is replaced with results of selectors.
 	Selectors      []string            // What captures to use to fill out the template
-	Replacements   []map[string]string // Replacements for each entry in selectors.
+	Replacements   []map[string]string // String replacements for each entry in selectors.
 	HandleMultiple string              // How to handle multiple captures. "Random" or "First."
 }
 

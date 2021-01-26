@@ -10,6 +10,8 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
+const Repo = "https://github.com/BKrajancic/boby"
+
 // Bot implements the service.Observer interface.
 // A Bot routes all messages to a set of commands, as along as the message
 // begins with the defaultPrefix (or guild's prefix) + the command's trigger.
@@ -86,7 +88,7 @@ func (b *Bot) OnMessage(conversation service.Conversation, sender service.User, 
 			service.Message{
 				Title:  "Help",
 				Fields: fields,
-				Footer: "Contribute to this project at: https://github.com/BKrajancic/boby",
+				Footer: "Contribute to this project at: " + Repo,
 			})
 	} else {
 		for _, command := range b.commands {

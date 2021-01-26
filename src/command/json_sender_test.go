@@ -55,12 +55,17 @@ func TestSimple(t *testing.T) {
 
 	config := JSONGetterConfig{
 		Grouped: true,
-		Title: FieldCapture{
-			Template:  "%s",
-			Selectors: []string{"Key1"},
-		},
+		Message: JSONCapture{
+			Title: FieldCapture{
+				Template:  "%s",
+				Selectors: []string{"Key1"},
+			},
 
-		Captures: []JSONCapture{
+			Body: FieldCapture{
+				Template: "Footer",
+			},
+		},
+		Fields: []JSONCapture{
 			{
 				Body: FieldCapture{
 					Template:  "%s",
@@ -68,8 +73,7 @@ func TestSimple(t *testing.T) {
 				},
 			},
 		},
-		URL:         "%s",
-		Description: "Footer",
+		URL: "%s",
 	}
 
 	getter, err := config.Command(jsonExamples)
@@ -106,12 +110,14 @@ func TestPair(t *testing.T) {
 
 	config := JSONGetterConfig{
 		Grouped: true,
-		Title: FieldCapture{
-			Template:  "%s",
-			Selectors: []string{"Key1"},
+		Message: JSONCapture{
+			Title: FieldCapture{
+				Template:  "%s",
+				Selectors: []string{"Key1"},
+			},
 		},
 
-		Captures: []JSONCapture{
+		Fields: []JSONCapture{
 			{
 				Body: FieldCapture{
 					Template:  "%s",
@@ -155,10 +161,6 @@ func TestPair(t *testing.T) {
 	if resultMessage.Title != "Value1" {
 		t.Fail()
 	}
-
-	if resultMessage.Description != config.Description {
-		t.Fail()
-	}
 }
 
 func TestBadRegex(t *testing.T) {
@@ -178,12 +180,14 @@ func TestEmptyMsg(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := JSONGetterConfig{
-		Title: FieldCapture{
-			Template:  "%s",
-			Selectors: []string{"key1"},
+		Message: JSONCapture{
+			Title: FieldCapture{
+				Template:  "%s",
+				Selectors: []string{"key1"},
+			},
 		},
 
-		Captures: []JSONCapture{
+		Fields: []JSONCapture{
 			{
 				Body: FieldCapture{
 					Template:  "%s",
@@ -232,12 +236,17 @@ func TestUngrouped(t *testing.T) {
 		Grouped: false,
 		Delay:   0,
 
-		Title: FieldCapture{
-			Template:  "%s",
-			Selectors: []string{"Key1"},
+		Message: JSONCapture{
+			Title: FieldCapture{
+				Template: "Title",
+			},
+			Body: FieldCapture{
+				Template:  "%s",
+				Selectors: []string{"Key1"},
+			},
 		},
 
-		Captures: []JSONCapture{
+		Fields: []JSONCapture{
 			{
 				Body: FieldCapture{
 					Template:  "%s",
@@ -270,12 +279,16 @@ func TestUngrouped(t *testing.T) {
 	)
 
 	resultMessage1, _ := demoSender.PopMessage()
-	if resultMessage1.Description != "Value2" {
+	if resultMessage1.Description != "Value1" {
+		t.Fail()
+	}
+
+	if resultMessage1.Title != "Title" {
 		t.Fail()
 	}
 
 	resultMessage2, _ := demoSender.PopMessage()
-	if resultMessage2.Description != "Value1" {
+	if resultMessage2.Description != "Value2" {
 		t.Fail()
 	}
 }
@@ -293,12 +306,14 @@ func TestToken(t *testing.T) {
 		Delay:   0,
 		Capture: "(.*)",
 
-		Title: FieldCapture{
-			Template:  "%s",
-			Selectors: []string{"Key1"},
+		Message: JSONCapture{
+			Title: FieldCapture{
+				Template:  "%s",
+				Selectors: []string{"Key1"},
+			},
 		},
 
-		Captures: []JSONCapture{
+		Fields: []JSONCapture{
 			{
 				Body: FieldCapture{
 					Template:  "%s",
@@ -348,12 +363,14 @@ func TestSpacesInMessage(t *testing.T) {
 		Delay:   0,
 		Capture: "(.*)",
 
-		Title: FieldCapture{
-			Template:  "%s",
-			Selectors: []string{"Key1"},
+		Message: JSONCapture{
+			Title: FieldCapture{
+				Template:  "%s",
+				Selectors: []string{"Key1"},
+			},
 		},
 
-		Captures: []JSONCapture{
+		Fields: []JSONCapture{
 			{
 				Body: FieldCapture{
 					Template:  "%s",
