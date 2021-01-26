@@ -27,7 +27,7 @@ To understand how to run the bot, first build it using `go build src/main`, then
 For properly understanding configuration files, make sure to view the files:
 
 1. [goquery_scraper](https://github.com/BKrajancic/boby/blob/main/src/command/goquery_scraper.go)
-2. [json_sender.go](https://github.com/BKrajancic/boby/blob/main/src/command/json_sender.go.go)
+2. [json_sender](https://github.com/BKrajancic/boby/blob/main/src/command/json_sender.go)
 3. [regexp_scraper](https://github.com/BKrajancic/boby/blob/main/src/command/regexp_scraper.go)
 
 Any of these files can be ignored by replacing their contents with `[]`.
