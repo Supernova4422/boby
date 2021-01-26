@@ -7,6 +7,7 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/service"
 )
 
+// AdminKey is the key used in storage to store if someone is an Admin.
 const AdminKey = "Admin"
 
 // TempStorage implements the Storage interface, but data is lost on destruction.

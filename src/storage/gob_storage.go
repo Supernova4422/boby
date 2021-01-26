@@ -61,55 +61,55 @@ func (g *GobStorage) SaveToFile() error {
 
 // GetGuildValue retrieves the value for key, for a Guild.
 // Returns an error if the key doesn't exist or can't be retrieved.
-func (j *GobStorage) GetGuildValue(guild service.Guild, key string) (interface{}, error) {
-	j.mutex.Lock()
-	defer j.mutex.Unlock()
-	return j.TempStorage.GetGuildValue(guild, key)
+func (g *GobStorage) GetGuildValue(guild service.Guild, key string) (interface{}, error) {
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+	return g.TempStorage.GetGuildValue(guild, key)
 }
 
 // SetGuildValue sets the value for key, for a Guild.
-func (j *GobStorage) SetGuildValue(guild service.Guild, key string, value interface{}) {
-	j.mutex.Lock()
-	defer j.mutex.Unlock()
-	j.TempStorage.SetGuildValue(guild, key, value)
-	j.SaveToFile()
+func (g *GobStorage) SetGuildValue(guild service.Guild, key string, value interface{}) {
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+	g.TempStorage.SetGuildValue(guild, key, value)
+	g.SaveToFile()
 }
 
 // GetUserValue retrieves the value for key, for a Guild.
 // Returns an error if the key doesn't exist or can't be retrieved.
-func (j *GobStorage) GetUserValue(user service.User, key string) (interface{}, error) {
-	j.mutex.Lock()
-	defer j.mutex.Unlock()
-	return j.TempStorage.GetUserValue(user, key)
+func (g *GobStorage) GetUserValue(user service.User, key string) (interface{}, error) {
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+	return g.TempStorage.GetUserValue(user, key)
 }
 
 // SetUserValue sets the value for key, for a Guild.
-func (j *GobStorage) SetUserValue(user service.User, key string, val interface{}) {
-	j.mutex.Lock()
-	defer j.mutex.Unlock()
-	j.TempStorage.SetUserValue(user, key, val)
-	j.SaveToFile()
+func (g *GobStorage) SetUserValue(user service.User, key string, val interface{}) {
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+	g.TempStorage.SetUserValue(user, key, val)
+	g.SaveToFile()
 }
 
 // IsAdmin returns true if userID has been set using SetAdmin.
-func (j *GobStorage) IsAdmin(guild service.Guild, userID string) bool {
-	j.mutex.Lock()
-	defer j.mutex.Unlock()
-	return j.TempStorage.IsAdmin(guild, userID)
+func (g *GobStorage) IsAdmin(guild service.Guild, userID string) bool {
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+	return g.TempStorage.IsAdmin(guild, userID)
 }
 
 // SetAdmin sets a userID as an admin for a guild.
-func (j *GobStorage) SetAdmin(guild service.Guild, userID string) {
-	j.mutex.Lock()
-	defer j.mutex.Unlock()
-	j.TempStorage.SetAdmin(guild, userID)
-	j.SaveToFile()
+func (g *GobStorage) SetAdmin(guild service.Guild, userID string) {
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+	g.TempStorage.SetAdmin(guild, userID)
+	g.SaveToFile()
 }
 
 // UnsetAdmin removes userID as an admin for a guild.
-func (j *GobStorage) UnsetAdmin(guild service.Guild, userID string) {
-	j.mutex.Lock()
-	defer j.mutex.Unlock()
-	j.TempStorage.UnsetAdmin(guild, userID)
-	j.SaveToFile()
+func (g *GobStorage) UnsetAdmin(guild service.Guild, userID string) {
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+	g.TempStorage.UnsetAdmin(guild, userID)
+	g.SaveToFile()
 }
