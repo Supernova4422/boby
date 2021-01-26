@@ -27,8 +27,8 @@ type GoQueryScraperConfig struct {
 	TitleSelector SelectorCapture // The output message's title.
 	URL           string          // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
 	ReplySelector SelectorCapture // The output message's body text.
-	Help          string // Help message to display
-	HelpInput     string // Help message to display for input following command
+	Help          string          // Help message to display.
+	HelpInput     string          // Help message to display for input following command.
 }
 
 // SelectorCapture will fill out a template string using webpage content selected with goquery.
