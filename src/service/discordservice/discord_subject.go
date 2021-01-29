@@ -36,10 +36,16 @@ func (d *DiscordSubject) Close() {
 	d.discord.Close()
 }
 
-// This function will be called (due to AddHandler above) every time a new
-// message is created on any channel that the authenticated bot has access to.
+func (d *DiscordSubject) messageUpdate(s *discordgo.Session, m *discordgo.MessageUpdate) {
+	d.onMessage(s, m.Message)
+}
+
 func (d *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if m.Author.ID == s.State.User.ID {
+	d.onMessage(s, m.Message)
+}
+
+func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
+	if m.Author == nil || m.Author.ID == s.State.User.ID {
 		return
 	}
 

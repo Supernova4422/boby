@@ -87,6 +87,8 @@ func NewDiscords(filepath string) (*DiscordSubject, *DiscordSender, *discordgo.S
 
 	// Register the messageCreate func as a callback for MessageCreate events.
 	discord.AddHandler(discordSubject.messageCreate)
+	discord.AddHandler(discordSubject.messageUpdate)
+
 	discord.UpdateStatus(0, "!help")
 
 	return &discordSubject, &DiscordSender{discord: discord}, discord, nil
