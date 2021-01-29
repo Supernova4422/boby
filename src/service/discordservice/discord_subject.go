@@ -2,6 +2,7 @@ package discordservice
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
@@ -41,6 +42,12 @@ func (d *DiscordSubject) messageUpdate(s *discordgo.Session, m *discordgo.Messag
 }
 
 func (d *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.MessageReference != nil {
+		msg, err := s.ChannelMessage(m.MessageReference.ChannelID, m.MessageReference.MessageID)
+		if err == nil {
+			m.Content = strings.Join([]string{m.Content, msg.Content}, " ")
+		}
+	}
 	d.onMessage(s, m.Message)
 }
 
