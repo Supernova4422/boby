@@ -17,11 +17,22 @@ The primary implementation of this bot is known as FLD-Bot, which has been added
 # Getting Started
 To use to this project, the only required software is a working go environment. For installation instructions, see [this page.](https://golang.org/doc/install)
 
-This project includes third party dependencies, so be sure to run `go get -d -v ./..` to install those dependencie.
+This project includes third party dependencies, so be sure to run `go get -d -v ./..` to install those dependencies.
 
 This repository contains additional scripts and files that can be used to aid testing or running a bot. This includes a python3 script, and dockerfiles (which can be loaded by using the python3 scripts). These aren't essential, but can help with ensuring that your contributions work outside your own environment.
 
-When running the bot, you will likely have issues that configuration files are missing. This is an issue, and a task is to have the bot guide a user to what files need to be created when running the bot.
+## Creating Configuration Files
+To understand how to run the bot, first build it using `go build src/main`, then run the program to receive more instructions and examples on how to run the bot.
+
+For properly understanding configuration files, make sure to view the files:
+
+1. [goquery_scraper](https://github.com/BKrajancic/boby/blob/main/src/command/goquery_scraper.go)
+2. [json_sender](https://github.com/BKrajancic/boby/blob/main/src/command/json_sender.go)
+3. [regexp_scraper](https://github.com/BKrajancic/boby/blob/main/src/command/regexp_scraper.go)
+
+Any of these files can be ignored by replacing their contents with `[]`.
+
+Feel free to send a message if you are having issues running the bot. Unfortunately, this isn't an easy bot to configure.
 
 ##  Contributing
 A pull request must have the following: 
