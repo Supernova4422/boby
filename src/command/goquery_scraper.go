@@ -27,8 +27,14 @@ type GoQueryScraperConfig struct {
 	TitleSelector SelectorCapture // The output message's title.
 	URL           string          // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
 	ReplySelector SelectorCapture // The output message's body text.
-	Help          string          // Help message to display.
-	HelpInput     string          // Help message to display for input following command.
+	Fields        []GoQueryFieldCapture
+	Help          string // Help message to display.
+	HelpInput     string // Help message to display for input following command.
+}
+
+type GoQueryFieldCapture struct {
+	Title       SelectorCapture
+	Description SelectorCapture
 }
 
 // SelectorCapture will fill out a template string using webpage content selected with goquery.
@@ -45,9 +51,9 @@ type HTMLGetter = func(string) (url string, out io.ReadCloser, err error)
 
 // selectorCaptureToString matches all selectors and fill out template.
 // Then using HandleMultiple decide which to use.
-func (s SelectorCapture) selectorCaptureToString(doc goquery.Document) string {
-	if len(s.Selectors) == 0 || strings.Count(s.Template, "%s") == 0 {
-		return s.Template
+func (s SelectorCapture) selectorCaptureToString(doc goquery.Document) (string, error) {
+	if len(s.Selectors) == 0 || strings.Contains(s.Template, "%s") == false {
+		return s.Template, nil
 	}
 
 	var maxLength int64 = math.MaxInt64
@@ -62,6 +68,9 @@ func (s SelectorCapture) selectorCaptureToString(doc goquery.Document) string {
 		}
 	}
 
+	// if maxLength == 0 {
+	// 	return "", fmt.Errorf("There was an error retrieving information from the webpage.")
+	// }
 	maxLength--
 
 	var index int = 0
@@ -98,7 +107,7 @@ func (s SelectorCapture) selectorCaptureToString(doc goquery.Document) string {
 		}
 	}
 
-	return reply
+	return reply, nil
 }
 
 // Command returns a webscraper Command from a config.
@@ -161,11 +170,31 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 						URL:   "",
 					})
 				} else {
-					fields = append(fields, service.MessageField{
-						Field: g.TitleSelector.selectorCaptureToString(*doc),
-						Value: g.ReplySelector.selectorCaptureToString(*doc),
-						URL:   redirect,
-					})
+					title, err1 := g.TitleSelector.selectorCaptureToString(*doc)
+					value, err2 := g.ReplySelector.selectorCaptureToString(*doc)
+					if err1 == nil && err2 == nil {
+						fields = append(fields, service.MessageField{
+							Field: title,
+							Value: value,
+							URL:   redirect,
+						})
+					}
+
+					for _, field := range g.Fields {
+						fieldTitle, err1 := field.Title.selectorCaptureToString(*doc)
+						value, err2 := field.Description.selectorCaptureToString(*doc)
+						if err1 == nil && err2 == nil {
+							field := service.MessageField{
+								Field:  fieldTitle,
+								Value:  value,
+								Inline: true,
+							}
+
+							if field.Field != "" && field.Value != "" {
+								fields = append(fields, field)
+							}
+						}
+					}
 				}
 			} else {
 				fields = append(fields, service.MessageField{
@@ -182,11 +211,18 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 		}
 	}
 
-	sink(sender, service.Message{
-		Title:       g.Title,
-		Description: "",
-		Fields:      fields,
-	})
+	if len(fields) > 0 {
+		replyMsg := service.Message{
+			Title:       fields[0].Field,
+			Description: fields[0].Value,
+			URL:         fields[0].URL,
+		}
+
+		if len(fields) > 1 {
+			replyMsg.Fields = fields[1:]
+		}
+		sink(sender, replyMsg)
+	}
 }
 
 // GetGoqueryScraperConfigs retrieves an array of GoQueryScraperConfig by parsing JSON from a buffer.

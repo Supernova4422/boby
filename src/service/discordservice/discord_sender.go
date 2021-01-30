@@ -25,7 +25,7 @@ func (d *DiscordSender) SendMessage(destination service.Conversation, msg servic
 			&discordgo.MessageEmbedField{
 				Name:   field.Field,
 				Value:  value,
-				Inline: false,
+				Inline: field.Inline,
 			})
 	}
 

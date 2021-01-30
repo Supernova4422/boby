@@ -11,7 +11,8 @@ type Message struct {
 
 // A MessageField stores a field and value pair.
 type MessageField struct {
-	Field string
-	Value string
-	URL   string
+	Field  string
+	Value  string
+	URL    string
+	Inline bool
 }
