@@ -33,10 +33,11 @@ type GoQueryScraperConfig struct {
 
 // SelectorCapture will fill out a template string using webpage content selected with goquery.
 type SelectorCapture struct {
-	Template       string              // Message template to be filled out. Every %s in a template is replaced with results of selectors.
-	Selectors      []string            // What goquery captures are used to fill out the template.
-	Replacements   []map[string]string // String replacements for each entry in selectors.
-	HandleMultiple string              // How to handle multiple captures. "Random" or "First."
+	Template        string              // Message template to be filled out. Every %s in a template is replaced with results of selectors.
+	Selectors       []string            // What goquery captures are used to fill out the template.
+	Replacements    []map[string]string // String replacements for each entry in selectors.
+	FullReplacement map[string]string   // String replacement that takes place on the completed selector.
+	HandleMultiple  string              // How to handle multiple captures. "Random" or "First."
 }
 
 // A HTMLGetter returns a url and buffer based on a string.
@@ -45,43 +46,39 @@ type HTMLGetter = func(string) (url string, out io.ReadCloser, err error)
 // selectorCaptureToString matches all selectors and fill out template.
 // Then using HandleMultiple decide which to use.
 func (s SelectorCapture) selectorCaptureToString(doc goquery.Document) string {
+	if len(s.Selectors) == 0 || strings.Count(s.Template, "%s") == 0 {
+		return s.Template
+	}
+
 	var maxLength int64 = math.MaxInt64
 	allCaptures := make([](*(goquery.Selection)), len(s.Selectors))
-	if len(s.Selectors) == 0 {
-		maxLength = 0
-	} else {
-		for i, selector := range s.Selectors {
-			capture := doc.Find(selector)
-			allCaptures[i] = capture
-			captureLength := int64(capture.Length())
+	for i, selector := range s.Selectors {
+		capture := doc.Find(selector)
+		allCaptures[i] = capture
+		captureLength := int64(capture.Length())
 
-			if captureLength < maxLength {
-				maxLength = captureLength
-			}
+		if captureLength < maxLength {
+			maxLength = captureLength
 		}
 	}
 
-	reply := s.Template
+	maxLength--
 
-	if maxLength == 0 && strings.Contains(reply, "%s") {
-		return "There was an error retrieving information from the webpage."
-	} else if maxLength > 0 {
-		maxLength--
-
-		var index int = 0
-		if maxLength > 0 {
-			if s.HandleMultiple == "Random" {
-				rand.Seed(time.Now().UnixNano())
-				index = int(rand.Int63n(maxLength))
-			} else if s.HandleMultiple == "Last" {
-				index = int(maxLength)
-			}
+	var index int = 0
+	if maxLength > 0 {
+		if s.HandleMultiple == "Random" {
+			rand.Seed(time.Now().UnixNano())
+			index = int(rand.Int63n(maxLength))
+		} else if s.HandleMultiple == "Last" {
+			index = int(maxLength)
 		}
+	}
 
-		tmp := make([]interface{}, len(s.Selectors))
-		for i, selector := range allCaptures {
-			selectorIndex := selector.Slice(int(index), int(index)+1)
-			val := strings.TrimSpace(selectorIndex.Text())
+	tmp := make([]interface{}, len(s.Selectors))
+	for i, selector := range allCaptures {
+		val := ""
+		if index < (*selector).Length() {
+			val = strings.TrimSpace(selector.Slice(int(index), int(index)+1).Text())
 			if i < len(s.Replacements) {
 				for search, replace := range s.Replacements[i] {
 					if strings.Contains(val, search) {
@@ -90,11 +87,17 @@ func (s SelectorCapture) selectorCaptureToString(doc goquery.Document) string {
 					}
 				}
 			}
-			tmp[i] = val
 		}
-
-		reply = fmt.Sprintf(reply, tmp...)
+		tmp[i] = val
 	}
+
+	reply := fmt.Sprintf(s.Template, tmp...)
+	for search, replace := range s.FullReplacement {
+		if strings.Contains(reply, search) {
+			reply = strings.ReplaceAll(reply, search, replace)
+		}
+	}
+
 	return reply
 }
 
