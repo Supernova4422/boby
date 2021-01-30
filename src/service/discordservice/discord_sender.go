@@ -29,10 +29,15 @@ func (d *DiscordSender) SendMessage(destination service.Conversation, msg servic
 			})
 	}
 
+	desc := msg.Description
+	if msg.URL != "" {
+		desc += fmt.Sprintf("\nRead more at: %s", msg.URL)
+	}
+
 	embed := discordgo.MessageEmbed{
 		URL:         msg.URL,
 		Title:       msg.Title,
-		Description: msg.Description,
+		Description: desc,
 		Fields:      fields,
 	}
 	if msg.Footer != "" {
