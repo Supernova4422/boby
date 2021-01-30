@@ -32,6 +32,7 @@ type GoQueryScraperConfig struct {
 	HelpInput     string // Help message to display for input following command.
 }
 
+// GoQueryFieldCapture is used to have a selector capture for a pair of selectors.
 type GoQueryFieldCapture struct {
 	Title       SelectorCapture
 	Description SelectorCapture
