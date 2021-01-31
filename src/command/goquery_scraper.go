@@ -166,9 +166,8 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 			if err == nil {
 				if doc.Text() == "" {
 					fields = append(fields, service.MessageField{
-						Field: msgURL,
-						Value: fmt.Sprintf("Webpage not found at %s", redirect),
-						URL:   "",
+						Field: "Error",
+						Value: fmt.Sprintf("No result was found for %s", msgURL),
 					})
 				} else {
 					title, err1 := g.TitleSelector.selectorCaptureToString(*doc)

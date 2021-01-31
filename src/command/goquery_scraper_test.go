@@ -864,11 +864,11 @@ func TestEmptyPage(t *testing.T) {
 	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if !strings.HasPrefix(resultMessage.Description, "Webpage not found at") {
+	if !strings.HasPrefix(resultMessage.Description, "No result was found for") {
 		t.Errorf("Message was different!")
 	}
 
-	if !strings.HasPrefix(resultMessage.Description, "Webpage not found at") {
+	if !strings.HasPrefix(resultMessage.Description, "No result was found for") {
 		t.Errorf("Message was different!")
 	}
 
