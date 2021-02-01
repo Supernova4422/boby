@@ -83,41 +83,42 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 		}
 		guild.GuildID = m.GuildID
 
-		if conversation.Admin == false {
-			userID := fmt.Sprintf("<@!%s>", m.Author.ID)
-			if (*d.storage).IsAdmin(guild, userID) {
-				conversation.Admin = true
-			} else {
-				for _, role := range m.Member.Roles {
-					for _, guildRole := range discordGuild.Roles {
-						if role == guildRole.ID {
-							adminPermissions := []int{
-								discordgo.PermissionAdministrator,
-								discordgo.PermissionManageServer,
-								discordgo.PermissionManageWebhooks,
-							}
-							for _, permission := range adminPermissions {
-								if (guildRole.Permissions & permission) == permission {
-									conversation.Admin = true
-									break
-								}
-							}
-							if conversation.Admin {
-								break
-							}
-						}
-					}
+		userID := fmt.Sprintf("<@!%s>", m.Author.ID)
+		if (*d.storage).IsAdmin(guild, userID) {
+			conversation.Admin = true
+		}
 
-					if conversation.Admin {
-						break
-					}
+		for _, role := range m.Member.Roles {
+			if conversation.Admin {
+				break
+			}
 
-					updatedRole := fmt.Sprintf("<@&%s>", role)
-					if (*d.storage).IsAdmin(guild, updatedRole) {
+			for _, guildRole := range discordGuild.Roles {
+				if conversation.Admin {
+					break
+				}
+
+				if role != guildRole.ID {
+					continue
+				}
+
+				adminPermissions := []int{
+					discordgo.PermissionAdministrator,
+					discordgo.PermissionManageServer,
+					discordgo.PermissionManageWebhooks,
+				}
+				for _, permission := range adminPermissions {
+					if (guildRole.Permissions & permission) == permission {
 						conversation.Admin = true
 						break
 					}
 				}
+			}
+
+			updatedRole := fmt.Sprintf("<@&%s>", role)
+			if (*d.storage).IsAdmin(guild, updatedRole) {
+				conversation.Admin = true
+				break
 			}
 		}
 	}

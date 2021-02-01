@@ -9,7 +9,7 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/service"
 )
 
-// GobStorage is an implementation of Storage, saveing to a file using the Gob format.
+// GobStorage is an implementation of Storage, saving to a file using the Gob format.
 type GobStorage struct {
 	TempStorage TempStorage
 	writer      TruncatableWriter
