@@ -93,53 +93,53 @@ func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate st
 	}
 
 	_, htmlReader, err := htmlGetter(url)
-	if err == nil {
-		defer htmlReader.Close()
-		body, err := ioutil.ReadAll(htmlReader)
-		if err == nil {
-			// Create a regular expression to find comments
-			bodyS := string(body)
-
-			matches := webpageCapture.FindAllStringSubmatch(bodyS, -1)
-			titleMatches := titleCapture.FindAllStringSubmatch(bodyS, -1)
-
-			if matches != nil {
-				allCaptures := make([]string, len(matches))
-				for i, captures := range matches {
-					allCaptures[i] = strings.Join(captures[1:], " ")
-				}
-
-				reply := fmt.Sprintf("%s.\n\nRead more at: %s", strings.Join(allCaptures, " "), url)
-				replyTitle := titleTemplate
-
-				if strings.Contains(replyTitle, "%s") {
-					titleCaptures := ""
-					for _, captures := range titleMatches {
-						for _, captureGroup := range captures[1:] {
-							if titleCaptures != "" {
-								titleCaptures += " "
-							}
-							titleCaptures += captureGroup
-						}
-					}
-					replyTitle = fmt.Sprintf(replyTitle, titleCaptures)
-				}
-
-				sink(sender, service.Message{
-					Title:       replyTitle,
-					Description: reply,
-					URL:         url,
-				})
-			} else {
-				sink(sender, service.Message{Description: "Could not extract data from the webpage."})
-			}
-		} else {
-			sink(sender, service.Message{Description: "An error occurred when processing the webpage."})
-		}
-	} else {
+	if err != nil {
 		sink(sender, service.Message{
 			Description: "An error occurred retrieving the webpage.",
 			URL:         url,
 		})
+		return
 	}
+
+	defer htmlReader.Close()
+	body, err := ioutil.ReadAll(htmlReader)
+	if err != nil {
+		sink(sender, service.Message{Description: "An error occurred when processing the webpage."})
+		return
+	}
+
+	// Create a regular expression to find comments
+	bodyS := string(body)
+	matches := webpageCapture.FindAllStringSubmatch(bodyS, -1)
+	titleMatches := titleCapture.FindAllStringSubmatch(bodyS, -1)
+	if matches == nil {
+		sink(sender, service.Message{Description: "Could not extract data from the webpage."})
+		return
+	}
+	allCaptures := make([]string, len(matches))
+	for i, captures := range matches {
+		allCaptures[i] = strings.Join(captures[1:], " ")
+	}
+
+	reply := fmt.Sprintf("%s.\n\nRead more at: %s", strings.Join(allCaptures, " "), url)
+	replyTitle := titleTemplate
+
+	if strings.Contains(replyTitle, "%s") {
+		titleCaptures := ""
+		for _, captures := range titleMatches {
+			for _, captureGroup := range captures[1:] {
+				if titleCaptures != "" {
+					titleCaptures += " "
+				}
+				titleCaptures += captureGroup
+			}
+		}
+		replyTitle = fmt.Sprintf(replyTitle, titleCaptures)
+	}
+
+	sink(sender, service.Message{
+		Title:       replyTitle,
+		Description: reply,
+		URL:         url,
+	})
 }

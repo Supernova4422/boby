@@ -160,54 +160,55 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 		}
 
 		redirect, htmlReader, err := htmlGetter(msgURL)
-		if err == nil {
-			defer htmlReader.Close()
-			doc, err := goquery.NewDocumentFromReader(htmlReader)
-			if err == nil {
-				if doc.Text() == "" {
-					fields = append(fields, service.MessageField{
-						Field: "Error",
-						Value: fmt.Sprintf("No result was found for %s", msgURL),
-					})
-				} else {
-					title, err1 := g.TitleSelector.selectorCaptureToString(*doc)
-					value, err2 := g.ReplySelector.selectorCaptureToString(*doc)
-					if err1 == nil && err2 == nil {
-						fields = append(fields, service.MessageField{
-							Field: title,
-							Value: value,
-							URL:   redirect,
-						})
-					}
-
-					for _, field := range g.Fields {
-						fieldTitle, err1 := field.Title.selectorCaptureToString(*doc)
-						value, err2 := field.Description.selectorCaptureToString(*doc)
-						if err1 == nil && err2 == nil {
-							field := service.MessageField{
-								Field:  fieldTitle,
-								Value:  value,
-								Inline: true,
-							}
-
-							if field.Field != "" && field.Value != "" {
-								fields = append(fields, field)
-							}
-						}
-					}
-				}
-			} else {
-				fields = append(fields, service.MessageField{
-					Field: msgURL,
-					Value: "An error occurred when processing the webpage.",
-				})
-			}
-		} else {
+		if err != nil {
 			fields = append(fields, service.MessageField{
 				Field: "Error",
 				Value: "An error occurred retrieving the webpage.",
 				URL:   msgURL,
 			})
+			continue
+		}
+
+		defer htmlReader.Close()
+		doc, err := goquery.NewDocumentFromReader(htmlReader)
+		if err != nil {
+			fields = append(fields, service.MessageField{
+				Field: msgURL,
+				Value: "An error occurred when processing the webpage.",
+			})
+			continue
+
+		}
+		if doc.Text() == "" {
+			fields = append(fields, service.MessageField{
+				Field: "Error",
+				Value: fmt.Sprintf("No result was found for \"%s\"", strings.Join(capture, " ")),
+			})
+			continue
+		}
+
+		title, err1 := g.TitleSelector.selectorCaptureToString(*doc)
+		value, err2 := g.ReplySelector.selectorCaptureToString(*doc)
+		if err1 == nil && err2 == nil {
+			fields = append(fields, service.MessageField{
+				Field: title,
+				Value: value,
+				URL:   redirect,
+			})
+		}
+
+		for _, field := range g.Fields {
+			fieldTitle, err1 := field.Title.selectorCaptureToString(*doc)
+			value, err2 := field.Description.selectorCaptureToString(*doc)
+			if err1 == nil && err2 == nil && fieldTitle != "" && value != "" {
+				fields = append(fields,
+					service.MessageField{
+						Field:  fieldTitle,
+						Value:  value,
+						Inline: true,
+					},
+				)
+			}
 		}
 	}
 
