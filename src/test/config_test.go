@@ -94,6 +94,7 @@ func getDemoBot(filepath string, bot *bot.Bot) *demoservice.DemoSender {
 
 func TestConfig(t *testing.T) {
 	configTests := "config_tests.json"
+	os.Args = append(os.Args, "/Users/bkrajancic/boby/src/main/config")
 	if len(os.Args) > 3 {
 		configDir := os.Args[3]
 		inputFp := path.Join(configDir, configTests)

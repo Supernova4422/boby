@@ -411,7 +411,7 @@ func TestGobTypeChange(t *testing.T) {
 		t.Fail()
 	}
 
-	valueOut, err := storage.GetUserValue(user, k0)
+	valueOut, _ := storage.GetUserValue(user, k0)
 	switch valueOut.(type) {
 	case int64:
 		break
