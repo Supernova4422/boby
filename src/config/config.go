@@ -236,7 +236,7 @@ func ConfiguredBot(configDir string) (bot.Bot, error) {
 
 	bot.AddCommand(
 		command.Command{
-			Trigger:   "unsetAdmin",
+			Trigger:   "unsetadmin",
 			Pattern:   regexp.MustCompile("(.*)"),
 			Exec:      command.UnsetAdmin,
 			Help:      "Unset a role or user as an admin, therefore giving them usual permissions.",
