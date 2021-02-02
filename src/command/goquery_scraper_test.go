@@ -949,6 +949,48 @@ func TestEmptyPage(t *testing.T) {
 	}
 }
 
+func TestEmptyPageTestSuffixWhenEmptyURL(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+
+	testConversation := service.Conversation{
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
+	}
+
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+
+	config := GoQueryScraperConfig{
+		Capture:   "(.*)", // This is a bad idea.
+		URL:       "e-commerce/",
+		URLSuffix: "empty",
+	}
+
+	scraper, err := config.CommandWithHTMLGetter(htmlGetRemembered(""))
+	if err != nil {
+		t.Errorf("An error occurred when making a reasonable scraper!")
+	}
+
+	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
+
+	resultMessage, resultConversation := demoSender.PopMessage()
+
+	if resultMessage.URL != "" {
+		t.Fail()
+	}
+
+	if !strings.HasPrefix(resultMessage.Description, "No result was found for") {
+		t.Errorf("Message was different!")
+	}
+
+	if !strings.HasPrefix(resultMessage.Description, "No result was found for") {
+		t.Errorf("Message was different!")
+	}
+
+	if resultConversation != testConversation {
+		t.Errorf("Sender was different!")
+	}
+}
+
 // htmlReturnErr will use a reader that returns an error.
 var HTMLReturnErr = func(string) (string, io.ReadCloser, error) {
 	return "", readerCrashes{}, nil

@@ -214,7 +214,9 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 	}
 
 	for i := range fields {
-		fields[i].URL += g.URLSuffix
+		if fields[i].URL != "" {
+			fields[i].URL += g.URLSuffix
+		}
 	}
 
 	if len(fields) > 0 {
