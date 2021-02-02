@@ -183,6 +183,7 @@ type TokenMaker struct {
 	Prefix  string // When calculating a token, what should be prepended
 	Postfix string // When calculating a token, what should be appended
 	Size    int    // Take the first 'Size' characters from the result.
+	Suffix  string // String to append after the token
 }
 
 // MakeToken will make a token from this token maker.
@@ -191,7 +192,7 @@ type TokenMaker struct {
 func (t TokenMaker) MakeToken(input string) (out string) {
 	if t.Type == "MD5" {
 		fullString := []byte(t.Prefix + input + t.Postfix)
-		return fmt.Sprintf("%x", md5.Sum(fullString))[:t.Size]
+		return fmt.Sprintf("%x", md5.Sum(fullString))[:t.Size] + t.Suffix
 	}
-	return ""
+	return t.Suffix
 }

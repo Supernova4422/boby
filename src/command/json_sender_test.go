@@ -350,6 +350,64 @@ func TestToken(t *testing.T) {
 	}
 }
 
+func TestTokenWithSuffix(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+	testConversation := service.Conversation{
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
+	}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+
+	config := JSONGetterConfig{
+		Grouped: false,
+		Delay:   0,
+		Capture: "(.*)",
+
+		Message: JSONCapture{
+			Title: FieldCapture{
+				Template:  "%s",
+				Selectors: []string{"Key1"},
+			},
+		},
+
+		Fields: []JSONCapture{
+			{
+				Body: FieldCapture{
+					Template:  "%s",
+					Selectors: []string{"URL"},
+				},
+			},
+		},
+		Token: TokenMaker{
+			Prefix:  "Y",
+			Postfix: "X",
+			Size:    6,
+			Type:    "MD5",
+			Suffix:  "?Z",
+		},
+		URL: "PREURL",
+	}
+
+	getter, err := config.Command(jsonURLReturn)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	getter.Exec(
+		testConversation,
+		testSender,
+		[][]string{{"Hello World"}},
+		nil,
+		demoSender.SendMessage,
+	)
+
+	resultMessage, _ := demoSender.PopMessage()
+	if resultMessage.Description != "PREURL2d1105?Z" {
+		t.Fail()
+	}
+}
+
 func TestSpacesInMessage(t *testing.T) {
 	demoSender := demoservice.DemoSender{}
 	testConversation := service.Conversation{
