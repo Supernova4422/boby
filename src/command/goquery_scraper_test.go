@@ -117,6 +117,78 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 	}
 }
 
+func TestGoQueryScraperWithSuffix(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+
+	testConversation := service.Conversation{
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
+	}
+
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+
+	config := GoQueryScraperConfig{
+		Trigger: "",
+		Capture: "(.*)",
+		TitleSelector: SelectorCapture{
+			Template: "%s",
+			Selectors: []string{
+				"h2",
+			},
+			HandleMultiple: "First",
+		},
+		URL:       "%s",
+		URLSuffix: "?referral",
+		ReplySelector: SelectorCapture{
+			Template: "%s",
+			Selectors: []string{
+				"h1",
+			},
+			HandleMultiple: "First",
+		},
+		Help: "This is just a test!",
+	}
+
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
+	if err != nil {
+		t.Errorf("An error occurred when making a reasonable scraper!")
+	}
+
+	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
+
+	resultMessage, resultConversation := demoSender.PopMessage()
+
+	if resultMessage.Title != "Heading Two" {
+		t.Errorf("Title was different!")
+	}
+
+	if !strings.HasPrefix(resultMessage.Description, "Heading One") {
+		t.Errorf("Message was different!")
+	}
+
+	if !strings.HasSuffix(resultMessage.URL, "?referral") {
+		t.Fail()
+	}
+
+	if resultConversation != testConversation {
+		t.Errorf("Sender was different!")
+	}
+
+	scraper.Exec(testConversation, testSender, [][]string{{"tables"}}, nil, demoSender.SendMessage)
+	resultMessage, resultConversation = demoSender.PopMessage()
+	if !strings.HasPrefix(resultMessage.Description, "Tables Heading One") {
+		t.Errorf("Message was different!")
+	}
+
+	if resultConversation != testConversation {
+		t.Errorf("Sender was different!")
+	}
+
+	if demoSender.IsEmpty() == false {
+		t.Errorf("Too many messages!")
+	}
+}
+
 func TestGoQueryScraperBadRegex(t *testing.T) {
 	config := GoQueryScraperConfig{Capture: "("}
 	if _, err := config.Command(); err == nil {

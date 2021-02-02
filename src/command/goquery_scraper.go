@@ -26,6 +26,7 @@ type GoQueryScraperConfig struct {
 	Capture       string          // How to capture words.
 	TitleSelector SelectorCapture // The output message's title.
 	URL           string          // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
+	URLSuffix     string          // When adding a URL to a message, this string is appended. This is useful for including referral links.
 	ReplySelector SelectorCapture // The output message's body text.
 	Fields        []GoQueryFieldCapture
 	Help          string // Help message to display.
@@ -210,6 +211,10 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 				)
 			}
 		}
+	}
+
+	for i := range fields {
+		fields[i].URL += g.URLSuffix
 	}
 
 	if len(fields) > 0 {
