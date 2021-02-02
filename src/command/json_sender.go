@@ -82,9 +82,10 @@ func (j JSONCapture) MessageField(dict map[string]interface{}) (field service.Me
 	if strings.Contains(body, "%s") == false {
 		title := j.Title.ToStringWithMap(dict)
 		if strings.Contains(title, "%s") == false {
+			// TODO: Temporary work around for interpreting "'", a better solution is needed.
 			field = service.MessageField{
-				Field: title,
-				Value: body,
+				Field: strings.ReplaceAll(title, "&#39;", "'"),
+				Value: strings.ReplaceAll(body, "&#39;", "'"),
 			}
 			err = nil
 		}
