@@ -31,6 +31,7 @@ type GoQueryScraperConfig struct {
 	Fields        []GoQueryFieldCapture
 	Help          string // Help message to display.
 	HelpInput     string // Help message to display for input following command.
+	HideURL       bool   // When true, a result returns no URL. Use with caution, attribution is often required.
 }
 
 // GoQueryFieldCapture is used to have a selector capture for a pair of selectors.
@@ -214,7 +215,9 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 	}
 
 	for i := range fields {
-		if fields[i].URL != "" {
+		if g.HideURL {
+			fields[i].URL = ""
+		} else if fields[i].URL != "" {
 			fields[i].URL += g.URLSuffix
 		}
 	}
