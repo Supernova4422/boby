@@ -191,14 +191,12 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 
 		title, err1 := g.TitleSelector.selectorCaptureToString(*doc)
 		value, err2 := g.ReplySelector.selectorCaptureToString(*doc)
-		if err1 == nil && err2 == nil {
-			if title != "" || value != "" {
-				fields = append(fields, service.MessageField{
-					Field: title,
-					Value: value,
-					URL:   redirect,
-				})
-			}
+		if err1 == nil && err2 == nil && title != "" && value != "" {
+			fields = append(fields, service.MessageField{
+				Field: title,
+				Value: value,
+				URL:   redirect,
+			})
 		}
 
 		for _, field := range g.Fields {
