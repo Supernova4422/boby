@@ -192,11 +192,13 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 		title, err1 := g.TitleSelector.selectorCaptureToString(*doc)
 		value, err2 := g.ReplySelector.selectorCaptureToString(*doc)
 		if err1 == nil && err2 == nil {
-			fields = append(fields, service.MessageField{
-				Field: title,
-				Value: value,
-				URL:   redirect,
-			})
+			if title != "" || value != "" {
+				fields = append(fields, service.MessageField{
+					Field: title,
+					Value: value,
+					URL:   redirect,
+				})
+			}
 		}
 
 		for _, field := range g.Fields {
@@ -222,18 +224,23 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 		}
 	}
 
-	if len(fields) > 0 {
-		replyMsg := service.Message{
-			Title:       fields[0].Field,
-			Description: fields[0].Value,
-			URL:         fields[0].URL,
-		}
-
-		if len(fields) > 1 {
-			replyMsg.Fields = fields[1:]
-		}
-		sink(sender, replyMsg)
+	if len(fields) == 0 {
+		fields = append(fields, service.MessageField{
+			Field: "Error",
+			Value: fmt.Sprintf("No result was found"),
+		})
 	}
+
+	replyMsg := service.Message{
+		Title:       fields[0].Field,
+		Description: fields[0].Value,
+		URL:         fields[0].URL,
+	}
+
+	if len(fields) > 1 {
+		replyMsg.Fields = fields[1:]
+	}
+	sink(sender, replyMsg)
 }
 
 // GetGoqueryScraperConfigs retrieves an array of GoQueryScraperConfig by parsing JSON from a buffer.

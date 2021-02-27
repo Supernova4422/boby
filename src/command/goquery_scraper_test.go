@@ -117,6 +117,58 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 	}
 }
 
+func TestGoQueryScraperWithMissingCapture(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+
+	testConversation := service.Conversation{
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
+	}
+
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+
+	config := GoQueryScraperConfig{
+		Trigger: "",
+		Capture: "(.*)",
+		TitleSelector: SelectorCapture{
+			Template: "%s",
+			Selectors: []string{
+				"h3",
+			},
+			HandleMultiple: "First",
+		},
+		URL: "%s",
+		ReplySelector: SelectorCapture{
+			Template: "%s",
+			Selectors: []string{
+				"h3",
+			},
+			HandleMultiple: "First",
+		},
+		Help: "This is just a test!",
+	}
+
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
+	if err != nil {
+		t.Errorf("An error occurred when making a reasonable scraper!")
+	}
+
+	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
+
+	resultMessage, resultConversation := demoSender.PopMessage()
+
+	if resultMessage.Title != "Error" {
+		t.Errorf("Title was different!")
+	}
+
+	if !strings.HasPrefix(resultMessage.Description, "No result was found") {
+		t.Errorf("Message was different!")
+	}
+
+	if resultConversation != testConversation {
+		t.Errorf("Sender was different!")
+	}
+}
 func TestGoQueryScraperWithSuffix(t *testing.T) {
 	demoSender := demoservice.DemoSender{}
 
@@ -653,7 +705,7 @@ func TestGoQueryScraperNoCaptureMissingSub(t *testing.T) {
 		Trigger: "",
 		Capture: "(.*)",
 		TitleSelector: SelectorCapture{
-			Template:       "%s",
+			Template:       "Title: %s",
 			Selectors:      []string{"h3"},
 			HandleMultiple: "First",
 		},
@@ -677,7 +729,7 @@ func TestGoQueryScraperNoCaptureMissingSub(t *testing.T) {
 	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if resultMessage.Title != "" {
+	if resultMessage.Title != "Title: " {
 		t.Fail()
 	}
 
