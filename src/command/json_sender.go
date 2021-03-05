@@ -51,10 +51,12 @@ func (j JSONGetterConfig) MessagesFromJSON(dict map[string]interface{}) (message
 		}
 	} else {
 		if body, err := j.Message.MessageField(dict); err == nil {
-			messages = append(messages, service.Message{
-				Title:       body.Field,
-				Description: body.Value,
-			})
+			if body.Field != "" || body.Value != "" {
+				messages = append(messages, service.Message{
+					Title:       body.Field,
+					Description: body.Value,
+				})
+			}
 		}
 
 		for _, field := range fields {
@@ -62,7 +64,6 @@ func (j JSONGetterConfig) MessagesFromJSON(dict map[string]interface{}) (message
 				Title:       field.Field,
 				Description: field.Value,
 			})
-
 		}
 	}
 	return
@@ -144,9 +145,15 @@ func (j JSONGetterConfig) Command(jsonGetter JSONGetter) (Command, error) {
 // jsonGetterFunc processes a message.
 func (j JSONGetterConfig) jsonGetterFunc(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message), jsonGetter JSONGetter) {
 	substitutions := strings.Count(j.URL, "%s")
-	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
+	noCapture := msg == nil || len(msg) == 0
+
+	if (substitutions > 0) && (noCapture || len(msg[0]) < substitutions) {
 		sink(sender, service.Message{Description: "An error occurred when building the url."})
 		return
+	}
+
+	if noCapture {
+		msg = [][]string{{""}}
 	}
 
 	for _, capture := range msg {
@@ -154,14 +161,17 @@ func (j JSONGetterConfig) jsonGetterFunc(sender service.Conversation, user servi
 
 		replacements := strings.Count(msgURL, "%s")
 
-		for i, word := range capture {
-			if i == replacements {
-				break
+		// HACK: noCapture is pretty hacky.
+		if noCapture == false {
+			for i, word := range capture {
+				if i == replacements {
+					break
+				}
+				msgURL = strings.Replace(msgURL, "%s", url.PathEscape(word), 1)
 			}
-			msgURL = strings.Replace(msgURL, "%s", url.PathEscape(word), 1)
+			msgURL += j.Token.MakeToken(strings.Join(capture, ""))
 		}
 
-		msgURL += j.Token.MakeToken(strings.Join(capture, ""))
 		fmt.Print(msgURL)
 		if jsonReader, err := jsonGetter(msgURL); err == nil {
 			defer jsonReader.Close()
