@@ -25,6 +25,7 @@ type GoQueryScraperConfig struct {
 	Trigger       string          // Word which triggers this command to activate.
 	Capture       string          // How to capture words.
 	TitleSelector SelectorCapture // The output message's title.
+	ErrorURL      string          // A url to show only when there is an error.
 	URL           string          // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
 	URLSuffix     string          // When adding a URL to a message, this string is appended. This is useful for including referral links.
 	ReplySelector SelectorCapture // The output message's body text.
@@ -177,14 +178,17 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 			fields = append(fields, service.MessageField{
 				Field: msgURL,
 				Value: "An error occurred when processing the webpage.",
+				URL:   g.ErrorURL,
 			})
 			continue
 
 		}
+
 		if doc.Text() == "" {
 			fields = append(fields, service.MessageField{
 				Field: "Error",
 				Value: fmt.Sprintf("No result was found for \"%s\"", strings.Join(capture, " ")),
+				URL:   g.ErrorURL,
 			})
 			continue
 		}
@@ -192,10 +196,14 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 		title, err1 := g.TitleSelector.selectorCaptureToString(*doc)
 		value, err2 := g.ReplySelector.selectorCaptureToString(*doc)
 		if err1 == nil && err2 == nil && title != "" && value != "" {
+			if g.HideURL {
+				redirect = ""
+			}
+
 			fields = append(fields, service.MessageField{
 				Field: title,
 				Value: value,
-				URL:   redirect,
+				URL:   redirect + g.URLSuffix,
 			})
 		}
 
@@ -214,18 +222,11 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 		}
 	}
 
-	for i := range fields {
-		if g.HideURL {
-			fields[i].URL = ""
-		} else if fields[i].URL != "" {
-			fields[i].URL += g.URLSuffix
-		}
-	}
-
 	if len(fields) == 0 {
 		fields = append(fields, service.MessageField{
 			Field: "Error",
 			Value: fmt.Sprintf("No result was found"),
+			URL:   g.ErrorURL,
 		})
 	}
 
