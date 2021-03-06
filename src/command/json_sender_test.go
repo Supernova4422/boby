@@ -18,6 +18,25 @@ func jsonGetRemembered(content string) JSONGetter {
 		return ioutil.NopCloser(reader), nil
 	}
 }
+func jsonExamplesPerc(name string) (io.ReadCloser, error) {
+	const example1 = `{
+	"Key1": "Value1",
+	"Key2": "%string"
+}`
+
+	const example2 = `{
+	"Key3": "Value3",
+	"Key4": "%string"
+}`
+
+	if name == "example1" {
+		return ioutil.NopCloser(strings.NewReader(example1)), nil
+	}
+	if name == "example2" {
+		return ioutil.NopCloser(strings.NewReader(example2)), nil
+	}
+	return nil, fmt.Errorf("error")
+}
 
 func jsonExamples(name string) (io.ReadCloser, error) {
 	const example1 = `{
@@ -100,7 +119,111 @@ func TestSimple(t *testing.T) {
 	}
 }
 
-func TestPair(t *testing.T) {
+func TestErrorMsgReplacementPerc(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+	testConversation := service.Conversation{
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
+	}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+
+	config := JSONGetterConfig{
+		Grouped: true,
+		Message: JSONCapture{
+			Title: FieldCapture{
+				Template:  "%s",
+				Selectors: []string{"Key1"},
+			},
+
+			Body: FieldCapture{
+				Template: "Footer",
+			},
+		},
+		Fields: []JSONCapture{
+			{
+				Body: FieldCapture{
+					Template:  "%s",
+					Selectors: []string{"Key2"},
+					ErrorMsg:  "Error Message",
+				},
+			},
+		},
+		URL: "%s",
+	}
+
+	getter, err := config.Command(jsonExamplesPerc)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	getter.Exec(
+		testConversation,
+		testSender,
+		[][]string{{"example1"}},
+		nil,
+		demoSender.SendMessage,
+	)
+
+	resultMessage, _ := demoSender.PopMessage()
+	if resultMessage.Fields[0].Value != "%string" {
+		t.Fail()
+	}
+}
+
+func TestErrorMsgReplacement(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+	testConversation := service.Conversation{
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
+	}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+
+	config := JSONGetterConfig{
+		Grouped: true,
+		Message: JSONCapture{
+			Title: FieldCapture{
+				Template:  "%s",
+				Selectors: []string{"Key1"},
+			},
+
+			Body: FieldCapture{
+				Template: "Footer",
+			},
+		},
+		Fields: []JSONCapture{
+			{
+				Body: FieldCapture{
+					Template:  "%s%s",
+					Selectors: []string{"Key2", "Key3"},
+					ErrorMsg:  "Error Message",
+				},
+			},
+		},
+		URL: "%s",
+	}
+
+	getter, err := config.Command(jsonExamples)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	getter.Exec(
+		testConversation,
+		testSender,
+		[][]string{{"example1"}},
+		nil,
+		demoSender.SendMessage,
+	)
+
+	resultMessage, _ := demoSender.PopMessage()
+	if resultMessage.Fields[0].Value != "Error Message" {
+		t.Fail()
+	}
+}
+
+func TestExtraPercentages(t *testing.T) {
 	demoSender := demoservice.DemoSender{}
 	testConversation := service.Conversation{
 		ServiceID:      demoSender.ID(),
