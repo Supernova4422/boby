@@ -185,7 +185,7 @@ func TestScraperNoCapture(t *testing.T) {
 	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if !strings.HasPrefix(resultMessage.Description, "Heading One Last Heading One") {
+	if !strings.HasPrefix(resultMessage.Description, "Heading One\nLast Heading One") {
 		t.Errorf("Message was different!")
 	}
 
