@@ -49,16 +49,16 @@ func main() {
 
 	discordConfig := path.Join(folder, "config.json")
 	discordSubject, discordSender, discord, err := discordservice.NewDiscords(discordConfig)
-	discordSubject.SetStorage(&storage)
 	if err != nil {
 		panic(err)
 	}
 	defer discordSubject.Close() // Cleanly close down the Discord session.
+	discordSubject.SetStorage(&storage)
 
 	helpTrigger := "help"
-	commands = append(commands, makeHelpCommand(commands, helpTrigger))
-
 	prefix := "!"
+	commands = append(commands, *makeHelpCommand(&commands, helpTrigger, prefix))
+
 	for i := range commands {
 		commands[i].AddSender(discordSender)
 		commands[i].SetDefaultPrefix(prefix)
@@ -75,13 +75,27 @@ func main() {
 	<-sc
 }
 
-func makeHelpCommand(commands []command.Command, helpTrigger string) command.Command {
-	exec := func(conversation service.Conversation, user service.User, _ [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+func makeHelpCommand(commands *[]command.Command, helpTrigger string, defaultPrefix string) *command.Command {
+	helpCommand := &command.Command{
+		Trigger: helpTrigger,
+		Pattern: regexp.MustCompile("(.*)"),
+		Help:    "Provides information on how to use the bot.",
+	}
+
+	helpCommand.Exec = func(conversation service.Conversation, user service.User, _ [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+		cmd := command.Command{Storage: storage}
+		cmd.SetDefaultPrefix(defaultPrefix)
 		fields := make([]service.MessageField, 0)
 
-		for i, command := range commands {
+		for i, command := range *commands {
 			fields = append(fields, service.MessageField{
-				Field: fmt.Sprintf("%s. %s%s %s", strconv.Itoa(i+1), "!" /* prefix */, command.Trigger, command.HelpInput),
+				Field: fmt.Sprintf(
+					"%s. %s%s %s",
+					strconv.Itoa(i+1),
+					cmd.GetPrefix(conversation),
+					command.Trigger,
+					command.HelpInput,
+				),
 				Value: command.Help,
 			})
 		}
@@ -96,13 +110,7 @@ func makeHelpCommand(commands []command.Command, helpTrigger string) command.Com
 		)
 	}
 
-	return command.Command{
-		Trigger: helpTrigger,
-		Pattern: regexp.MustCompile("(.*)"),
-		Help:    "Provides information on how to use the bot.",
-		Exec:    exec,
-	}
-
+	return helpCommand
 }
 
 // loadGobStorage loads a file used for storage.
