@@ -87,6 +87,7 @@ func TestConfig(t *testing.T) {
 				}
 
 				for i := range commands {
+					demoService.Register(&commands[i])
 					commands[i].SetDefaultPrefix("!")
 					commands[i].AddSender(&demoSender)
 				}
