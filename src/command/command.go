@@ -62,6 +62,7 @@ func (c *Command) RouteByID(conversation service.Conversation, msg service.Messa
 	}
 }
 
+// OnMessage checks if a message begins with a prefix, and if so, calls Exec.
 func (c *Command) OnMessage(conversation service.Conversation, source service.User, msg string) {
 	prefix := c.GetPrefix(conversation)
 	trigger := fmt.Sprintf("%s%s", prefix, c.Trigger)
