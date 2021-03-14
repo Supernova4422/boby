@@ -6,9 +6,16 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
+// ImAdminTrigger is a trigger to use for an ImAdmin command.
 const ImAdminTrigger = "imadmin"
+
+// SetAdminTrigger is a trigger to use for an SetAdmin command.
 const SetAdminTrigger = "setadmin"
+
+// UnsetAdminTrigger is a trigger to use for an UnsetAdmin command.
 const UnsetAdminTrigger = "unsetadmin"
+
+// IsAdminTrigger is a trigger to use for an IsAdmin command.
 const IsAdminTrigger = "isadmin"
 
 // Repo is a URL to this project's repository. Useful for showing with help information.
