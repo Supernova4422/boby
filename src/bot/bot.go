@@ -10,9 +10,6 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
-// Repo is a URL to this project's repository. Useful for showing with help information.
-const Repo = "https://github.com/BKrajancic/boby"
-
 // Bot implements the service.Observer interface.
 // A Bot routes all messages to a set of commands, as along as the message
 // begins with the defaultPrefix (or guild's prefix) + the command's trigger.
@@ -35,10 +32,12 @@ func (b *Bot) AddSender(sender service.Sender) {
 	b.observers = append(b.observers, sender)
 }
 
+/*
 // AddCommand adds a command that input messages are routed to.
 func (b *Bot) AddCommand(cmd command.Command) {
 	b.commands = append(b.commands, cmd)
 }
+*/
 
 // GetPrefix returns the prefix for a conversation.
 // A prefix at the start of the message identifies the message is a command for
@@ -90,7 +89,8 @@ func (b *Bot) OnMessage(conversation service.Conversation, sender service.User, 
 				Title:  "Help",
 				Fields: fields,
 				Footer: "Contribute to this project at: " + Repo,
-			})
+			},
+		)
 	} else {
 		for _, command := range b.commands {
 			trigger := fmt.Sprintf("%s%s", prefix, command.Trigger)

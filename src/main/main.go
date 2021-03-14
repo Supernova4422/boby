@@ -9,9 +9,13 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"regexp"
+	"strconv"
 	"syscall"
 
+	"github.com/BKrajancic/boby/m/v2/src/command"
 	"github.com/BKrajancic/boby/m/v2/src/config"
+	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/service/discordservice"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
@@ -31,7 +35,12 @@ func main() {
 		panic(err)
 	}
 
-	bot, err := config.ConfiguredBot(folder)
+	storage, err := loadGobStorage(path.Join(folder, "storage.gob"))
+	if err != nil {
+		panic(err)
+	}
+
+	commands, err := config.ConfiguredBot(folder, &storage)
 	if err != nil {
 		fmt.Println("An error occurred when loading the configuration files.")
 		config.MakeExampleDir(exampleDir)
@@ -40,26 +49,23 @@ func main() {
 
 	discordConfig := path.Join(folder, "config.json")
 	discordSubject, discordSender, discord, err := discordservice.NewDiscords(discordConfig)
+	discordSubject.SetStorage(&storage)
 	if err != nil {
 		panic(err)
 	}
 	defer discordSubject.Close() // Cleanly close down the Discord session.
 
+	helpTrigger := "help"
+	commands = append(commands, makeHelpCommand(commands, helpTrigger))
+
 	prefix := "!"
-	bot.SetDefaultPrefix(prefix)
-	help := bot.HelpTrigger()
-	discord.UpdateStatus(0, prefix+help)
-
-	storage, err := loadGobStorage(path.Join(folder, "storage.gob"))
-	if err != nil {
-		panic(err)
+	for i := range commands {
+		commands[i].AddSender(discordSender)
+		commands[i].SetDefaultPrefix(prefix)
+		discordSubject.Register(&commands[i])
 	}
-	discordSubject.SetStorage(&storage)
 
-	bot.SetStorage(&storage)
-
-	discordSubject.Register(&bot)
-	bot.AddSender(discordSender)
+	discord.UpdateStatus(0, prefix+helpTrigger)
 
 	// Start all routines, e.g.
 	// go routine()
@@ -67,6 +73,36 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
+}
+
+func makeHelpCommand(commands []command.Command, helpTrigger string) command.Command {
+	exec := func(conversation service.Conversation, user service.User, _ [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+		fields := make([]service.MessageField, 0)
+
+		for i, command := range commands {
+			fields = append(fields, service.MessageField{
+				Field: fmt.Sprintf("%s. %s%s %s", strconv.Itoa(i+1), "!" /* prefix */, command.Trigger, command.HelpInput),
+				Value: command.Help,
+			})
+		}
+
+		sink(
+			conversation,
+			service.Message{
+				Title:  "Help",
+				Fields: fields,
+				Footer: "Contribute to this project at: " + config.Repo,
+			},
+		)
+	}
+
+	return command.Command{
+		Trigger: helpTrigger,
+		Pattern: regexp.MustCompile("(.*)"),
+		Help:    "Provides information on how to use the bot.",
+		Exec:    exec,
+	}
+
 }
 
 // loadGobStorage loads a file used for storage.
