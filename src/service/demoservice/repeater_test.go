@@ -1,4 +1,4 @@
-package bot
+package demoservice
 
 import (
 	"fmt"
@@ -7,7 +7,6 @@ import (
 
 	"github.com/BKrajancic/boby/m/v2/src/command"
 	"github.com/BKrajancic/boby/m/v2/src/service"
-	"github.com/BKrajancic/boby/m/v2/src/service/demoservice"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
@@ -21,22 +20,21 @@ func Repeater(sender service.Conversation, user service.User, msg [][]string, st
 
 func TestParseWithoutPrefix(t *testing.T) {
 	// Prepare context.
-	bot := Bot{}
 	prefix := "!"
-	bot.SetDefaultPrefix(prefix)
-	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
-	demoServiceSubject.Register(&bot)
-	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
-	bot.AddSender(&demoSender)
+
+	demoServiceSubject := DemoService{ServiceID: ServiceID}
+	demoSender := DemoSender{ServiceID: ServiceID}
 
 	testCmd := "repeat "
-	bot.AddCommand(
-		command.Command{
-			Trigger: testCmd,
-			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    Repeater,
-			Help:    "",
-		}) // Repeater command.
+	cmd := command.Command{
+		Trigger: testCmd,
+		Pattern: regexp.MustCompile("(.*)"),
+		Exec:    Repeater,
+		Help:    "",
+	} // Repeater command.
+	cmd.SetDefaultPrefix(prefix)
+	cmd.AddSender(&demoSender)
+	demoServiceSubject.Register(&cmd)
 
 	// Message to repeat.
 	testConversation := service.Conversation{
@@ -61,22 +59,20 @@ func TestParseWithoutPrefix(t *testing.T) {
 
 func TestParseWithPrefix(t *testing.T) {
 	// Prepare context.
-	bot := Bot{}
 	prefix := "!"
-	bot.SetDefaultPrefix(prefix)
-	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
-	demoServiceSubject.Register(&bot)
-	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
-	bot.AddSender(&demoSender)
+	demoServiceSubject := DemoService{ServiceID: ServiceID}
+	demoSender := DemoSender{ServiceID: ServiceID}
 
 	testCmd := "repeat "
-	bot.AddCommand(
-		command.Command{
-			Trigger: testCmd,
-			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    Repeater,
-			Help:    "",
-		}) // Repeater command.
+	cmd := command.Command{
+		Trigger: testCmd,
+		Pattern: regexp.MustCompile("(.*)"),
+		Exec:    Repeater,
+		Help:    "",
+	} // Repeater command.
+	cmd.SetDefaultPrefix(prefix)
+	cmd.AddSender(&demoSender)
+	demoServiceSubject.Register(&cmd)
 
 	// Message to repeat.
 	testConversation := service.Conversation{
@@ -101,22 +97,21 @@ func TestParseWithPrefix(t *testing.T) {
 
 func TestParseWithoutSpace(t *testing.T) {
 	// Prepare context.
-	bot := Bot{}
 	prefix := "!"
-	bot.SetDefaultPrefix(prefix)
-	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
-	demoServiceSubject.Register(&bot)
-	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
-	bot.AddSender(&demoSender)
+	demoServiceSubject := DemoService{ServiceID: ServiceID}
+	demoSender := DemoSender{ServiceID: ServiceID}
 
 	testCmd := "repeat" // Should be fine.
-	bot.AddCommand(
-		command.Command{
-			Trigger: testCmd,
-			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    Repeater,
-			Help:    "",
-		}) // Repeater command.
+	cmd := command.Command{
+		Trigger: testCmd,
+		Pattern: regexp.MustCompile("(.*)"),
+		Exec:    Repeater,
+		Help:    "",
+	} // Repeater command.
+	cmd.SetDefaultPrefix(prefix)
+	cmd.AddSender(&demoSender)
+	demoServiceSubject.Register(&cmd)
+
 	testConversation := service.Conversation{
 		ServiceID:      demoServiceSubject.ID(),
 		ConversationID: "0",
@@ -142,22 +137,20 @@ func TestParseWithoutSpace(t *testing.T) {
 // Ensure that spaces are respected in the regex
 func TestEmpty(t *testing.T) {
 	// Prepare context.
-	bot := Bot{}
 	prefix := "!"
-	bot.SetDefaultPrefix(prefix)
-	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
-	demoServiceSubject.Register(&bot)
-	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
-	bot.AddSender(&demoSender)
+	demoServiceSubject := DemoService{ServiceID: ServiceID}
+	demoSender := DemoSender{ServiceID: ServiceID}
 
 	testCmd := "repeat"
-	bot.AddCommand(
-		command.Command{
-			Trigger: testCmd + " ",
-			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    Repeater,
-			Help:    "",
-		}) // Repeater command.
+	cmd := command.Command{
+		Trigger: testCmd + " ",
+		Pattern: regexp.MustCompile("(.*)"),
+		Exec:    Repeater,
+		Help:    "",
+	}
+	cmd.SetDefaultPrefix(prefix)
+	cmd.AddSender(&demoSender)
+	demoServiceSubject.Register(&cmd)
 
 	// Message to repeat.
 	testConversation := service.Conversation{
@@ -169,7 +162,7 @@ func TestEmpty(t *testing.T) {
 	// All should not return a thing.
 
 	// Repeat only after a command.
-	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s", "message3"))
+	demoServiceSubject.AddMessage(testConversation, testSender, "message3")
 	// Respect prefix.
 	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s", testCmd, "message2"))
 	// Respect whitespace.

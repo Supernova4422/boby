@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"regexp"
 
 	"github.com/BKrajancic/boby/m/v2/src/command"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
@@ -18,9 +17,6 @@ const jsonFilepath = "json_getter_config.json"
 const regexpFilepath = "regexp_scraper_config.json"
 const goqueryFilepath = "goquery_scraper_config.json"
 
-// Repo is a URL to this project's repository. Useful for showing with help information.
-const Repo = "https://github.com/BKrajancic/boby"
-
 // MakeExampleDir makes an example folder with example config files.
 func MakeExampleDir(dir string) error {
 	fmt.Printf(
@@ -30,7 +26,7 @@ func MakeExampleDir(dir string) error {
 	fmt.Println("The configuration files can be edited, and the folder can be used to run this software.")
 	fmt.Printf("For information on editing configuration files, "+
 		"make sure to read the documentation at %s, or this project's readme.md file.",
-		Repo)
+		command.Repo)
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.Mkdir(dir, 0755)
@@ -149,52 +145,7 @@ func MakeExampleDir(dir string) error {
 // ConfiguredBot uses files in configDir to return a bot ready for usage.
 // This bot is not attached to any storage or services.
 func ConfiguredBot(configDir string, storage *storage.Storage) ([]command.Command, error) {
-	commands := []command.Command{
-		{
-			Trigger:   "imadmin",
-			Pattern:   regexp.MustCompile("(.*)"),
-			Exec:      command.ImAdmin,
-			Help:      "Check if the sender is an admin.",
-			HelpInput: "[@role or @user]",
-			Storage:   storage,
-		},
-
-		{
-			Trigger:   "isadmin",
-			Pattern:   regexp.MustCompile("(.*)"),
-			Exec:      command.CheckAdmin,
-			Help:      "Check if a role or user is an admin.",
-			HelpInput: "[@role or @user]",
-			Storage:   storage,
-		},
-
-		{
-			Trigger:   "setadmin",
-			Pattern:   regexp.MustCompile("(.*)"),
-			Exec:      command.SetAdmin,
-			Help:      "Set a role or user as an admin, therefore giving them all permissions for this bot. Users/Roles with any of the following server permissions are automatically treated as admin: 'Administrator', 'Manage Server', 'Manage Webhooks.'",
-			HelpInput: "[@role or @user]",
-			Storage:   storage,
-		},
-
-		{
-			Trigger:   "unsetadmin",
-			Pattern:   regexp.MustCompile("(.*)"),
-			Exec:      command.UnsetAdmin,
-			Help:      "Unset a role or user as an admin, therefore giving them usual permissions.",
-			HelpInput: "[@role or @user]",
-			Storage:   storage,
-		},
-
-		{
-			Trigger:   "setprefix",
-			Pattern:   regexp.MustCompile("(.*)"),
-			Exec:      command.SetPrefix,
-			Help:      "Set the prefix of all commands of this bot, for this server.",
-			HelpInput: "[word]",
-			Storage:   storage,
-		},
-	}
+	commands := command.AdminCommands(storage)
 
 	file, err := os.Open(path.Join(configDir, jsonFilepath))
 	if err != nil {

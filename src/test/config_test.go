@@ -3,7 +3,6 @@
 package test
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -11,8 +10,6 @@ import (
 	"path"
 	"testing"
 
-	"github.com/BKrajancic/boby/m/v2/src/bot"
-	"github.com/BKrajancic/boby/m/v2/src/command"
 	"github.com/BKrajancic/boby/m/v2/src/config"
 	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/service/demoservice"
@@ -66,32 +63,6 @@ func GetTestInputs(filepath string) ([]ConfigTest, error) {
 	return configTests, nil
 }
 
-func getDemoBot(filepath string, bot *bot.Bot) *demoservice.DemoSender {
-	demoSender := demoservice.DemoSender{}
-	bot.AddSender(&demoSender)
-
-	file, err := os.Open(filepath)
-	if err != nil {
-		panic(err)
-	}
-
-	RegexScraperConfigs, err := command.GetRegexpScraperConfigs(bufio.NewReader(file))
-	if err != nil {
-		panic(err)
-	}
-
-	for _, RegexScraperConfig := range RegexScraperConfigs {
-		scraperCommand, err := RegexScraperConfig.Command()
-		if err == nil {
-			bot.AddCommand(scraperCommand)
-		} else {
-			panic(err)
-		}
-	}
-
-	return &demoSender
-}
-
 func TestConfig(t *testing.T) {
 	configTests := "config_tests.json"
 	if len(os.Args) > 3 {
@@ -102,16 +73,23 @@ func TestConfig(t *testing.T) {
 			t.Log("Configuration file was not used for this test.")
 		} else {
 			t.Log("Configuration file was used for this test.")
-			bot, err := config.ConfiguredBot(configDir)
-			bot.SetDefaultPrefix("!")
-
 			tempStorage := storage.GetTempStorage()
 			var _storage storage.Storage = &tempStorage
-			bot.SetStorage(&_storage)
+			commands, err := config.ConfiguredBot(configDir, &_storage)
 
 			if err == nil {
-				demoSender := demoservice.DemoSender{}
-				bot.AddSender(&demoSender)
+				demoService := demoservice.DemoService{
+					ServiceID: demoservice.ServiceID,
+				}
+
+				demoSender := demoservice.DemoSender{
+					ServiceID: demoservice.ServiceID,
+				}
+
+				for i := range commands {
+					commands[i].SetDefaultPrefix("!")
+					commands[i].AddSender(&demoSender)
+				}
 
 				inputTest, _ := GetTestInputs(inputFp)
 
@@ -123,7 +101,8 @@ func TestConfig(t *testing.T) {
 				testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 				results := make([]service.Message, 0)
 				for _, input := range inputTest {
-					bot.OnMessage(testConversation, testSender, input.Input)
+					demoService.AddMessage(testConversation, testSender, input.Input)
+					demoService.Run()
 					for _, expect := range input.Expect {
 						resultMessage, _ := demoSender.PopMessage()
 						results = append(results, resultMessage)
