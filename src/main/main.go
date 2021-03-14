@@ -91,7 +91,7 @@ func makeHelpCommand(commands []command.Command, helpTrigger string) command.Com
 			service.Message{
 				Title:  "Help",
 				Fields: fields,
-				Footer: "Contribute to this project at: " + config.Repo,
+				Footer: "Contribute to this project at: " + command.Repo,
 			},
 		)
 	}
