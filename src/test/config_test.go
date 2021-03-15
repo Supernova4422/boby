@@ -65,6 +65,7 @@ func GetTestInputs(filepath string) ([]ConfigTest, error) {
 
 func TestConfig(t *testing.T) {
 	configTests := "config_tests.json"
+	os.Args = append(os.Args, "/workspaces/boby/src/main/config")
 	if len(os.Args) > 3 {
 		configDir := os.Args[len(os.Args)-1]
 		inputFp := path.Join(configDir, configTests)
@@ -87,6 +88,7 @@ func TestConfig(t *testing.T) {
 				}
 
 				for i := range commands {
+					demoService.Register(&commands[i])
 					commands[i].SetDefaultPrefix("!")
 					commands[i].AddSender(&demoSender)
 				}
