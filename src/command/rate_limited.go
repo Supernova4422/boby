@@ -58,7 +58,8 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 		return command
 	}
 
-	curry := func(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	rateLimitedCommand := command
+	rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 		now := time.Now().Unix()
 		history := []int64{}
 
@@ -99,16 +100,13 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 		}
 	}
 
-	return Command{
-		Trigger: command.Trigger,
-		Pattern: command.Pattern,
-		Exec:    curry,
-		Help: fmt.Sprintf(
-			"%s. Can only be used %d times every %d seconds.",
-			command.Help,
-			r.TimesPerInterval,
-			r.SecondsPerInterval,
-		),
-		HelpInput: command.HelpInput,
-	}
+	rateLimitedCommand.Help = fmt.Sprintf(
+		"%s. Can only be used %d times every %d seconds.",
+		command.Help,
+		r.TimesPerInterval,
+		r.SecondsPerInterval,
+	)
+
+	return rateLimitedCommand
 }
+
