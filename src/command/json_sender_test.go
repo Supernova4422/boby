@@ -86,6 +86,7 @@ func TestSimple(t *testing.T) {
 		},
 		Fields: []JSONCapture{
 			{
+				Title: FieldCapture{Template: "title"},
 				Body: FieldCapture{
 					Template:  "%s",
 					Selectors: []string{"Key2"},
@@ -119,6 +120,57 @@ func TestSimple(t *testing.T) {
 	}
 }
 
+func TestSimpleSkip(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+	testConversation := service.Conversation{
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
+	}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+
+	config := JSONGetterConfig{
+		Grouped: true,
+		Message: JSONCapture{
+			Title: FieldCapture{
+				Template:  "%s",
+				Selectors: []string{"Key1"},
+			},
+
+			Body: FieldCapture{
+				Template: "Footer",
+			},
+		},
+		Fields: []JSONCapture{
+			{
+				Body: FieldCapture{
+					Template:  "%s",
+					Selectors: []string{"Key2"},
+				},
+			},
+		},
+		URL: "%s",
+	}
+
+	getter, err := config.Command(jsonExamples)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	getter.Exec(
+		testConversation,
+		testSender,
+		[][]string{{"example1"}},
+		nil,
+		demoSender.SendMessage,
+	)
+
+	resultMessage, _ := demoSender.PopMessage()
+	if len(resultMessage.Fields) != 0 {
+		t.Fail()
+	}
+}
+
 func TestErrorMsgReplacementPerc(t *testing.T) {
 	demoSender := demoservice.DemoSender{}
 	testConversation := service.Conversation{
@@ -141,6 +193,9 @@ func TestErrorMsgReplacementPerc(t *testing.T) {
 		},
 		Fields: []JSONCapture{
 			{
+				Title: FieldCapture{
+					Template: "Title",
+				},
 				Body: FieldCapture{
 					Template:  "%s",
 					Selectors: []string{"Key2"},
@@ -193,6 +248,7 @@ func TestErrorMsgReplacement(t *testing.T) {
 		},
 		Fields: []JSONCapture{
 			{
+				Title: FieldCapture{Template: "Title"},
 				Body: FieldCapture{
 					Template:  "%s%s",
 					Selectors: []string{"Key2", "Key3"},
@@ -242,12 +298,19 @@ func TestExtraPercentages(t *testing.T) {
 
 		Fields: []JSONCapture{
 			{
+				Title: FieldCapture{
+					Template: "Title",
+				},
+
 				Body: FieldCapture{
 					Template:  "%s",
 					Selectors: []string{"Key1"},
 				},
 			},
 			{
+				Title: FieldCapture{
+					Template: "Title",
+				},
 				Body: FieldCapture{
 					Template:  "%s",
 					Selectors: []string{"Key2"},
@@ -371,12 +434,18 @@ func TestUngrouped(t *testing.T) {
 
 		Fields: []JSONCapture{
 			{
+				Title: FieldCapture{
+					Template: "Title",
+				},
 				Body: FieldCapture{
 					Template:  "%s",
 					Selectors: []string{"Key2"},
 				},
 			},
 			{
+				Title: FieldCapture{
+					Template: "Title",
+				},
 				Body: FieldCapture{
 					Template:  "%s",
 					Selectors: []string{"Key1"},
@@ -439,6 +508,9 @@ func TestUngroupedNoMain(t *testing.T) {
 				},
 			},
 			{
+				Title: FieldCapture{
+					Template: "Title",
+				},
 				Body: FieldCapture{
 					Template:  "%s",
 					Selectors: []string{"Key1"},
@@ -500,6 +572,9 @@ func TestToken(t *testing.T) {
 
 		Fields: []JSONCapture{
 			{
+				Title: FieldCapture{
+					Template: "Title",
+				},
 				Body: FieldCapture{
 					Template:  "%s",
 					Selectors: []string{"URL"},
@@ -557,6 +632,9 @@ func TestTokenWithSuffix(t *testing.T) {
 
 		Fields: []JSONCapture{
 			{
+				Title: FieldCapture{
+					Template: "Title",
+				},
 				Body: FieldCapture{
 					Template:  "%s",
 					Selectors: []string{"URL"},
@@ -615,6 +693,9 @@ func TestSpacesInMessage(t *testing.T) {
 
 		Fields: []JSONCapture{
 			{
+				Title: FieldCapture{
+					Template: "Title",
+				},
 				Body: FieldCapture{
 					Template:  "%s",
 					Selectors: []string{"URL"},

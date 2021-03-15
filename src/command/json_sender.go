@@ -37,7 +37,9 @@ func (j JSONGetterConfig) MessagesFromJSON(dict map[string]interface{}) (message
 	fields := make([]service.MessageField, 0)
 	for _, field := range j.Fields {
 		if field, err := field.MessageField(dict); err == nil {
-			fields = append(fields, field)
+			if field.Field != "" && field.Value != "" {
+				fields = append(fields, field)
+			}
 		}
 	}
 
