@@ -25,12 +25,14 @@ type GoQueryScraperConfig struct {
 	Trigger       string          // Word which triggers this command to activate.
 	Capture       string          // How to capture words.
 	TitleSelector SelectorCapture // The output message's title.
+	ErrorURL      string          // A url to show only when there is an error.
 	URL           string          // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
 	URLSuffix     string          // When adding a URL to a message, this string is appended. This is useful for including referral links.
 	ReplySelector SelectorCapture // The output message's body text.
 	Fields        []GoQueryFieldCapture
 	Help          string // Help message to display.
 	HelpInput     string // Help message to display for input following command.
+	HideURL       bool   // When true, a result returns no URL. Use with caution, attribution is often required.
 }
 
 // GoQueryFieldCapture is used to have a selector capture for a pair of selectors.
@@ -176,25 +178,32 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 			fields = append(fields, service.MessageField{
 				Field: msgURL,
 				Value: "An error occurred when processing the webpage.",
+				URL:   g.ErrorURL,
 			})
 			continue
 
 		}
+
 		if doc.Text() == "" {
 			fields = append(fields, service.MessageField{
 				Field: "Error",
 				Value: fmt.Sprintf("No result was found for \"%s\"", strings.Join(capture, " ")),
+				URL:   g.ErrorURL,
 			})
 			continue
 		}
 
 		title, err1 := g.TitleSelector.selectorCaptureToString(*doc)
 		value, err2 := g.ReplySelector.selectorCaptureToString(*doc)
-		if err1 == nil && err2 == nil {
+		if err1 == nil && err2 == nil && title != "" && value != "" {
+			if g.HideURL {
+				redirect = ""
+			}
+
 			fields = append(fields, service.MessageField{
 				Field: title,
 				Value: value,
-				URL:   redirect,
+				URL:   redirect + g.URLSuffix,
 			})
 		}
 
@@ -213,24 +222,24 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 		}
 	}
 
-	for i := range fields {
-		if fields[i].URL != "" {
-			fields[i].URL += g.URLSuffix
-		}
+	if len(fields) == 0 {
+		fields = append(fields, service.MessageField{
+			Field: "Error",
+			Value: fmt.Sprintf("No result was found"),
+			URL:   g.ErrorURL,
+		})
 	}
 
-	if len(fields) > 0 {
-		replyMsg := service.Message{
-			Title:       fields[0].Field,
-			Description: fields[0].Value,
-			URL:         fields[0].URL,
-		}
-
-		if len(fields) > 1 {
-			replyMsg.Fields = fields[1:]
-		}
-		sink(sender, replyMsg)
+	replyMsg := service.Message{
+		Title:       fields[0].Field,
+		Description: fields[0].Value,
+		URL:         fields[0].URL,
 	}
+
+	if len(fields) > 1 {
+		replyMsg.Fields = fields[1:]
+	}
+	sink(sender, replyMsg)
 }
 
 // GetGoqueryScraperConfigs retrieves an array of GoQueryScraperConfig by parsing JSON from a buffer.

@@ -51,10 +51,12 @@ func (j JSONGetterConfig) MessagesFromJSON(dict map[string]interface{}) (message
 		}
 	} else {
 		if body, err := j.Message.MessageField(dict); err == nil {
-			messages = append(messages, service.Message{
-				Title:       body.Field,
-				Description: body.Value,
-			})
+			if body.Field != "" || body.Value != "" {
+				messages = append(messages, service.Message{
+					Title:       body.Field,
+					Description: body.Value,
+				})
+			}
 		}
 
 		for _, field := range fields {
@@ -62,7 +64,6 @@ func (j JSONGetterConfig) MessagesFromJSON(dict map[string]interface{}) (message
 				Title:       field.Field,
 				Description: field.Value,
 			})
-
 		}
 	}
 	return
@@ -77,38 +78,59 @@ type JSONCapture struct {
 // MessageField uses a dict (which is a usually a reading of a JSON file), to create a MessageField.
 // Returns an error if %s is present in either the title or description even after replacements are made.
 func (j JSONCapture) MessageField(dict map[string]interface{}) (field service.MessageField, err error) {
-	err = fmt.Errorf("there were missing fields in the json")
-	body := j.Body.ToStringWithMap(dict)
-	if strings.Contains(body, "%s") == false {
-		title := j.Title.ToStringWithMap(dict)
-		if strings.Contains(title, "%s") == false {
-			// TODO: Temporary work around for interpreting "'", a better solution is needed.
-			field = service.MessageField{
-				Field: strings.ReplaceAll(title, "&#39;", "'"),
-				Value: strings.ReplaceAll(body, "&#39;", "'"),
-			}
-			err = nil
-		}
+	body, err := j.Body.ToStringWithMap(dict)
+	if err != nil {
+		body = j.Body.ErrorMsg
 	}
-	return
+
+	title, err := j.Title.ToStringWithMap(dict)
+	if err != nil {
+		title = j.Title.ErrorMsg
+	}
+
+	// TODO: Temporary work around for interpreting "'", a better solution is needed.
+	field = service.MessageField{
+		Field: strings.ReplaceAll(title, "&#39;", "'"),
+		Value: strings.ReplaceAll(body, "&#39;", "'"),
+	}
+
+	return field, nil
 }
 
 // A FieldCapture represents a template to be filled out by selectors.
 type FieldCapture struct {
 	Template  string   // Message template to be filled out. Use %s to denote text to be replaced.
 	Selectors []string // What captures to use to fill out the template
+	ErrorMsg  string   // If the template has any %s remaining, replace the entire msg with this msg.
 }
 
 // ToStringWithMap uses a map to fill out the template.
 // If a key is missing, it is skipped.
-func (f FieldCapture) ToStringWithMap(dict map[string]interface{}) (out string) {
-	out = f.Template
+func (f FieldCapture) ToStringWithMap(dict map[string]interface{}) (out string, err error) {
+	split := strings.SplitAfter(f.Template, "%s")
+	expectReplacments := len(split) - 1
+
+	replacements := 0
 	for _, selector := range f.Selectors {
-		if val, ok := dict[selector]; ok {
-			out = fmt.Sprintf(out, val.(string))
+		if val, ok := dict[selector]; ok && val != "" {
+			out += fmt.Sprintf(split[replacements], val.(string))
+			replacements++
+		} else {
+			break
+		}
+
+		if replacements == expectReplacments {
+			break
 		}
 	}
-	return out
+
+	out += split[len(split)-1]
+
+	if replacements < expectReplacments {
+		return "", fmt.Errorf("there was an error processing results")
+	}
+
+	return out, nil
 }
 
 // JSONGetter will accept a string and provide a reader. This could be a file, a webpage, who cares!
@@ -144,9 +166,15 @@ func (j JSONGetterConfig) Command(jsonGetter JSONGetter) (Command, error) {
 // jsonGetterFunc processes a message.
 func (j JSONGetterConfig) jsonGetterFunc(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message), jsonGetter JSONGetter) {
 	substitutions := strings.Count(j.URL, "%s")
-	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
+	noCapture := msg == nil || len(msg) == 0
+
+	if (substitutions > 0) && (noCapture || len(msg[0]) < substitutions) {
 		sink(sender, service.Message{Description: "An error occurred when building the url."})
 		return
+	}
+
+	if noCapture {
+		msg = [][]string{{""}}
 	}
 
 	for _, capture := range msg {
@@ -154,14 +182,17 @@ func (j JSONGetterConfig) jsonGetterFunc(sender service.Conversation, user servi
 
 		replacements := strings.Count(msgURL, "%s")
 
-		for i, word := range capture {
-			if i == replacements {
-				break
+		// HACK: noCapture is pretty hacky.
+		if noCapture == false {
+			for i, word := range capture {
+				if i == replacements {
+					break
+				}
+				msgURL = strings.Replace(msgURL, "%s", url.PathEscape(word), 1)
 			}
-			msgURL = strings.Replace(msgURL, "%s", url.PathEscape(word), 1)
+			msgURL += j.Token.MakeToken(strings.Join(capture, ""))
 		}
 
-		msgURL += j.Token.MakeToken(strings.Join(capture, ""))
 		fmt.Print(msgURL)
 		if jsonReader, err := jsonGetter(msgURL); err == nil {
 			defer jsonReader.Close()

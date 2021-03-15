@@ -117,6 +117,118 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 	}
 }
 
+func TestGoQueryScraperWithMissingCapture(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+
+	testConversation := service.Conversation{
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
+	}
+
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+
+	config := GoQueryScraperConfig{
+		Trigger: "",
+		Capture: "(.*)",
+		TitleSelector: SelectorCapture{
+			Template: "%s",
+			Selectors: []string{
+				"h3",
+			},
+			HandleMultiple: "First",
+		},
+		URL: "%s",
+		ReplySelector: SelectorCapture{
+			Template: "%s",
+			Selectors: []string{
+				"h3",
+			},
+			HandleMultiple: "First",
+		},
+		Help: "This is just a test!",
+	}
+
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
+	if err != nil {
+		t.Errorf("An error occurred when making a reasonable scraper!")
+	}
+
+	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
+
+	resultMessage, resultConversation := demoSender.PopMessage()
+
+	if resultMessage.Title != "Error" {
+		t.Errorf("Title was different!")
+	}
+
+	if !strings.HasPrefix(resultMessage.Description, "No result was found") {
+		t.Errorf("Message was different!")
+	}
+
+	if resultConversation != testConversation {
+		t.Errorf("Sender was different!")
+	}
+}
+
+func TestGoQueryScraperWithMissingCaptureAndErrorURL(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+	errorURL := "errorURL"
+
+	testConversation := service.Conversation{
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
+	}
+
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+
+	config := GoQueryScraperConfig{
+		Trigger: "",
+		Capture: "(.*)",
+		TitleSelector: SelectorCapture{
+			Template: "%s",
+			Selectors: []string{
+				"h3",
+			},
+			HandleMultiple: "First",
+		},
+		URL:      "%s",
+		ErrorURL: errorURL,
+		ReplySelector: SelectorCapture{
+			Template: "%s",
+			Selectors: []string{
+				"h3",
+			},
+			HandleMultiple: "First",
+		},
+		Help: "This is just a test!",
+	}
+
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
+	if err != nil {
+		t.Errorf("An error occurred when making a reasonable scraper!")
+	}
+
+	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
+
+	resultMessage, resultConversation := demoSender.PopMessage()
+
+	if resultMessage.Title != "Error" {
+		t.Errorf("Title was different!")
+	}
+
+	if !strings.HasPrefix(resultMessage.Description, "No result was found") {
+		t.Errorf("Message was different!")
+	}
+
+	if resultMessage.URL != errorURL {
+		t.Fail()
+	}
+
+	if resultConversation != testConversation {
+		t.Errorf("Sender was different!")
+	}
+}
+
 func TestGoQueryScraperWithSuffix(t *testing.T) {
 	demoSender := demoservice.DemoSender{}
 
@@ -391,6 +503,111 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 	}
 }
 
+func TestGoQueryScraperFieldsExtraHideURL(t *testing.T) {
+
+	demoSender := demoservice.DemoSender{}
+
+	testConversation := service.Conversation{
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
+	}
+
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+
+	demoSelectorCapture := SelectorCapture{
+		Template:  "%s",
+		Selectors: []string{"h1"},
+	}
+
+	demoSelectorCapture2 := SelectorCapture{
+		Template:  "%s",
+		Selectors: []string{"h2"},
+	}
+
+	config := GoQueryScraperConfig{
+		Trigger:       "",
+		Capture:       "(.*)",
+		TitleSelector: demoSelectorCapture,
+		ReplySelector: demoSelectorCapture2,
+		URL:           "%s",
+		HideURL:       true,
+		Fields: []GoQueryFieldCapture{
+			{
+				Title:       demoSelectorCapture,
+				Description: demoSelectorCapture2,
+			},
+			{
+				Title:       SelectorCapture{},
+				Description: SelectorCapture{},
+			},
+			{
+				Title:       demoSelectorCapture2,
+				Description: demoSelectorCapture2,
+			},
+		},
+		Help: "This is just a test!",
+	}
+
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
+	if err != nil {
+		t.Fail()
+	}
+
+	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
+
+	resultMessage, resultConversation := demoSender.PopMessage()
+
+	if resultMessage.Title != "Heading One" {
+		t.Fail()
+	}
+
+	if resultMessage.Description != "Heading Two" {
+		t.Fail()
+	}
+
+	if resultMessage.URL != "" {
+		t.Fail()
+	}
+
+	for _, field := range resultMessage.Fields {
+		if field.Inline == false {
+			t.Fail()
+		}
+	}
+
+	if resultMessage.Fields[0].Field != "Heading One" {
+		t.Fail()
+	}
+
+	if resultMessage.Fields[0].Value != "Heading Two" {
+		t.Fail()
+	}
+
+	if resultMessage.Fields[0].URL != "" {
+		t.Fail()
+	}
+
+	if resultMessage.Fields[1].Field != "Heading Two" {
+		t.Fail()
+	}
+
+	if resultMessage.Fields[1].Value != "Heading Two" {
+		t.Fail()
+	}
+
+	if resultMessage.Fields[1].URL != "" {
+		t.Fail()
+	}
+
+	if resultConversation != testConversation {
+		t.Fail()
+	}
+
+	if demoSender.IsEmpty() == false {
+		t.Fail()
+	}
+}
+
 func TestGoQueryScraperFields(t *testing.T) {
 
 	demoSender := demoservice.DemoSender{}
@@ -548,7 +765,7 @@ func TestGoQueryScraperNoCaptureMissingSub(t *testing.T) {
 		Trigger: "",
 		Capture: "(.*)",
 		TitleSelector: SelectorCapture{
-			Template:       "%s",
+			Template:       "Title: %s",
 			Selectors:      []string{"h3"},
 			HandleMultiple: "First",
 		},
@@ -572,7 +789,7 @@ func TestGoQueryScraperNoCaptureMissingSub(t *testing.T) {
 	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
-	if resultMessage.Title != "" {
+	if resultMessage.Title != "Title: " {
 		t.Fail()
 	}
 
@@ -1032,5 +1249,63 @@ func TestInvalidReader(t *testing.T) {
 
 	if resultConversation != testConversation {
 		t.Errorf("Sender was different!")
+	}
+}
+
+func TestGoQueryScraperWithCaptureHideUrl(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+
+	testConversation := service.Conversation{
+		ServiceID:      demoSender.ID(),
+		ConversationID: "0",
+	}
+
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+
+	config := GoQueryScraperConfig{
+		HideURL: true,
+		Trigger: "",
+		Capture: "(.*)",
+		TitleSelector: SelectorCapture{
+			Template: "%s",
+			Selectors: []string{
+				"h2",
+			},
+			HandleMultiple: "First",
+		},
+		URL: "%s",
+		ReplySelector: SelectorCapture{
+			Template: "%s",
+			Selectors: []string{
+				"h1",
+			},
+			HandleMultiple: "First",
+		},
+		Help: "This is just a test!",
+	}
+
+	scraper, err := config.CommandWithHTMLGetter(htmlTestPage)
+	if err != nil {
+		t.Errorf("An error occurred when making a reasonable scraper!")
+	}
+
+	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
+
+	resultMessage, resultConversation := demoSender.PopMessage()
+
+	if resultMessage.Title != "Heading Two" {
+		t.Errorf("Title was different!")
+	}
+
+	if !strings.HasPrefix(resultMessage.Description, "Heading One") {
+		t.Errorf("Message was different!")
+	}
+
+	if resultConversation != testConversation {
+		t.Errorf("Sender was different!")
+	}
+
+	if resultMessage.URL != "" {
+		t.Fail()
 	}
 }

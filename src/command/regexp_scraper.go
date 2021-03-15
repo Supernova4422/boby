@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/url"
 	"strings"
 
 	"regexp"
@@ -81,22 +82,22 @@ func (r RegexpScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Comma
 // scraper returns the received message
 func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate string, titleCapture *regexp.Regexp, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message), htmlGetter HTMLGetter) {
 	substitutions := strings.Count(urlTemplate, "%s")
-	url := urlTemplate
+	urlPage := urlTemplate
 	if substitutions > 0 {
 		if msg == nil || len(msg) == 0 || len(msg[0]) < substitutions {
 			sink(sender, service.Message{Description: "An error when building the url."})
 			return
 		}
 		for _, capture := range msg[0] {
-			url = fmt.Sprintf(url, capture)
+			urlPage = fmt.Sprintf(urlPage, url.PathEscape(capture))
 		}
 	}
 
-	_, htmlReader, err := htmlGetter(url)
+	_, htmlReader, err := htmlGetter(urlPage)
 	if err != nil {
 		sink(sender, service.Message{
 			Description: "An error occurred retrieving the webpage.",
-			URL:         url,
+			URL:         urlPage,
 		})
 		return
 	}
@@ -121,7 +122,7 @@ func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate st
 		allCaptures[i] = strings.Join(captures[1:], " ")
 	}
 
-	reply := fmt.Sprintf("%s.\n\nRead more at: %s", strings.Join(allCaptures, " "), url)
+	reply := fmt.Sprintf("%s", strings.Join(allCaptures, "\n"))
 	replyTitle := titleTemplate
 
 	if strings.Contains(replyTitle, "%s") {
@@ -140,6 +141,6 @@ func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate st
 	sink(sender, service.Message{
 		Title:       replyTitle,
 		Description: reply,
-		URL:         url,
+		URL:         urlPage,
 	})
 }

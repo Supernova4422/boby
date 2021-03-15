@@ -7,10 +7,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"regexp"
 
-	"github.com/BKrajancic/boby/m/v2/src/bot"
 	"github.com/BKrajancic/boby/m/v2/src/command"
+	"github.com/BKrajancic/boby/m/v2/src/storage"
 	"github.com/BKrajancic/boby/m/v2/src/utils"
 )
 
@@ -27,7 +26,7 @@ func MakeExampleDir(dir string) error {
 	fmt.Println("The configuration files can be edited, and the folder can be used to run this software.")
 	fmt.Printf("For information on editing configuration files, "+
 		"make sure to read the documentation at %s, or this project's readme.md file.",
-		bot.Repo)
+		command.Repo)
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.Mkdir(dir, 0755)
@@ -145,114 +144,71 @@ func MakeExampleDir(dir string) error {
 
 // ConfiguredBot uses files in configDir to return a bot ready for usage.
 // This bot is not attached to any storage or services.
-func ConfiguredBot(configDir string) (bot.Bot, error) {
-	bot := bot.Bot{}
+func ConfiguredBot(configDir string, storage *storage.Storage) ([]command.Command, error) {
+	commands := command.AdminCommands(storage)
 
-	var jsonGetters []command.JSONGetterConfig
+	file, err := os.Open(path.Join(configDir, jsonFilepath))
+	if err != nil {
+		return commands, err
+	}
+
+	bytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		return commands, err
+	}
+
 	// Get JSON getters.
-	if file, err := os.Open(path.Join(configDir, jsonFilepath)); err == nil {
-		if bytes, err := ioutil.ReadAll(file); err == nil {
-			if err := json.Unmarshal(bytes, &jsonGetters); err == nil {
-				for _, jsonGetter := range jsonGetters {
-					if command, err := jsonGetter.Command(utils.JSONGetWithHTTP); err == nil {
-						bot.AddCommand(jsonGetter.RateLimit.GetRateLimitedCommand(command))
-					} else {
-						return bot, err
-					}
-				}
-			} else {
-				return bot, err
-			}
-		} else {
-			return bot, err
+	var jsonGetters []command.JSONGetterConfig
+	if err = json.Unmarshal(bytes, &jsonGetters); err != nil {
+		return commands, err
+	}
+
+	for _, jsonGetter := range jsonGetters {
+		command, err := jsonGetter.Command(utils.JSONGetWithHTTP)
+		if err != nil {
+			return commands, err
 		}
-	} else {
-		return bot, err
+		commands = append(commands, jsonGetter.RateLimit.GetRateLimitedCommand(command))
 	}
 
 	// Get regex scraper.
-	if file, err := os.Open(path.Join(configDir, regexpFilepath)); err == nil {
-		if regexScraperConfigs, err := command.GetRegexpScraperConfigs(bufio.NewReader(file)); err == nil {
-			for _, regexScraperConfig := range regexScraperConfigs {
-				if command, err := regexScraperConfig.Command(); err == nil {
-					bot.AddCommand(command)
-				} else {
-					return bot, err
-				}
-			}
-		} else {
-			return bot, err
-		}
-	} else {
-		return bot, err
+	file, err = os.Open(path.Join(configDir, regexpFilepath))
+	if err != nil {
+		return commands, err
 	}
 
-	if file, err := os.Open(path.Join(configDir, goqueryFilepath)); err == nil {
-		if goqueryScraperConfigs, err := command.GetGoqueryScraperConfigs(bufio.NewReader(file)); err == nil {
-			for _, goqueryScraperConfig := range goqueryScraperConfigs {
-				if scraperCommand, err := goqueryScraperConfig.Command(); err == nil {
-					bot.AddCommand(scraperCommand)
-				} else {
-					return bot, err
-				}
-			}
-		} else {
-			return bot, err
+	regexScraperConfigs, err := command.GetRegexpScraperConfigs(bufio.NewReader(file))
+	if err != nil {
+		return commands, err
+	}
+
+	for _, regexScraperConfig := range regexScraperConfigs {
+		command, err := regexScraperConfig.Command()
+		if err != nil {
+			return commands, err
 		}
-	} else {
-		return bot, err
+		commands = append(commands, command)
+	}
+
+	file, err = os.Open(path.Join(configDir, goqueryFilepath))
+	if err != nil {
+		return commands, err
+	}
+
+	goqueryScraperConfigs, err := command.GetGoqueryScraperConfigs(bufio.NewReader(file))
+	if err != nil {
+		return commands, err
+	}
+
+	for _, goqueryScraperConfig := range goqueryScraperConfigs {
+		scraperCommand, err := goqueryScraperConfig.Command()
+		if err != nil {
+			return commands, err
+		}
+		commands = append(commands, scraperCommand)
 	}
 
 	// TODO: Helptext is hardcoded for discord, and is therefore a leaky abstraction.
-	bot.AddCommand(
-		command.Command{
-			Trigger:   "imadmin",
-			Pattern:   regexp.MustCompile("(.*)"),
-			Exec:      command.ImAdmin,
-			Help:      "Check if the sender is an admin.",
-			HelpInput: "[@role or @user]",
-		},
-	)
 
-	bot.AddCommand(
-		command.Command{
-			Trigger:   "isadmin",
-			Pattern:   regexp.MustCompile("(.*)"),
-			Exec:      command.CheckAdmin,
-			Help:      "Check if a role or user is an admin.",
-			HelpInput: "[@role or @user]",
-		},
-	)
-
-	bot.AddCommand(
-		command.Command{
-			Trigger:   "setadmin",
-			Pattern:   regexp.MustCompile("(.*)"),
-			Exec:      command.SetAdmin,
-			Help:      "Set a role or user as an admin, therefore giving them all permissions for this bot. Users/Roles with any of the following server permissions are automatically treated as admin: 'Administrator', 'Manage Server', 'Manage Webhooks.'",
-			HelpInput: "[@role or @user]",
-		},
-	)
-
-	bot.AddCommand(
-		command.Command{
-			Trigger:   "unsetadmin",
-			Pattern:   regexp.MustCompile("(.*)"),
-			Exec:      command.UnsetAdmin,
-			Help:      "Unset a role or user as an admin, therefore giving them usual permissions.",
-			HelpInput: "[@role or @user]",
-		},
-	)
-
-	bot.AddCommand(
-		command.Command{
-			Trigger:   "setprefix",
-			Pattern:   regexp.MustCompile("(.*)"),
-			Exec:      command.SetPrefix,
-			Help:      "Set the prefix of all commands of this bot, for this server.",
-			HelpInput: "[word]",
-		},
-	)
-
-	return bot, nil
+	return commands, nil
 }

@@ -1,48 +1,48 @@
-package bot
+package command
 
 import (
 	"fmt"
 	"regexp"
 	"testing"
 
-	"github.com/BKrajancic/boby/m/v2/src/command"
 	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/service/demoservice"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
-func TestSetPrefix(t *testing.T) {
+func TestSetPrefix2(t *testing.T) {
 	// Prepare context.
-	bot := Bot{}
 	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
-	bot.SetStorage(&_storage)
 	prefix0 := "!"
-	bot.SetDefaultPrefix(prefix0)
 
 	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
-	demoServiceSubject.Register(&bot)
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
-	bot.AddSender(&demoSender)
 
 	testCmd := "repeat "
-	bot.AddCommand(
-		command.Command{
-			Trigger: testCmd,
-			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    Repeater,
-			Help:    "",
-		}) // Repeater command.
+	cmd1 := Command{
+		Trigger: testCmd,
+		Pattern: regexp.MustCompile("(.*)"),
+		Exec:    Repeater,
+		Help:    "",
+		Storage: &_storage,
+	} // Repeater
+	cmd1.SetDefaultPrefix(prefix0)
+	cmd1.AddSender(&demoSender)
+	demoServiceSubject.Register(&cmd1)
 
 	prefixCmd := "setprefix"
-	bot.AddCommand(
-		command.Command{
-			Trigger: prefixCmd,
-			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    command.SetPrefix,
-			Help:    "[word] | Set the prefix of all commands of this bot, for this server.",
-		},
-	)
+
+	cmd2 := Command{
+		Trigger: prefixCmd,
+		Pattern: regexp.MustCompile("(.*)"),
+		Exec:    SetPrefix,
+		Help:    "[word] | Set the prefix of all commands of this bot, for this server.",
+		Storage: &_storage,
+	}
+	cmd2.SetDefaultPrefix(prefix0)
+	cmd2.AddSender(&demoSender)
+	demoServiceSubject.Register(&cmd2)
 
 	// Message to repeat.
 	testConversation := service.Conversation{
@@ -102,36 +102,37 @@ func TestSetPrefix(t *testing.T) {
 
 func TestIgnoreSetPrefix(t *testing.T) {
 	// Prepare context.
-	bot := Bot{}
 	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
-	bot.SetStorage(&_storage)
 	prefix0 := "!"
-	bot.SetDefaultPrefix(prefix0)
 
 	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
-	demoServiceSubject.Register(&bot)
+	// demoServiceSubject.Register(&bot)
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
-	bot.AddSender(&demoSender)
 
 	testCmd := "repeat "
-	bot.AddCommand(
-		command.Command{
-			Trigger: testCmd,
-			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    Repeater,
-			Help:    "",
-		}) // Repeater command.
+	cmd1 := Command{
+		Trigger: testCmd,
+		Pattern: regexp.MustCompile("(.*)"),
+		Exec:    Repeater,
+		Help:    "",
+		Storage: &_storage,
+	}
+	cmd1.AddSender(&demoSender)
+	cmd1.SetDefaultPrefix(prefix0)
+	demoServiceSubject.Register(&cmd1)
 
 	prefixCmd := "setprefix"
-	bot.AddCommand(
-		command.Command{
-			Trigger: prefixCmd,
-			Pattern: regexp.MustCompile("(.*)"),
-			Exec:    command.SetPrefix,
-			Help:    "[word] | Set the prefix of all commands of this bot, for this server.",
-		},
-	)
+	cmd2 := Command{
+		Trigger: prefixCmd,
+		Pattern: regexp.MustCompile("(.*)"),
+		Exec:    SetPrefix,
+		Help:    "[word] | Set the prefix of all commands of this bot, for this server.",
+		Storage: &_storage,
+	}
+	cmd2.AddSender(&demoSender)
+	cmd2.SetDefaultPrefix(prefix0)
+	demoServiceSubject.Register(&cmd2)
 
 	// Message to repeat.
 	testConversation := service.Conversation{
