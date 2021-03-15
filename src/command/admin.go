@@ -2,8 +2,6 @@ package command
 
 import (
 	"regexp"
-
-	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
 // ImAdminTrigger is a trigger to use for an ImAdmin command.
@@ -22,7 +20,7 @@ const IsAdminTrigger = "isadmin"
 const Repo = "https://github.com/BKrajancic/boby"
 
 // AdminCommands returns an array of commands for handling admins.
-func AdminCommands(storage *storage.Storage) []Command {
+func AdminCommands() []Command {
 	return []Command{
 		{
 			Trigger:   ImAdminTrigger,
@@ -30,7 +28,6 @@ func AdminCommands(storage *storage.Storage) []Command {
 			Exec:      ImAdmin,
 			Help:      "Check if the sender is an admin.",
 			HelpInput: "[@role or @user]",
-			Storage:   storage,
 		},
 
 		{
@@ -39,7 +36,6 @@ func AdminCommands(storage *storage.Storage) []Command {
 			Exec:      CheckAdmin,
 			Help:      "Check if a role or user is an admin.",
 			HelpInput: "[@role or @user]",
-			Storage:   storage,
 		},
 
 		{
@@ -48,7 +44,6 @@ func AdminCommands(storage *storage.Storage) []Command {
 			Exec:      SetAdmin,
 			Help:      "Set a role or user as an admin, therefore giving them all permissions for this bot. Users/Roles with any of the following server permissions are automatically treated as admin: 'Administrator', 'Manage Server', 'Manage Webhooks.'",
 			HelpInput: "[@role or @user]",
-			Storage:   storage,
 		},
 
 		{
@@ -57,7 +52,6 @@ func AdminCommands(storage *storage.Storage) []Command {
 			Exec:      UnsetAdmin,
 			Help:      "Unset a role or user as an admin, therefore giving them usual permissions.",
 			HelpInput: "[@role or @user]",
-			Storage:   storage,
 		},
 
 		{
@@ -66,7 +60,6 @@ func AdminCommands(storage *storage.Storage) []Command {
 			Exec:      SetPrefix,
 			Help:      "Set the prefix of all commands of this bot, for this server.",
 			HelpInput: "[word]",
-			Storage:   storage,
 		},
 	}
 }

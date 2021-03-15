@@ -62,6 +62,7 @@ func main() {
 	for i := range commands {
 		commands[i].AddSender(discordSender)
 		commands[i].SetDefaultPrefix(prefix)
+		commands[i].Storage = &storage
 		discordSubject.Register(&commands[i])
 	}
 
