@@ -89,7 +89,7 @@ func NewDiscords(filepath string) (*DiscordSubject, *DiscordSender, *discordgo.S
 	discord.AddHandler(discordSubject.messageCreate)
 	discord.AddHandler(discordSubject.messageUpdate)
 
-	discord.UpdateStatus(0, "!help")
+	discord.UpdateGameStatus(0, "!help")
 
 	return &discordSubject, &DiscordSender{discord: discord}, discord, nil
 }

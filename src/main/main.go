@@ -66,7 +66,7 @@ func main() {
 		discordSubject.Register(&commands[i])
 	}
 
-	discord.UpdateStatus(0, prefix+helpTrigger)
+	discord.UpdateGameStatus(0, prefix+helpTrigger)
 
 	// Start all routines, e.g.
 	// go routine()

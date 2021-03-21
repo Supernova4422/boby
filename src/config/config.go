@@ -145,7 +145,7 @@ func MakeExampleDir(dir string) error {
 // ConfiguredBot uses files in configDir to return a bot ready for usage.
 // This bot is not attached to any storage or services.
 func ConfiguredBot(configDir string, storage *storage.Storage) ([]command.Command, error) {
-	commands := command.AdminCommands(storage)
+	commands := command.AdminCommands()
 
 	file, err := os.Open(path.Join(configDir, jsonFilepath))
 	if err != nil {

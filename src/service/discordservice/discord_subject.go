@@ -102,7 +102,7 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 					continue
 				}
 
-				adminPermissions := []int{
+				adminPermissions := []int64{
 					discordgo.PermissionAdministrator,
 					discordgo.PermissionManageServer,
 					discordgo.PermissionManageWebhooks,
