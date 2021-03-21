@@ -13,7 +13,7 @@ type Conversation struct {
 	Admin          bool
 }
 
-// Convert a conversation to guild
+// Guild will convert a conversation to a Guild.
 func (c Conversation) Guild () Guild {
 	return Guild{
 		ServiceID: c.ServiceID,
