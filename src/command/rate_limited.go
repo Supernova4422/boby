@@ -63,8 +63,7 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 		now := time.Now().Unix()
 		history := []int64{}
 
-		if val, err := (*storage).GetUserValue(user, r.ID); err == nil {
-			var ok bool
+		if val, ok := (*storage).GetUserValue(user, r.ID); ok {
 			history, ok = val.([]int64)
 			if ok == false {
 				panic(fmt.Errorf("interface type wasn't usable"))

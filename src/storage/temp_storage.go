@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
@@ -13,7 +12,9 @@ const AdminKey = "Admin"
 // TempStorage implements the Storage interface, but data is lost on destruction.
 type TempStorage struct {
 	UserValues  map[string]map[string]map[string]interface{}
+	DefaultUserValues  map[string]interface{}
 	GuildValues map[string]map[string]map[string]interface{}
+	DefaultGuildValues map[string]interface{}
 	mutex       *sync.Mutex
 }
 
@@ -24,20 +25,29 @@ func GetTempStorage() TempStorage {
 
 // GetGuildValue retrieves the value for key, for a Guild.
 // Returns an error if the key doesn't exist or can't be retrieved.
-func (t *TempStorage) GetGuildValue(guild service.Guild, key string) (val interface{}, err error) {
+func (t *TempStorage) GetGuildValue(guild service.Guild, key string) (interface{}, bool) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
-	err = fmt.Errorf("no value for key %s", key)
-	if serviceMap, ok := t.GuildValues[guild.ServiceID]; ok == true {
-		if guildMap, ok := serviceMap[guild.GuildID]; ok {
-			val, ok = guildMap[key]
-			if ok {
-				err = nil
-			}
-		}
+	serviceMap, ok := t.GuildValues[guild.ServiceID]
+	if ok == false {
+		val, ok := t.DefaultGuildValues[key]
+		return val, ok 
 	}
-	return
+
+	keyMap, ok := serviceMap[guild.GuildID]
+	if ok == false {
+		val, ok := t.DefaultGuildValues[key]
+		return val, ok
+	}
+
+	val, ok := keyMap[key]
+	if ok == false {
+		val, ok := t.DefaultGuildValues[key]
+		return val, ok
+	}
+
+	return val, ok 
 }
 
 // SetGuildValue sets the value for key, for a Guild.
@@ -60,22 +70,55 @@ func (t *TempStorage) SetGuildValue(guild service.Guild, key string, val interfa
 	t.GuildValues[guild.ServiceID][guild.GuildID][key] = val
 }
 
-// GetUserValue retrieves the value for key, for a User.
-// Returns an error if the key doesn't exist or can't be retrieved.
-func (t *TempStorage) GetUserValue(user service.User, key string) (val interface{}, err error) {
+// SetDefaultGuildValue sets the default value for key, for all Guilds.
+func (t *TempStorage) SetDefaultGuildValue(key string, val interface{}) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
-	err = fmt.Errorf("no value for key %s", key)
-	if serviceMap, ok := t.UserValues[user.ServiceID]; ok {
-		if userMap, ok := serviceMap[user.Name]; ok {
-			val, ok = userMap[key]
-			if ok {
-				err = nil
-			}
-		}
+	if t.DefaultGuildValues == nil {
+		t.DefaultGuildValues = make(map[string]interface{})
 	}
-	return
+
+	t.DefaultGuildValues[key] = val
+}
+
+// SetDefaultUserValue sets the default value for key, for all Users.
+func (t *TempStorage) SetDefaultUserValue(key string, val interface{}) {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+
+	if t.DefaultUserValues == nil {
+		t.DefaultUserValues = make(map[string]interface{})
+	}
+
+	t.DefaultUserValues[key] = val
+}
+
+// GetUserValue retrieves the value for key, for a User.
+// Returns an error if the key doesn't exist or can't be retrieved.
+func (t *TempStorage) GetUserValue(user service.User, key string) (interface{}, bool) {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+
+	serviceMap, ok := t.UserValues[user.ServiceID]
+	if ok == false {
+		val, ok := t.DefaultUserValues[key]
+		return val, ok
+	}
+
+	keyMap, ok := serviceMap[user.Name]
+	if ok == false {
+		val, ok := t.DefaultUserValues[key]
+		return val, ok
+	}
+
+	val, ok := keyMap[key]
+	if ok == false {
+		val, ok := t.DefaultUserValues[key]
+		return val, ok
+	}
+
+	return val, ok 
 }
 
 // SetUserValue sets the value for key, for a Guild.
@@ -100,7 +143,7 @@ func (t *TempStorage) SetUserValue(user service.User, key string, val interface{
 
 // IsAdmin returns true if ID is an admin.
 func (t *TempStorage) IsAdmin(guild service.Guild, ID string) bool {
-	if val, err := t.GetGuildValue(guild, AdminKey); err == nil {
+	if val, ok := t.GetGuildValue(guild, AdminKey); ok {
 		if admins, ok := val.([]string); ok {
 			for _, adminID := range admins {
 				if adminID == ID {
@@ -114,7 +157,7 @@ func (t *TempStorage) IsAdmin(guild service.Guild, ID string) bool {
 
 // SetAdmin sets a userID as an admin for a guild.
 func (t *TempStorage) SetAdmin(guild service.Guild, ID string) {
-	if val, err := t.GetGuildValue(guild, AdminKey); err == nil {
+	if val, ok := t.GetGuildValue(guild, AdminKey); ok {
 		currentAdmins, ok := val.([]string)
 		if ok {
 			t.SetGuildValue(guild, AdminKey, append(currentAdmins, ID))
@@ -129,7 +172,7 @@ func (t *TempStorage) SetAdmin(guild service.Guild, ID string) {
 // UnsetAdmin removes userID as an admin for a guild.
 func (t *TempStorage) UnsetAdmin(guild service.Guild, ID string) {
 	newAdmins := []string{}
-	if val, err := t.GetGuildValue(guild, AdminKey); err == nil {
+	if val, ok := t.GetGuildValue(guild, AdminKey); ok {
 		currentAdmins, ok := val.([]string)
 		if ok == false {
 			panic(ok)

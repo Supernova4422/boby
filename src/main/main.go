@@ -36,6 +36,8 @@ func main() {
 	}
 
 	storage, err := loadGobStorage(path.Join(folder, "storage.gob"))
+	prefix := "!"
+	storage.SetDefaultGuildValue("prefix", prefix)
 	if err != nil {
 		panic(err)
 	}
@@ -56,12 +58,11 @@ func main() {
 	discordSubject.SetStorage(&storage)
 
 	helpTrigger := "help"
-	prefix := "!"
-	commands = append(commands, *makeHelpCommand(&commands, helpTrigger, prefix))
+	commands = append(commands, *makeHelpCommand(&commands, helpTrigger))
 
 	for i := range commands {
 		commands[i].AddSender(discordSender)
-		commands[i].SetDefaultPrefix(prefix)
+		commands[i].Storage = &storage
 		discordSubject.Register(&commands[i])
 	}
 
@@ -75,7 +76,7 @@ func main() {
 	<-sc
 }
 
-func makeHelpCommand(commands *[]command.Command, helpTrigger string, defaultPrefix string) *command.Command {
+func makeHelpCommand(commands *[]command.Command, helpTrigger string) *command.Command {
 	helpCommand := &command.Command{
 		Trigger: helpTrigger,
 		Pattern: regexp.MustCompile("(.*)"),
@@ -83,16 +84,19 @@ func makeHelpCommand(commands *[]command.Command, helpTrigger string, defaultPre
 	}
 
 	helpCommand.Exec = func(conversation service.Conversation, user service.User, _ [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
-		cmd := command.Command{Storage: storage}
-		cmd.SetDefaultPrefix(defaultPrefix)
 		fields := make([]service.MessageField, 0)
+		prefix, ok := (*storage).GetGuildValue(conversation.Guild(), "prefix")
+
+		if ok == false {
+			prefix = "" 
+		}
 
 		for i, command := range *commands {
 			fields = append(fields, service.MessageField{
 				Field: fmt.Sprintf(
 					"%s. %s%s %s",
 					strconv.Itoa(i+1),
-					cmd.GetPrefix(conversation),
+					prefix,
 					command.Trigger,
 					command.HelpInput,
 				),

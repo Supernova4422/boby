@@ -15,6 +15,7 @@ func TestSetPrefix2(t *testing.T) {
 	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
 	prefix0 := "!"
+	_storage.SetDefaultGuildValue("prefix", prefix0)
 
 	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
@@ -27,7 +28,6 @@ func TestSetPrefix2(t *testing.T) {
 		Help:    "",
 		Storage: &_storage,
 	} // Repeater
-	cmd1.SetDefaultPrefix(prefix0)
 	cmd1.AddSender(&demoSender)
 	demoServiceSubject.Register(&cmd1)
 
@@ -40,7 +40,6 @@ func TestSetPrefix2(t *testing.T) {
 		Help:    "[word] | Set the prefix of all commands of this bot, for this server.",
 		Storage: &_storage,
 	}
-	cmd2.SetDefaultPrefix(prefix0)
 	cmd2.AddSender(&demoSender)
 	demoServiceSubject.Register(&cmd2)
 
@@ -105,6 +104,7 @@ func TestIgnoreSetPrefix(t *testing.T) {
 	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
 	prefix0 := "!"
+	_storage.SetDefaultGuildValue("prefix", prefix0)
 
 	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
 	// demoServiceSubject.Register(&bot)
@@ -119,7 +119,6 @@ func TestIgnoreSetPrefix(t *testing.T) {
 		Storage: &_storage,
 	}
 	cmd1.AddSender(&demoSender)
-	cmd1.SetDefaultPrefix(prefix0)
 	demoServiceSubject.Register(&cmd1)
 
 	prefixCmd := "setprefix"
@@ -131,7 +130,6 @@ func TestIgnoreSetPrefix(t *testing.T) {
 		Storage: &_storage,
 	}
 	cmd2.AddSender(&demoSender)
-	cmd2.SetDefaultPrefix(prefix0)
 	demoServiceSubject.Register(&cmd2)
 
 	// Message to repeat.

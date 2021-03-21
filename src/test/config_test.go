@@ -76,6 +76,7 @@ func TestConfig(t *testing.T) {
 			tempStorage := storage.GetTempStorage()
 			var _storage storage.Storage = &tempStorage
 			commands, err := config.ConfiguredBot(configDir, &_storage)
+			_storage.SetDefaultGuildValue("prefix", "!")
 
 			if err == nil {
 				demoService := demoservice.DemoService{
@@ -88,7 +89,6 @@ func TestConfig(t *testing.T) {
 
 				for i := range commands {
 					demoService.Register(&commands[i])
-					commands[i].SetDefaultPrefix("!")
 					commands[i].AddSender(&demoSender)
 				}
 

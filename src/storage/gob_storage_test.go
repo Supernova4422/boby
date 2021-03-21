@@ -91,18 +91,18 @@ func TestGobSetGetGuildValue(t *testing.T) {
 		t.Fail()
 	}
 
-	valueOut, err := storage.GetGuildValue(guild, k0)
-	if err != nil || valueOut != v0 {
+	valueOut, ok := storage.GetGuildValue(guild, k0)
+	if ok == false || valueOut != v0 {
 		t.Fail()
 	}
 
-	valueOut, err = storage.GetGuildValue(guild, k1)
-	if err != nil || valueOut != v1 {
+	valueOut, ok = storage.GetGuildValue(guild, k1)
+	if ok == false || valueOut != v1 {
 		t.Fail()
 	}
 
-	valueOut, err = storage.GetGuildValue(guild, k2)
-	if err != nil || valueOut != v2 {
+	valueOut, ok = storage.GetGuildValue(guild, k2)
+	if ok == false || valueOut != v2 {
 		t.Fail()
 	}
 }
@@ -132,22 +132,75 @@ func TestGobSetGetUserValue(t *testing.T) {
 		t.Fail()
 	}
 
-	valueOut, err := storage.GetUserValue(user, k0)
-	if err != nil || valueOut != v0 {
+	valueOut, ok := storage.GetUserValue(user, k0)
+	if ok == false || valueOut != v0 {
 		t.Fail()
 	}
 
-	valueOut, err = storage.GetUserValue(user, k1)
-	if err != nil || valueOut != v1 {
+	valueOut, ok = storage.GetUserValue(user, k1)
+	if ok == false || valueOut != v1 {
 		t.Fail()
 	}
 
-	valueOut, err = storage.GetUserValue(user, k2)
-	if err != nil || valueOut != v2 {
+	valueOut, ok = storage.GetUserValue(user, k2)
+	if ok == false || valueOut != v2 {
 		t.Fail()
 	}
 }
 
+func TestGobSetGetDefaultUserValue(t *testing.T) {
+	bytesOut := bytes.NewBuffer([]byte{})
+	writer := TruncatableBuffer{bytesOut}
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
+		writer:      writer,
+		mutex:       &sync.Mutex{},
+	}
+
+	k0 := "k0"
+	v0 := "v0"
+
+	storage.SetDefaultUserValue(k0, v0)
+	storage, err := LoadFromBuffer(writer)
+	if err != nil {
+		t.Fail()
+	}
+
+	valueOut, ok := storage.GetUserValue(
+		service.User{ServiceID: "0", Name: "0"},
+		k0,
+	)
+	if ok == false || valueOut != v0 {
+		t.Fail()
+	}
+}
+
+func TestGobSetGetDefaultGuildValue(t *testing.T) {
+	bytesOut := bytes.NewBuffer([]byte{})
+	writer := TruncatableBuffer{bytesOut}
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
+		writer:      writer,
+		mutex:       &sync.Mutex{},
+	}
+
+	k0 := "k0"
+	v0 := "v0"
+	storage.SetDefaultGuildValue(k0, v0)
+	storage, err := LoadFromBuffer(writer)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	valueOut, ok := storage.GetGuildValue(
+		service.Guild{ServiceID: "0", GuildID: "0"},
+		k0,
+	)
+	if ok == false || valueOut != v0 {
+		t.Fail()
+	}
+}
 func TestGobGetUserValue(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
@@ -159,8 +212,8 @@ func TestGobGetUserValue(t *testing.T) {
 
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
 	key := "key"
-	_, err := storage.GetGuildValue(guild, key)
-	if err == nil {
+	_, ok := storage.GetGuildValue(guild, key)
+	if ok {
 		t.Fail()
 	}
 }
@@ -179,8 +232,8 @@ func TestGobGetValueMissingButHasService(t *testing.T) {
 	key2 := "key2"
 	value := "value"
 	storage.SetGuildValue(guild, key1, value)
-	_, err := storage.GetGuildValue(guild, key2)
-	if err == nil {
+	_, ok := storage.GetGuildValue(guild, key2)
+	if ok {
 		t.Fail()
 	}
 }
@@ -201,8 +254,8 @@ func TestGobGetValueDifferentGuilds(t *testing.T) {
 	value := "value"
 	storage.SetGuildValue(guild1, key1, value)
 	guild2 := service.Guild{ServiceID: serviceID, GuildID: "1"}
-	_, err := storage.GetGuildValue(guild2, key2)
-	if err == nil {
+	_, ok := storage.GetGuildValue(guild2, key2)
+	if ok {
 		t.Fail()
 	}
 }

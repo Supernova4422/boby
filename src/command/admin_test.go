@@ -15,13 +15,13 @@ const prefix = ""
 func getBot() (*demoservice.DemoService, *demoservice.DemoSender, *storage.TempStorage) {
 	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
+	_storage.SetDefaultGuildValue("prefix", prefix)
 	commands := AdminCommands(&_storage)
 
 	demoService := demoservice.DemoService{ServiceID: demoservice.ServiceID}
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
 	for i := range commands {
 		commands[i].AddSender(&demoSender)
-		commands[i].SetDefaultPrefix(prefix)
 		demoService.Register(&commands[i])
 	}
 

@@ -21,6 +21,9 @@ func Repeater(sender service.Conversation, user service.User, msg [][]string, st
 func TestParseWithoutPrefix(t *testing.T) {
 	// Prepare context.
 	prefix := "!"
+	tempStorage := storage.GetTempStorage()
+	var _storage storage.Storage = &tempStorage
+	_storage.SetDefaultGuildValue("prefix", prefix)
 
 	demoServiceSubject := DemoService{ServiceID: ServiceID}
 	demoSender := DemoSender{ServiceID: ServiceID}
@@ -30,9 +33,9 @@ func TestParseWithoutPrefix(t *testing.T) {
 		Trigger: testCmd,
 		Pattern: regexp.MustCompile("(.*)"),
 		Exec:    Repeater,
+		Storage: &_storage,
 		Help:    "",
 	} // Repeater command.
-	cmd.SetDefaultPrefix(prefix)
 	cmd.AddSender(&demoSender)
 	demoServiceSubject.Register(&cmd)
 
@@ -60,6 +63,10 @@ func TestParseWithoutPrefix(t *testing.T) {
 func TestParseWithPrefix(t *testing.T) {
 	// Prepare context.
 	prefix := "!"
+	tempStorage := storage.GetTempStorage()
+	var _storage storage.Storage = &tempStorage
+	_storage.SetDefaultGuildValue("prefix", prefix)
+
 	demoServiceSubject := DemoService{ServiceID: ServiceID}
 	demoSender := DemoSender{ServiceID: ServiceID}
 
@@ -68,9 +75,9 @@ func TestParseWithPrefix(t *testing.T) {
 		Trigger: testCmd,
 		Pattern: regexp.MustCompile("(.*)"),
 		Exec:    Repeater,
+		Storage: &_storage,
 		Help:    "",
 	} // Repeater command.
-	cmd.SetDefaultPrefix(prefix)
 	cmd.AddSender(&demoSender)
 	demoServiceSubject.Register(&cmd)
 
@@ -98,6 +105,10 @@ func TestParseWithPrefix(t *testing.T) {
 func TestParseWithoutSpace(t *testing.T) {
 	// Prepare context.
 	prefix := "!"
+	tempStorage := storage.GetTempStorage()
+	var _storage storage.Storage = &tempStorage
+	_storage.SetDefaultGuildValue("prefix", prefix)
+
 	demoServiceSubject := DemoService{ServiceID: ServiceID}
 	demoSender := DemoSender{ServiceID: ServiceID}
 
@@ -106,9 +117,9 @@ func TestParseWithoutSpace(t *testing.T) {
 		Trigger: testCmd,
 		Pattern: regexp.MustCompile("(.*)"),
 		Exec:    Repeater,
+		Storage: &_storage,
 		Help:    "",
 	} // Repeater command.
-	cmd.SetDefaultPrefix(prefix)
 	cmd.AddSender(&demoSender)
 	demoServiceSubject.Register(&cmd)
 
@@ -138,6 +149,10 @@ func TestParseWithoutSpace(t *testing.T) {
 func TestEmpty(t *testing.T) {
 	// Prepare context.
 	prefix := "!"
+	tempStorage := storage.GetTempStorage()
+	var _storage storage.Storage = &tempStorage
+	_storage.SetDefaultGuildValue("prefix", prefix)
+
 	demoServiceSubject := DemoService{ServiceID: ServiceID}
 	demoSender := DemoSender{ServiceID: ServiceID}
 
@@ -146,9 +161,9 @@ func TestEmpty(t *testing.T) {
 		Trigger: testCmd + " ",
 		Pattern: regexp.MustCompile("(.*)"),
 		Exec:    Repeater,
+		Storage: &_storage,
 		Help:    "",
 	}
-	cmd.SetDefaultPrefix(prefix)
 	cmd.AddSender(&demoSender)
 	demoServiceSubject.Register(&cmd)
 

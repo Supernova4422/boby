@@ -12,3 +12,11 @@ type Conversation struct {
 	GuildID        string
 	Admin          bool
 }
+
+// Convert a conversation to guild
+func (c Conversation) Guild () Guild {
+	return Guild{
+		ServiceID: c.ServiceID,
+		GuildID:   c.GuildID,
+	} 
+}

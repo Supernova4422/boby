@@ -61,7 +61,7 @@ func (g *GobStorage) SaveToFile() error {
 
 // GetGuildValue retrieves the value for key, for a Guild.
 // Returns an error if the key doesn't exist or can't be retrieved.
-func (g *GobStorage) GetGuildValue(guild service.Guild, key string) (interface{}, error) {
+func (g *GobStorage) GetGuildValue(guild service.Guild, key string) (interface{}, bool) {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
 	return g.TempStorage.GetGuildValue(guild, key)
@@ -75,19 +75,35 @@ func (g *GobStorage) SetGuildValue(guild service.Guild, key string, value interf
 	g.SaveToFile()
 }
 
-// GetUserValue retrieves the value for key, for a Guild.
+// SetDefaultGuildValue sets the default value for key, for all Guilds.
+func (g *GobStorage) SetDefaultGuildValue(key string, value interface{}) {
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+	g.TempStorage.SetDefaultGuildValue(key, value)
+	g.SaveToFile()
+}
+
+// GetUserValue retrieves the value for key, for a User.
 // Returns an error if the key doesn't exist or can't be retrieved.
-func (g *GobStorage) GetUserValue(user service.User, key string) (interface{}, error) {
+func (g *GobStorage) GetUserValue(user service.User, key string) (interface{}, bool) {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
 	return g.TempStorage.GetUserValue(user, key)
 }
 
-// SetUserValue sets the value for key, for a Guild.
+// SetUserValue sets the value for key, for a User.
 func (g *GobStorage) SetUserValue(user service.User, key string, val interface{}) {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
 	g.TempStorage.SetUserValue(user, key, val)
+	g.SaveToFile()
+}
+
+// SetDefaultUserValue sets the default value for key, for all Users.
+func (g *GobStorage) SetDefaultUserValue(key string, val interface{}) {
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+	g.TempStorage.SetDefaultUserValue(key, val)
 	g.SaveToFile()
 }
 
