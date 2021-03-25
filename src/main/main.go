@@ -63,7 +63,7 @@ func main() {
 	for i := range commands {
 		commands[i].AddSender(discordSender)
 		commands[i].Storage = &storage
-		discordSubject.Register(&commands[i])
+		discordSubject.Register(commands[i])
 	}
 
 	discord.UpdateGameStatus(0, prefix+helpTrigger)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/BKrajancic/boby/m/v2/src/command"
 	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 	"github.com/bwmarrin/discordgo"
@@ -23,7 +24,54 @@ func (d *DiscordSubject) SetStorage(storage *storage.Storage) {
 }
 
 // Register will add an observer that will handle discord messages being received.
-func (d *DiscordSubject) Register(observer service.Observer) {
+func (d *DiscordSubject) Register(cmd command.Command) {
+
+	help := cmd.Help
+	limit := 100
+	if len(help) > limit {
+		help = help[0:limit]
+	}
+	command := discordgo.ApplicationCommand {
+		Name:        cmd.Trigger,
+		Description: help, 
+		/*
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        cmd.Trigger,
+				Description: "TODO",
+				Required:    true,
+			},
+		},
+		*/
+	}
+
+	// guildID := flag.String("guild", "", "Test guild ID. If not passed - bot registers commands globally")
+
+	commandHandler := func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionApplicationCommandResponseData{
+				Content: "Hey there! Congratulations, you just executed your first slash command",
+			},
+		})
+	}
+
+
+	d.discord.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		commandHandler(s, i)
+	})
+
+	_, err := d.discord.ApplicationCommandCreate(
+		d.discord.State.User.ID,
+		"",
+		&command,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	var observer service.Observer = &cmd
 	d.observers = append(d.observers, &observer)
 }
 
