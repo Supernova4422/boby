@@ -24,7 +24,7 @@ func AdminCommands() []Command {
 	return []Command{
 		{
 			Trigger:   ImAdminTrigger,
-			Pattern:   regexp.MustCompile("(.*)"),
+			Parameters: []CommandParameter{{Type: "string"}}, 
 			Exec:      ImAdmin,
 			Help:      "Check if the sender is an admin.",
 			HelpInput: "[@role or @user]",
@@ -32,7 +32,7 @@ func AdminCommands() []Command {
 
 		{
 			Trigger:   IsAdminTrigger,
-			Pattern:   regexp.MustCompile("(.*)"),
+			Parameters: []CommandParameter{{Type: "string"}}, 
 			Exec:      CheckAdmin,
 			Help:      "Check if a role or user is an admin.",
 			HelpInput: "[@role or @user]",
@@ -40,7 +40,7 @@ func AdminCommands() []Command {
 
 		{
 			Trigger:   "setadmin",
-			Pattern:   regexp.MustCompile("(.*)"),
+			Parameters: []CommandParameter{{Type: "string"}}, 
 			Exec:      SetAdmin,
 			Help:      "Set a role or user as an admin, therefore giving them all permissions for this bot. Users/Roles with any of the following server permissions are automatically treated as admin: 'Administrator', 'Manage Server', 'Manage Webhooks.'",
 			HelpInput: "[@role or @user]",
@@ -48,7 +48,7 @@ func AdminCommands() []Command {
 
 		{
 			Trigger:   UnsetAdminTrigger,
-			Pattern:   regexp.MustCompile("(.*)"),
+			Parameters: []CommandParameter{{Type: "string"}}, 
 			Exec:      UnsetAdmin,
 			Help:      "Unset a role or user as an admin, therefore giving them usual permissions.",
 			HelpInput: "[@role or @user]",
@@ -56,7 +56,7 @@ func AdminCommands() []Command {
 
 		{
 			Trigger:   "setprefix",
-			Pattern:   regexp.MustCompile("(.*)"),
+			Parameters: []CommandParameter{{Type: "string"}}, 
 			Exec:      SetPrefix,
 			Help:      "Set the prefix of all commands of this bot, for this server.",
 			HelpInput: "[word]",

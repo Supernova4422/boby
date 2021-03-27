@@ -11,7 +11,6 @@ import (
 
 	"math"
 	"net/url"
-	"regexp"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
@@ -121,7 +120,7 @@ func (g GoQueryScraperConfig) Command() (Command, error) {
 
 // CommandWithHTMLGetter makes a scraper Command from a config, retrieving HTML pages using HTMLGetter.
 func (g GoQueryScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Command, error) {
-	curry := func(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 		g.onMessage(
 			sender,
 			user,
@@ -132,93 +131,91 @@ func (g GoQueryScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Comm
 		)
 	}
 
-	regex, err := regexp.Compile(g.Capture)
-	if err != nil {
-		return Command{}, err
-	}
 
 	return Command{
-		Trigger:   g.Trigger,
-		Pattern:   regex,
-		Exec:      curry,
-		Help:      g.Help,
-		HelpInput: g.HelpInput,
+		Trigger:             g.Trigger,
+		Parameters:          []CommandParameter{{Type: "string", }},
+		Exec:                curry,
+		Help:                g.Help,
+		HelpInput:           g.HelpInput,
 	}, nil
 }
 
 // onMessage processes the request, and sends out messages.
-func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message), htmlGetter HTMLGetter) {
+func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message), htmlGetter HTMLGetter) {
 	substitutions := strings.Count(g.URL, "%s")
-	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg[0]) < substitutions) {
+	if (substitutions > 0) && (msg == nil || len(msg) == 0 || len(msg) < substitutions) {
 		sink(sender, service.Message{Description: "An error occurred when building the url."})
 		return
 	}
 
 	fields := make([]service.MessageField, 0)
-	for _, capture := range msg {
-		msgURL := g.URL
+	msgURL := g.URL
 
-		for _, word := range capture {
-			msgURL = fmt.Sprintf(msgURL, url.PathEscape(word))
+	for _, word := range msg {
+		msgURL = fmt.Sprintf(msgURL, url.PathEscape(word.(string)))
+	}
+
+	redirect, htmlReader, err := htmlGetter(msgURL)
+	if err != nil {
+		fields = append(fields, service.MessageField{
+			Field: "Error",
+			Value: "An error occurred retrieving the webpage.",
+			URL:   msgURL,
+		})
+		return
+	}
+
+	defer htmlReader.Close()
+	doc, err := goquery.NewDocumentFromReader(htmlReader)
+	if err != nil {
+		fields = append(fields, service.MessageField{
+			Field: msgURL,
+			Value: "An error occurred when processing the webpage.",
+			URL:   g.ErrorURL,
+		})
+		return
+	}
+
+	if doc.Text() == "" {
+		captures := []string{}
+		for _, item := range msg{
+			captures = append(captures, item.(string)) 
 		}
 
-		redirect, htmlReader, err := htmlGetter(msgURL)
-		if err != nil {
-			fields = append(fields, service.MessageField{
-				Field: "Error",
-				Value: "An error occurred retrieving the webpage.",
-				URL:   msgURL,
-			})
-			continue
+		fields = append(fields, service.MessageField{
+			Field: "Error",
+			Value: fmt.Sprintf("No result was found for \"%s\"", strings.Join(captures, " ")),
+			URL:   g.ErrorURL,
+		})
+		return
+	}
+
+	title, err1 := g.TitleSelector.selectorCaptureToString(*doc)
+	value, err2 := g.ReplySelector.selectorCaptureToString(*doc)
+	if err1 == nil && err2 == nil && title != "" && value != "" {
+		if g.HideURL {
+			redirect = ""
 		}
 
-		defer htmlReader.Close()
-		doc, err := goquery.NewDocumentFromReader(htmlReader)
-		if err != nil {
-			fields = append(fields, service.MessageField{
-				Field: msgURL,
-				Value: "An error occurred when processing the webpage.",
-				URL:   g.ErrorURL,
-			})
-			continue
+		fields = append(fields, service.MessageField{
+			Field: title,
+			Value: value,
+			URL:   redirect + g.URLSuffix,
+		})
+	}
 
-		}
-
-		if doc.Text() == "" {
-			fields = append(fields, service.MessageField{
-				Field: "Error",
-				Value: fmt.Sprintf("No result was found for \"%s\"", strings.Join(capture, " ")),
-				URL:   g.ErrorURL,
-			})
-			continue
-		}
-
-		title, err1 := g.TitleSelector.selectorCaptureToString(*doc)
-		value, err2 := g.ReplySelector.selectorCaptureToString(*doc)
-		if err1 == nil && err2 == nil && title != "" && value != "" {
-			if g.HideURL {
-				redirect = ""
-			}
-
-			fields = append(fields, service.MessageField{
-				Field: title,
-				Value: value,
-				URL:   redirect + g.URLSuffix,
-			})
-		}
-
-		for _, field := range g.Fields {
-			fieldTitle, err1 := field.Title.selectorCaptureToString(*doc)
-			value, err2 := field.Description.selectorCaptureToString(*doc)
-			if err1 == nil && err2 == nil && fieldTitle != "" && value != "" {
-				fields = append(fields,
-					service.MessageField{
-						Field:  fieldTitle,
-						Value:  value,
-						Inline: true,
-					},
-				)
-			}
+	for _, field := range g.Fields {
+		fieldTitle, err1 := field.Title.selectorCaptureToString(*doc)
+		value, err2 := field.Description.selectorCaptureToString(*doc)
+		if err1 == nil && err2 == nil && fieldTitle != "" && value != "" {
+			fields = append(fields,
+				service.MessageField{
+					Field:  fieldTitle,
+					Value:  value,
+					Inline: true,
+				},
+			)
 		}
 	}
 

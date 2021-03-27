@@ -109,7 +109,7 @@ func TestRateLimitedCommand(t *testing.T) {
 
 	replyCommand := Command{
 		Trigger: testCmd,
-		Pattern: regexp.MustCompile("(.*)"),
+		Parameters: regexp.MustCompile("(.*)"),
 		Exec:    Repeater,
 		Help:    "Help",
 	}

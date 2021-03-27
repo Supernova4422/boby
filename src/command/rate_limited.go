@@ -59,7 +59,7 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 	}
 
 	rateLimitedCommand := command
-	rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 		now := time.Now().Unix()
 		history := []int64{}
 
