@@ -22,8 +22,9 @@ type Command struct {
 }
 
 type CommandParameter struct {
-	Type  string
-	Input string 
+	Type         string
+	Name         string
+	Description  string
 }
 
 var INPUTS = map[string]func(string) (interface{}, error){
@@ -48,7 +49,7 @@ var INPUTS = map[string]func(string) (interface{}, error){
 			return false, nil
 		}
 
-		return false, error("parsing error")
+		return false, fmt.Errorf("parsing error")
 	},
 }
 
@@ -72,6 +73,8 @@ func (c *Command) RouteByID(conversation service.Conversation, msg service.Messa
 	}
 }
 
+/*
+This is a subject responsibility.
 // OnMessage checks if a message begins with a prefix, and if so, calls Exec.
 func (c *Command) OnMessage(conversation service.Conversation, source service.User, msg string) {
 	prefix, ok := (*c.Storage).GetGuildValue(conversation.Guild(), "prefix")
@@ -99,3 +102,4 @@ func (c *Command) OnMessage(conversation service.Conversation, source service.Us
 		)
 	}
 }
+*/

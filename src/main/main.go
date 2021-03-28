@@ -9,7 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
-	"regexp"
+	// "regexp"
 	"strconv"
 	"syscall"
 
@@ -50,15 +50,15 @@ func main() {
 	}
 
 	discordConfig := path.Join(folder, "config.json")
-	discordSubject, discordSender, discord, err := discordservice.NewDiscords(discordConfig)
+	discordSubject, discordSender, _, err := discordservice.NewDiscords(discordConfig)
 	if err != nil {
 		panic(err)
 	}
 	defer discordSubject.Close() // Cleanly close down the Discord session.
 	discordSubject.SetStorage(&storage)
 
-	helpTrigger := "help"
-	commands = append(commands, *makeHelpCommand(&commands, helpTrigger))
+	// helpTrigger := "help"
+	// commands = append(commands, *makeHelpCommand(&commands, helpTrigger))
 
 	for i := range commands {
 		commands[i].AddSender(discordSender)
@@ -66,7 +66,7 @@ func main() {
 		discordSubject.Register(commands[i])
 	}
 
-	discord.UpdateGameStatus(0, prefix+helpTrigger)
+	// discord.UpdateGameStatus(0, prefix+helpTrigger)
 
 	// Start all routines, e.g.
 	// go routine()
@@ -79,15 +79,15 @@ func main() {
 func makeHelpCommand(commands *[]command.Command, helpTrigger string) *command.Command {
 	helpCommand := &command.Command{
 		Trigger: helpTrigger,
-		Pattern: regexp.MustCompile("(.*)"),
+		Parameters: []command.CommandParameter{{Type: "string"}},
 		Help:    "Provides information on how to use the bot.",
 	}
 
-	helpCommand.Exec = func(conversation service.Conversation, user service.User, _ [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	helpCommand.Exec = func(conversation service.Conversation, user service.User, _ []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 		fields := make([]service.MessageField, 0)
 		prefix, ok := (*storage).GetGuildValue(conversation.Guild(), "prefix")
 
-		if ok == false {
+		if !ok {
 			prefix = "" 
 		}
 

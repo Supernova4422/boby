@@ -105,7 +105,7 @@ func TestSimple(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{"example1"}},
+		[]interface{}{"example1"},
 		nil,
 		demoSender.SendMessage,
 	)
@@ -160,7 +160,7 @@ func TestSimpleSkip(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{"example1"}},
+		[]interface{}{"example1"},
 		nil,
 		demoSender.SendMessage,
 	)
@@ -215,7 +215,7 @@ func TestErrorMsgReplacementPerc(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{"example1"}},
+		[]interface{}{"example1"},
 		nil,
 		demoSender.SendMessage,
 	)
@@ -268,7 +268,7 @@ func TestErrorMsgReplacement(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{"example1"}},
+		[]interface{}{"example1"},
 		nil,
 		demoSender.SendMessage,
 	)
@@ -330,7 +330,7 @@ func TestExtraPercentages(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{url}},
+		[]interface{}{url},
 		nil,
 		demoSender.SendMessage,
 	)
@@ -345,14 +345,6 @@ func TestExtraPercentages(t *testing.T) {
 	}
 
 	if resultMessage.Title != "Value1" {
-		t.Fail()
-	}
-}
-
-func TestBadRegex(t *testing.T) {
-	config := JSONGetterConfig{Capture: "("}
-	_, err := config.Command(jsonExamples)
-	if err == nil {
 		t.Fail()
 	}
 }
@@ -399,7 +391,7 @@ func TestEmptyMsg(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{}},
+		[]interface{}{},
 		nil,
 		demoSender.SendMessage,
 	)
@@ -465,7 +457,7 @@ func TestUngrouped(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{url}},
+		[]interface{}{url},
 		nil,
 		demoSender.SendMessage,
 	)
@@ -530,7 +522,7 @@ func TestUngroupedNoMain(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{url}},
+		[]interface{}{url},
 		nil,
 		demoSender.SendMessage,
 	)
@@ -561,8 +553,7 @@ func TestToken(t *testing.T) {
 	config := JSONGetterConfig{
 		Grouped: false,
 		Delay:   0,
-		Capture: "(.*)",
-
+		Parameters: []CommandParameter{{Type: "string"}}, 
 		Message: JSONCapture{
 			Title: FieldCapture{
 				Template:  "%s",
@@ -599,7 +590,7 @@ func TestToken(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{"Hello World"}},
+		[]interface{}{"Hello World"},
 		nil,
 		demoSender.SendMessage,
 	)
@@ -621,8 +612,7 @@ func TestTokenWithSuffix(t *testing.T) {
 	config := JSONGetterConfig{
 		Grouped: false,
 		Delay:   0,
-		Capture: "(.*)",
-
+		Parameters: []CommandParameter{{Type: "string"}}, 
 		Message: JSONCapture{
 			Title: FieldCapture{
 				Template:  "%s",
@@ -660,7 +650,7 @@ func TestTokenWithSuffix(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{"Hello World"}},
+		[]interface{}{"Hello World"},
 		nil,
 		demoSender.SendMessage,
 	)
@@ -682,7 +672,7 @@ func TestSpacesInMessage(t *testing.T) {
 	config := JSONGetterConfig{
 		Grouped: false,
 		Delay:   0,
-		Capture: "(.*)",
+		Parameters: []CommandParameter{{Type: "string"}},
 
 		Message: JSONCapture{
 			Title: FieldCapture{
@@ -714,7 +704,7 @@ func TestSpacesInMessage(t *testing.T) {
 	getter.Exec(
 		testConversation,
 		testSender,
-		[][]string{{"Hello World Here"}},
+		[]interface{}{"Hello World Here"},
 		nil,
 		demoSender.SendMessage,
 	)

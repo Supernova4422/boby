@@ -37,8 +37,8 @@ func MakeExampleDir(dir string) error {
 
 	jsonGetters := []command.JSONGetterConfig{
 		{
-			Trigger: "cmd",
-			Capture: "(.*)",
+			Trigger:    "cmd",
+			Parameters: []command.CommandParameter{{Type: "string"}},
 			Message: command.JSONCapture{
 				Title: command.FieldCapture{
 					Template:  "Title: %s",
@@ -77,7 +77,7 @@ func MakeExampleDir(dir string) error {
 	regexpGetters := []command.RegexpScraperConfig{
 		{
 			Trigger:       "rx",
-			Capture:       "(.*)",
+			Parameters:    []command.CommandParameter{{Type: "string"}},
 			TitleTemplate: "Title: %s",
 			TitleCapture:  "<h1>(.*)</h1>",
 			ReplyCapture:  "<h1>(.*)</h1>",
@@ -91,7 +91,7 @@ func MakeExampleDir(dir string) error {
 		{
 			Title:   "Title",
 			Trigger: "gq",
-			Capture: "(@.*)",
+			Parameters: []command.CommandParameter{{Type: "string"}},
 			TitleSelector: command.SelectorCapture{
 				Template:       "Title: %s",
 				Selectors:      []string{".titlefield"},

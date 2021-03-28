@@ -79,7 +79,7 @@ func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate st
 	substitutions := strings.Count(urlTemplate, "%s")
 	urlPage := urlTemplate
 	if substitutions > 0 {
-		if msg == nil || len(msg) == 0 || len(msg) < substitutions {
+		if len(msg) == 0 || len(msg) < substitutions {
 			sink(sender, service.Message{Description: "An error when building the url."})
 			return
 		}
@@ -117,7 +117,7 @@ func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate st
 		allCaptures[i] = strings.Join(captures[1:], " ")
 	}
 
-	reply := fmt.Sprintf("%s", strings.Join(allCaptures, "\n"))
+	reply := strings.Join(allCaptures, "\n")
 	replyTitle := titleTemplate
 
 	if strings.Contains(replyTitle, "%s") {

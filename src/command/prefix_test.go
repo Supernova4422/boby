@@ -2,7 +2,6 @@ package command
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
@@ -23,25 +22,35 @@ func TestSetPrefix2(t *testing.T) {
 	testCmd := "repeat "
 	cmd1 := Command{
 		Trigger: testCmd,
-		Pattern: regexp.MustCompile("(.*)"),
+		Parameters: []CommandParameter{{Type: "string"}},
 		Exec:    Repeater,
 		Help:    "",
 		Storage: &_storage,
 	} // Repeater
 	cmd1.AddSender(&demoSender)
-	demoServiceSubject.Register(&cmd1)
+
+	types := []string{}
+	for _, commandParameter := range cmd1.Parameters {
+		types = append(types, commandParameter.Type)
+	}
+	demoServiceSubject.Register(cmd1.Trigger, types, cmd1.Exec, cmd1.RouteByID)
 
 	prefixCmd := "setprefix"
 
 	cmd2 := Command{
 		Trigger: prefixCmd,
-		Pattern: regexp.MustCompile("(.*)"),
+		Parameters: []CommandParameter{{Type: "string"}},
 		Exec:    SetPrefix,
 		Help:    "[word] | Set the prefix of all commands of this bot, for this server.",
 		Storage: &_storage,
 	}
-	cmd2.AddSender(&demoSender)
-	demoServiceSubject.Register(&cmd2)
+
+	cmd2.AddSender(&demoSender) 
+	types = []string{}
+	for _, commandParameter := range cmd2.Parameters {
+		types = append(types, commandParameter.Type)
+	}
+	demoServiceSubject.Register(cmd2.Trigger, types, cmd2.Exec, cmd2.RouteByID)
 
 	// Message to repeat.
 	testConversation := service.Conversation{
@@ -113,24 +122,34 @@ func TestIgnoreSetPrefix(t *testing.T) {
 	testCmd := "repeat "
 	cmd1 := Command{
 		Trigger: testCmd,
-		Pattern: regexp.MustCompile("(.*)"),
+		Parameters: []CommandParameter{{Type: "string"}},
 		Exec:    Repeater,
 		Help:    "",
 		Storage: &_storage,
 	}
-	cmd1.AddSender(&demoSender)
-	demoServiceSubject.Register(&cmd1)
+
+	cmd1.AddSender(&demoSender) 
+	types := []string{}
+	for _, commandParameter := range cmd1.Parameters {
+		types = append(types, commandParameter.Type)
+	}
+	demoServiceSubject.Register(cmd1.Trigger, types, cmd1.Exec, cmd1.RouteByID)
 
 	prefixCmd := "setprefix"
 	cmd2 := Command{
 		Trigger: prefixCmd,
-		Pattern: regexp.MustCompile("(.*)"),
+		Parameters: []CommandParameter{{Type: "string"}},
 		Exec:    SetPrefix,
 		Help:    "[word] | Set the prefix of all commands of this bot, for this server.",
 		Storage: &_storage,
 	}
+
 	cmd2.AddSender(&demoSender)
-	demoServiceSubject.Register(&cmd2)
+	types = []string{}
+	for _, commandParameter := range cmd2.Parameters {
+		types = append(types, commandParameter.Type)
+	}
+	demoServiceSubject.Register(cmd2.Trigger, types, cmd2.Exec, cmd2.RouteByID)
 
 	// Message to repeat.
 	testConversation := service.Conversation{

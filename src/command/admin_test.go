@@ -18,12 +18,20 @@ func getBot() (*demoservice.DemoService, *demoservice.DemoSender, *storage.TempS
 	_storage.SetDefaultGuildValue("prefix", prefix)
 	commands := AdminCommands()
 
-	demoService := demoservice.DemoService{ServiceID: demoservice.ServiceID}
+	demoService := demoservice.DemoService{
+		ServiceID: demoservice.ServiceID,
+		Storage:   &_storage,
+	}
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
 	for i := range commands {
 		commands[i].AddSender(&demoSender)
-		commands[i].Storage = &_storage
-		demoService.Register(&commands[i])
+
+		cmd := commands[i]
+		types := []string{}
+		for _, commandParameter := range cmd.Parameters {
+			types = append(types, commandParameter.Type)
+		}
+		demoService.Register(cmd.Trigger, types, cmd.Exec, cmd.RouteByID)
 	}
 
 	return &demoService, &demoSender, &tempStorage

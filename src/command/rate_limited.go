@@ -65,7 +65,7 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 
 		if val, ok := (*storage).GetUserValue(user, r.ID); ok {
 			history, ok = val.([]int64)
-			if ok == false {
+			if !ok {
 				panic(fmt.Errorf("interface type wasn't usable"))
 			}
 		}
