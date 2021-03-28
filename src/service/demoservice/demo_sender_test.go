@@ -31,12 +31,3 @@ func TestDemoSender(t *testing.T) {
 
 	}
 }
-
-type observerDemo struct {
-	LastMsg string
-}
-
-// OnMessage does nothing.
-func (o *observerDemo) OnMessage(conversation service.Conversation, sender service.User, msg string) {
-	o.LastMsg = msg
-}

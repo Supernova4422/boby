@@ -2,7 +2,6 @@ package demoservice
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/BKrajancic/boby/m/v2/src/command"
@@ -10,8 +9,8 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
-func Repeater(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
-	sink(sender, service.Message{Description: msg[0][0]})
+func Repeater(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	sink(sender, service.Message{Description: msg[0].(string)})
 }
 
 // This is able to test
@@ -25,19 +24,24 @@ func TestParseWithoutPrefix(t *testing.T) {
 	var _storage storage.Storage = &tempStorage
 	_storage.SetDefaultGuildValue("prefix", prefix)
 
-	demoServiceSubject := DemoService{ServiceID: ServiceID}
+	demoServiceSubject := DemoService{ServiceID: ServiceID, Storage: &_storage}
 	demoSender := DemoSender{ServiceID: ServiceID}
 
 	testCmd := "repeat "
 	cmd := command.Command{
 		Trigger: testCmd,
-		Pattern: regexp.MustCompile("(.*)"),
+		Parameters: []command.CommandParameter{{Type: "string"}},
 		Exec:    Repeater,
 		Storage: &_storage,
 		Help:    "",
 	} // Repeater command.
 	cmd.AddSender(&demoSender)
-	demoServiceSubject.Register(&cmd)
+
+	types := []string{}
+	for _, commandParameter := range cmd.Parameters {
+		types = append(types, commandParameter.Type)
+	}
+	demoServiceSubject.Register(cmd.Trigger, types, cmd.Exec, cmd.RouteByID)
 
 	// Message to repeat.
 	testConversation := service.Conversation{
@@ -67,19 +71,24 @@ func TestParseWithPrefix(t *testing.T) {
 	var _storage storage.Storage = &tempStorage
 	_storage.SetDefaultGuildValue("prefix", prefix)
 
-	demoServiceSubject := DemoService{ServiceID: ServiceID}
+	demoServiceSubject := DemoService{ServiceID: ServiceID, Storage: &_storage}
 	demoSender := DemoSender{ServiceID: ServiceID}
 
 	testCmd := "repeat "
 	cmd := command.Command{
 		Trigger: testCmd,
-		Pattern: regexp.MustCompile("(.*)"),
+		Parameters: []command.CommandParameter{{Type: "string"}},
 		Exec:    Repeater,
 		Storage: &_storage,
 		Help:    "",
 	} // Repeater command.
 	cmd.AddSender(&demoSender)
-	demoServiceSubject.Register(&cmd)
+
+	types := []string{}
+	for _, commandParameter := range cmd.Parameters {
+		types = append(types, commandParameter.Type)
+	}
+	demoServiceSubject.Register(cmd.Trigger, types, cmd.Exec, cmd.RouteByID)
 
 	// Message to repeat.
 	testConversation := service.Conversation{
@@ -109,19 +118,24 @@ func TestParseWithoutSpace(t *testing.T) {
 	var _storage storage.Storage = &tempStorage
 	_storage.SetDefaultGuildValue("prefix", prefix)
 
-	demoServiceSubject := DemoService{ServiceID: ServiceID}
+	demoServiceSubject := DemoService{ServiceID: ServiceID, Storage: &_storage}
 	demoSender := DemoSender{ServiceID: ServiceID}
 
 	testCmd := "repeat" // Should be fine.
 	cmd := command.Command{
 		Trigger: testCmd,
-		Pattern: regexp.MustCompile("(.*)"),
+		Parameters: []command.CommandParameter{{Type: "string"}},
 		Exec:    Repeater,
 		Storage: &_storage,
 		Help:    "",
 	} // Repeater command.
 	cmd.AddSender(&demoSender)
-	demoServiceSubject.Register(&cmd)
+
+	types := []string{}
+	for _, commandParameter := range cmd.Parameters {
+		types = append(types, commandParameter.Type)
+	}
+	demoServiceSubject.Register(cmd.Trigger, types, cmd.Exec, cmd.RouteByID)
 
 	testConversation := service.Conversation{
 		ServiceID:      demoServiceSubject.ID(),
@@ -153,19 +167,24 @@ func TestEmpty(t *testing.T) {
 	var _storage storage.Storage = &tempStorage
 	_storage.SetDefaultGuildValue("prefix", prefix)
 
-	demoServiceSubject := DemoService{ServiceID: ServiceID}
+	demoServiceSubject := DemoService{ServiceID: ServiceID, Storage: &_storage}
 	demoSender := DemoSender{ServiceID: ServiceID}
 
 	testCmd := "repeat"
 	cmd := command.Command{
 		Trigger: testCmd + " ",
-		Pattern: regexp.MustCompile("(.*)"),
+		Parameters: []command.CommandParameter{{Type: "string"}},
 		Exec:    Repeater,
 		Storage: &_storage,
 		Help:    "",
 	}
 	cmd.AddSender(&demoSender)
-	demoServiceSubject.Register(&cmd)
+
+	types := []string{}
+	for _, commandParameter := range cmd.Parameters {
+		types = append(types, commandParameter.Type)
+	}
+	demoServiceSubject.Register(cmd.Trigger, types, cmd.Exec, cmd.RouteByID)
 
 	// Message to repeat.
 	testConversation := service.Conversation{

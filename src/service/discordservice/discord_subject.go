@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/BKrajancic/boby/m/v2/src/command"
-	"github.com/BKrajancic/boby/m/v2/src/service"
+	// "github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 	"github.com/bwmarrin/discordgo"
 )
@@ -14,7 +14,7 @@ import (
 type DiscordSubject struct {
 	discord       *discordgo.Session
 	discordSender DiscordSender
-	observers     []*service.Observer
+	observers     []command.Command
 	storage       *storage.Storage
 }
 
@@ -31,19 +31,24 @@ func (d *DiscordSubject) Register(cmd command.Command) {
 	if len(help) > limit {
 		help = help[0:limit]
 	}
+
+	
+
+	options := []*discordgo.ApplicationCommandOption{}
+	for _, parameter := range cmd.Parameters {
+		option := discordgo.ApplicationCommandOption{
+			Type:        discordgo.ApplicationCommandOptionString,
+			Name:        parameter.Name,
+			Description: parameter.Description,
+			Required:    true,
+		}
+		options = append(options, &option)
+	}
+
 	command := discordgo.ApplicationCommand {
 		Name:        cmd.Trigger,
-		Description: help, 
-		/*
-		Options: []*discordgo.ApplicationCommandOption{
-			{
-				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        cmd.Trigger,
-				Description: "TODO",
-				Required:    true,
-			},
-		},
-		*/
+		Description: help,
+		Options:     options,
 	}
 
 	// guildID := flag.String("guild", "", "Test guild ID. If not passed - bot registers commands globally")
@@ -68,11 +73,11 @@ func (d *DiscordSubject) Register(cmd command.Command) {
 		&command,
 	)
 	if err != nil {
+		fmt.Printf("%s", err)
 		panic(err)
 	}
 
-	var observer service.Observer = &cmd
-	d.observers = append(d.observers, &observer)
+	d.observers = append(d.observers, cmd)
 }
 
 // ID returns the discord service ID, this is the same for all DiscordSubject objects.
@@ -100,6 +105,7 @@ func (d *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.Messag
 }
 
 func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
+	/*
 	if m.Author == nil || m.Author.ID == s.State.User.ID {
 		return
 	}
@@ -174,4 +180,5 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 	for _, service := range d.observers {
 		(*service).OnMessage(conversation, user, m.Content)
 	}
+	*/
 }
