@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+
 	// "regexp"
 	"strconv"
 	"syscall"
@@ -62,7 +63,6 @@ func main() {
 
 	for i := range commands {
 		commands[i].AddSender(discordSender)
-		commands[i].Storage = &storage
 		discordSubject.Register(commands[i])
 	}
 
@@ -78,9 +78,9 @@ func main() {
 
 func makeHelpCommand(commands *[]command.Command, helpTrigger string) *command.Command {
 	helpCommand := &command.Command{
-		Trigger: helpTrigger,
-		Parameters: []command.CommandParameter{{Type: "string"}},
-		Help:    "Provides information on how to use the bot.",
+		Trigger:    helpTrigger,
+		Parameters: []command.Parameter{{Type: "string"}},
+		Help:       "Provides information on how to use the bot.",
 	}
 
 	helpCommand.Exec = func(conversation service.Conversation, user service.User, _ []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
@@ -88,7 +88,7 @@ func makeHelpCommand(commands *[]command.Command, helpTrigger string) *command.C
 		prefix, ok := (*storage).GetGuildValue(conversation.Guild(), "prefix")
 
 		if !ok {
-			prefix = "" 
+			prefix = ""
 		}
 
 		for i, command := range *commands {

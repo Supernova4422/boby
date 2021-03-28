@@ -19,64 +19,64 @@ const Repo = "https://github.com/BKrajancic/boby"
 func AdminCommands() []Command {
 	return []Command{
 		{
-			Trigger:   ImAdminTrigger,
-			Parameters: []CommandParameter{}, 
-			Exec:      ImAdmin,
-			Help:      "Check if the sender is an admin.",
-			HelpInput: "[@role or @user]",
+			Trigger:    ImAdminTrigger,
+			Parameters: []Parameter{},
+			Exec:       ImAdmin,
+			Help:       "Check if the sender is an admin.",
+			HelpInput:  "[@role or @user]",
 		},
 
 		{
-			Trigger:   IsAdminTrigger,
-			Parameters: []CommandParameter{
+			Trigger: IsAdminTrigger,
+			Parameters: []Parameter{
 				{
-					Name: "User_or_Role",
+					Name:        "User_or_Role",
 					Description: "User/Role To check if is an admin",
-					Type: "string",
+					Type:        "string",
 				},
-			}, 
+			},
 			Exec:      CheckAdmin,
 			Help:      "Check if a role/user is admin.",
 			HelpInput: "[@role or @user]",
 		},
 
 		{
-			Trigger:   "setadmin",
-			Parameters: []CommandParameter{
+			Trigger: "setadmin",
+			Parameters: []Parameter{
 				{
-					Name: "User_or_Role",
+					Name:        "User_or_Role",
 					Description: "User/Role to set as an admin",
-					Type: "string",
+					Type:        "string",
 				},
-			}, 
+			},
 			Exec:      SetAdmin,
 			Help:      "Set a role or user as an admin, therefore giving them all permissions for this bot. Users/Roles with any of the following server permissions are automatically treated as admin: 'Administrator', 'Manage Server', 'Manage Webhooks.'",
 			HelpInput: "[@role or @user]",
 		},
 
 		{
-			Trigger:   UnsetAdminTrigger,
-			Parameters: []CommandParameter{
+			Trigger: UnsetAdminTrigger,
+			Parameters: []Parameter{
 				{
-					Name: "User_or_Role",
+					Name:        "User_or_Role",
 					Description: "User/Role to unset as an admin",
-					Type: "string",
+					Type:        "string",
 				},
-			}, 
+			},
 			Exec:      UnsetAdmin,
 			Help:      "Unset a role or user as an admin, therefore giving them usual permissions.",
 			HelpInput: "[@role or @user]",
 		},
 
 		{
-			Trigger:   "setprefix",
-			Parameters: []CommandParameter{
+			Trigger: "setprefix",
+			Parameters: []Parameter{
 				{
-					Name: "prefix",
+					Name:        "prefix",
 					Description: "This feature should no longer work.",
-					Type: "string",
+					Type:        "string",
 				},
-			}, 
+			},
 			Exec:      SetPrefix,
 			Help:      "Set the prefix of all commands of this bot, for this server.",
 			HelpInput: "[word]",

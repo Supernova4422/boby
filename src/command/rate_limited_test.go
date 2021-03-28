@@ -107,10 +107,10 @@ func TestRateLimitedCommand(t *testing.T) {
 	testCmd := "repeat"
 
 	replyCommand := Command{
-		Trigger: testCmd,
-		Parameters: []CommandParameter{{Type: "string"}},
-		Exec:    Repeater,
-		Help:    "Help",
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
 	}
 
 	limitMsg := "You hit the limit"
@@ -162,10 +162,10 @@ func TestRateLimitedCommandDisaster(t *testing.T) {
 	testCmd := "repeat"
 
 	replyCommand := Command{
-		Trigger: testCmd,
-		Parameters: []CommandParameter{{Type: "string"}},
-		Exec:    Repeater,
-		Help:    "Help",
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
 	}
 
 	limitMsg := "You hit the limit"
@@ -209,10 +209,10 @@ func TestRateLimitedCommandWithGobStorage(t *testing.T) {
 	testCmd := "repeat"
 
 	replyCommand := Command{
-		Trigger: testCmd,
-		Parameters: []CommandParameter{{Type: "string"}},
-		Exec:    Repeater,
-		Help:    "Help",
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
 	}
 
 	limitMsg := "You hit the limit"
@@ -264,10 +264,10 @@ func TestRateLimitedCommandMinute(t *testing.T) {
 	testCmd := "repeat"
 
 	replyCommand := Command{
-		Trigger: testCmd,
-		Parameters: []CommandParameter{{Type: "string"}},
-		Exec:    Repeater,
-		Help:    "Help",
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
 	}
 
 	limitMsg := "You hit the limit"
@@ -319,10 +319,10 @@ func TestRateLimitedCommandHour(t *testing.T) {
 	testCmd := "repeat"
 
 	replyCommand := Command{
-		Trigger: testCmd,
-		Parameters: []CommandParameter{{Type: "string"}},
-		Exec:    Repeater,
-		Help:    "Help",
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
 	}
 
 	limitMsg := "You hit the limit"
@@ -367,10 +367,10 @@ func TestRateLimitedUseless(t *testing.T) {
 	testCmd := "repeat"
 
 	replyCommand := Command{
-		Trigger: testCmd,
-		Parameters: []CommandParameter{{Type: "string"}},
-		Exec:    Repeater,
-		Help:    "Help",
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
 	}
 
 	limitMsg := "You hit the limit"
@@ -391,10 +391,10 @@ func TestRateLimitedNotUseless(t *testing.T) {
 	testCmd := "repeat"
 
 	replyCommand := Command{
-		Trigger: testCmd,
-		Parameters: []CommandParameter{{Type: "string"}},
-		Exec:    Repeater,
-		Help:    "Help",
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
 	}
 
 	limitMsg := "You hit the limit"

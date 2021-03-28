@@ -29,11 +29,10 @@ func TestParseWithoutPrefix(t *testing.T) {
 
 	testCmd := "repeat "
 	cmd := command.Command{
-		Trigger: testCmd,
-		Parameters: []command.CommandParameter{{Type: "string"}},
-		Exec:    Repeater,
-		Storage: &_storage,
-		Help:    "",
+		Trigger:    testCmd,
+		Parameters: []command.Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "",
 	} // Repeater command.
 	cmd.AddSender(&demoSender)
 
@@ -76,11 +75,10 @@ func TestParseWithPrefix(t *testing.T) {
 
 	testCmd := "repeat "
 	cmd := command.Command{
-		Trigger: testCmd,
-		Parameters: []command.CommandParameter{{Type: "string"}},
-		Exec:    Repeater,
-		Storage: &_storage,
-		Help:    "",
+		Trigger:    testCmd,
+		Parameters: []command.Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "",
 	} // Repeater command.
 	cmd.AddSender(&demoSender)
 
@@ -123,11 +121,10 @@ func TestParseWithoutSpace(t *testing.T) {
 
 	testCmd := "repeat" // Should be fine.
 	cmd := command.Command{
-		Trigger: testCmd,
-		Parameters: []command.CommandParameter{{Type: "string"}},
-		Exec:    Repeater,
-		Storage: &_storage,
-		Help:    "",
+		Trigger:    testCmd,
+		Parameters: []command.Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "",
 	} // Repeater command.
 	cmd.AddSender(&demoSender)
 
@@ -172,11 +169,10 @@ func TestEmpty(t *testing.T) {
 
 	testCmd := "repeat"
 	cmd := command.Command{
-		Trigger: testCmd + " ",
-		Parameters: []command.CommandParameter{{Type: "string"}},
-		Exec:    Repeater,
-		Storage: &_storage,
-		Help:    "",
+		Trigger:    testCmd + " ",
+		Parameters: []command.Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "",
 	}
 	cmd.AddSender(&demoSender)
 

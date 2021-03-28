@@ -20,14 +20,14 @@ import (
 
 // GoQueryScraperConfig can be turned into a scraper that uses GoQuery.
 type GoQueryScraperConfig struct {
-	Title         string             // When sending a post, what should the title be.
-	Trigger       string             // Word which triggers this command to activate.
-	Parameters    []CommandParameter // How to capture words.
-	TitleSelector SelectorCapture    // The output message's title.
-	ErrorURL      string             // A url to show only when there is an error.
-	URL           string             // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
-	URLSuffix     string             // When adding a URL to a message, this string is appended. This is useful for including referral links.
-	ReplySelector SelectorCapture    // The output message's body text.
+	Title         string          // When sending a post, what should the title be.
+	Trigger       string          // Word which triggers this command to activate.
+	Parameters    []Parameter     // How to capture words.
+	TitleSelector SelectorCapture // The output message's title.
+	ErrorURL      string          // A url to show only when there is an error.
+	URL           string          // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
+	URLSuffix     string          // When adding a URL to a message, this string is appended. This is useful for including referral links.
+	ReplySelector SelectorCapture // The output message's body text.
 	Fields        []GoQueryFieldCapture
 	Help          string // Help message to display.
 	HelpInput     string // Help message to display for input following command.
@@ -131,19 +131,18 @@ func (g GoQueryScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Comm
 		)
 	}
 
-
 	return Command{
-		Trigger:             g.Trigger,
-		Parameters:          []CommandParameter{
+		Trigger: g.Trigger,
+		Parameters: []Parameter{
 			{
-				Name: "Word",
+				Name:        "Word",
 				Description: "Word to translate.",
-				Type: "string", 
+				Type:        "string",
 			},
 		},
-		Exec:                curry,
-		Help:                g.Help,
-		HelpInput:           g.HelpInput,
+		Exec:      curry,
+		Help:      g.Help,
+		HelpInput: g.HelpInput,
 	}, nil
 }
 
@@ -169,9 +168,9 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 		sink(
 			sender,
 			service.Message{
-				Title: "Error",
+				Title:       "Error",
 				Description: "An error occurred retrieving the webpage.",
-				URL:   msgURL,
+				URL:         msgURL,
 			},
 		)
 		return
@@ -182,9 +181,9 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 		sink(
 			sender,
 			service.Message{
-				Title: msgURL,
+				Title:       msgURL,
 				Description: "An error occurred when processing the webpage.",
-				URL:   g.ErrorURL,
+				URL:         g.ErrorURL,
 			},
 		)
 		return
@@ -192,19 +191,19 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 
 	if doc.Text() == "" {
 		captures := []string{}
-		for _, item := range msg{
-			captures = append(captures, item.(string)) 
+		for _, item := range msg {
+			captures = append(captures, item.(string))
 		}
 
 		sink(
 			sender,
 			service.Message{
-				Title: "Error",
+				Title:       "Error",
 				Description: fmt.Sprintf("No result was found for \"%s\"", strings.Join(captures, " ")),
-				URL:   g.ErrorURL,
+				URL:         g.ErrorURL,
 			},
 		)
-		return 
+		return
 	}
 
 	title, err1 := g.TitleSelector.selectorCaptureToString(*doc)

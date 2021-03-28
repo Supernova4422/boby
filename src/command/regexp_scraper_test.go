@@ -17,7 +17,7 @@ import (
 func TestMakeScraper(t *testing.T) {
 	config := RegexpScraperConfig{
 		Trigger:      "!",
-		Parameters:   []CommandParameter{{Type: "string"}},
+		Parameters:   []Parameter{{Type: "string"}},
 		URL:          "%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
@@ -54,7 +54,7 @@ func TestScraperWithCapture(t *testing.T) {
 
 	config := RegexpScraperConfig{
 		Trigger:      testCmd,
-		Parameters:    []CommandParameter{{Type: "string"}},
+		Parameters:   []Parameter{{Type: "string"}},
 		URL:          "%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
@@ -100,7 +100,7 @@ func TestScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 
 	config := RegexpScraperConfig{
 		Trigger:       testCmd,
-		Parameters:    []CommandParameter{{Type: "string"}},
+		Parameters:    []Parameter{{Type: "string"}},
 		URL:           "%s",
 		ReplyCapture:  "<h1>([^<]*)</h1>",
 		TitleTemplate: "Title",
@@ -136,7 +136,7 @@ func TestScraperWithTitleCapture(t *testing.T) {
 
 	config := RegexpScraperConfig{
 		Trigger:       testCmd,
-		Parameters:    []CommandParameter{{Type: "string"}},
+		Parameters:    []Parameter{{Type: "string"}},
 		URL:           "%s",
 		ReplyCapture:  "<h1>([^<]*)</h1>",
 		TitleTemplate: "%s",
@@ -173,7 +173,7 @@ func TestScraperNoCapture(t *testing.T) {
 
 	config := RegexpScraperConfig{
 		Trigger:      testCmd,
-		Parameters:    []CommandParameter{{Type: "string"}},
+		Parameters:   []Parameter{{Type: "string"}},
 		URL:          "usual",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
@@ -198,7 +198,7 @@ func TestScraperNoCapture(t *testing.T) {
 func TestGetRegexScraperConfigs(t *testing.T) {
 	configIn := []RegexpScraperConfig{{
 		Trigger:      "test",
-		Parameters:    []CommandParameter{{Type: "string"}},
+		Parameters:   []Parameter{{Type: "string"}},
 		URL:          "%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}}

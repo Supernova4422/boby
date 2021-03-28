@@ -61,8 +61,8 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
-		Trigger: "",
-		Parameters: []CommandParameter{{Type: "string", }}, 
+		Trigger:    "",
+		Parameters: []Parameter{{Type: "string"}},
 		TitleSelector: SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
@@ -128,8 +128,8 @@ func TestGoQueryScraperWithMissingCapture(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
-		Trigger: "",
-		Parameters: []CommandParameter{{Type: "string"}},
+		Trigger:    "",
+		Parameters: []Parameter{{Type: "string"}},
 		TitleSelector: SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
@@ -182,8 +182,8 @@ func TestGoQueryScraperWithMissingCaptureAndErrorURL(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
-		Trigger: "",
-		Parameters: []CommandParameter{{Type: "string"}},
+		Trigger:    "",
+		Parameters: []Parameter{{Type: "string"}},
 		TitleSelector: SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
@@ -240,8 +240,8 @@ func TestGoQueryScraperWithSuffix(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
-		Trigger: "",
-		Parameters: []CommandParameter{{Type: "string"}},
+		Trigger:    "",
+		Parameters: []Parameter{{Type: "string"}},
 		TitleSelector: SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
@@ -312,8 +312,8 @@ func TestGoQueryScraperWithReplacement(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
-		Trigger: "",
-		Parameters: []CommandParameter{{Type: "string"}},
+		Trigger:    "",
+		Parameters: []Parameter{{Type: "string"}},
 		TitleSelector: SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
@@ -380,8 +380,8 @@ func TestGoQueryScraperWithFullReplacementOnMissing(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
-		Trigger: "",
-		Parameters: []CommandParameter{{Type: "string"}},
+		Trigger:    "",
+		Parameters: []Parameter{{Type: "string"}},
 		TitleSelector: SelectorCapture{
 			Template: "%s (%s , %s)",
 			Selectors: []string{
@@ -450,8 +450,8 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
-		Trigger: "",
-		Parameters: []CommandParameter{{Type: "string"}},
+		Trigger:    "",
+		Parameters: []Parameter{{Type: "string"}},
 		TitleSelector: SelectorCapture{
 			Template: "%s",
 			Selectors: []string{
@@ -519,7 +519,7 @@ func TestGoQueryScraperFieldsExtraHideURL(t *testing.T) {
 
 	config := GoQueryScraperConfig{
 		Trigger:       "",
-		Parameters:    []CommandParameter{{Type: "string"}},
+		Parameters:    []Parameter{{Type: "string"}},
 		TitleSelector: demoSelectorCapture,
 		ReplySelector: demoSelectorCapture2,
 		URL:           "%s",
@@ -624,7 +624,7 @@ func TestGoQueryScraperFields(t *testing.T) {
 
 	config := GoQueryScraperConfig{
 		Trigger:       "",
-		Parameters:    []CommandParameter{{Type: "string"}},
+		Parameters:    []Parameter{{Type: "string"}},
 		TitleSelector: demoSelectorCapture,
 		ReplySelector: demoSelectorCapture2,
 		URL:           "%s",
@@ -704,8 +704,8 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
-		Trigger: "",
-		Parameters: []CommandParameter{{Type: "string"}},
+		Trigger:    "",
+		Parameters: []Parameter{{Type: "string"}},
 		TitleSelector: SelectorCapture{
 			Template:       "Title Template!",
 			Selectors:      []string{"h3"},
@@ -755,8 +755,8 @@ func TestGoQueryScraperNoCaptureMissingSub(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
-		Trigger: "",
-		Parameters: []CommandParameter{{Type: "string"}},
+		Trigger:    "",
+		Parameters: []Parameter{{Type: "string"}},
 		TitleSelector: SelectorCapture{
 			Template:       "Title: %s",
 			Selectors:      []string{"h3"},
@@ -806,8 +806,8 @@ func TestGoQueryScrapeEscapeUrl(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
-		Trigger: "",
-		Parameters: []CommandParameter{{Type: "string"}},
+		Trigger:    "",
+		Parameters: []Parameter{{Type: "string"}},
 		TitleSelector: SelectorCapture{
 			Template:       "Title Template!",
 			Selectors:      []string{},
@@ -1004,8 +1004,8 @@ func TestGoQueryScraperUnusedCapture(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
-		Trigger: "",
-		Parameters: []CommandParameter{{Type: "string"}}, // This is a bad idea.
+		Trigger:    "",
+		Parameters: []Parameter{{Type: "string"}}, // This is a bad idea.
 		TitleSelector: SelectorCapture{
 			Template:       "Example Scrape",
 			Selectors:      []string{},
@@ -1130,8 +1130,8 @@ func TestEmptyPage(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
-		Parameters: []CommandParameter{{Type: "string"}}, // This is a bad idea.
-		URL:     "e-commerce/",
+		Parameters: []Parameter{{Type: "string"}}, // This is a bad idea.
+		URL:        "e-commerce/",
 	}
 
 	scraper, err := config.CommandWithHTMLGetter(htmlGetRemembered(""))
@@ -1166,9 +1166,9 @@ func TestEmptyPageTestSuffixWhenEmptyURL(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
-		Parameters:    []CommandParameter{{Type: "string"}}, // This is a bad idea.
-		URL:       "e-commerce/",
-		URLSuffix: "empty",
+		Parameters: []Parameter{{Type: "string"}}, // This is a bad idea.
+		URL:        "e-commerce/",
+		URLSuffix:  "empty",
 	}
 
 	scraper, err := config.CommandWithHTMLGetter(htmlGetRemembered(""))
@@ -1220,8 +1220,8 @@ func TestInvalidReader(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
-		Parameters: []CommandParameter{{Type: "string"}}, // This is a bad idea.
-		URL:     "e-commerce/",
+		Parameters: []Parameter{{Type: "string"}}, // This is a bad idea.
+		URL:        "e-commerce/",
 	}
 
 	scraper, err := config.CommandWithHTMLGetter(HTMLReturnErr)
@@ -1252,9 +1252,9 @@ func TestGoQueryScraperWithCaptureHideUrl(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := GoQueryScraperConfig{
-		HideURL: true,
-		Trigger: "",
-		Parameters: []CommandParameter{{Type: "string"}},
+		HideURL:    true,
+		Trigger:    "",
+		Parameters: []Parameter{{Type: "string"}},
 		TitleSelector: SelectorCapture{
 			Template: "%s",
 			Selectors: []string{

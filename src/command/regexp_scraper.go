@@ -19,7 +19,7 @@ import (
 // That Command will process a HTML based on a regexp, to send responses.
 type RegexpScraperConfig struct {
 	Trigger       string
-	Parameters    []CommandParameter
+	Parameters    []Parameter
 	TitleTemplate string // Title template that will be replaced by regex captures (using %s).
 	TitleCapture  string // Regex captures for title replacement.
 	URL           string // A url to scrape from, can contain one "%s" which is replaced with the first capture group.

@@ -38,7 +38,7 @@ func MakeExampleDir(dir string) error {
 	jsonGetters := []command.JSONGetterConfig{
 		{
 			Trigger:    "cmd",
-			Parameters: []command.CommandParameter{{Type: "string"}},
+			Parameters: []command.Parameter{{Type: "string"}},
 			Message: command.JSONCapture{
 				Title: command.FieldCapture{
 					Template:  "Title: %s",
@@ -77,7 +77,7 @@ func MakeExampleDir(dir string) error {
 	regexpGetters := []command.RegexpScraperConfig{
 		{
 			Trigger:       "rx",
-			Parameters:    []command.CommandParameter{{Type: "string"}},
+			Parameters:    []command.Parameter{{Type: "string"}},
 			TitleTemplate: "Title: %s",
 			TitleCapture:  "<h1>(.*)</h1>",
 			ReplyCapture:  "<h1>(.*)</h1>",
@@ -89,9 +89,9 @@ func MakeExampleDir(dir string) error {
 
 	goqueryGetters := []command.GoQueryScraperConfig{
 		{
-			Title:   "Title",
-			Trigger: "gq",
-			Parameters: []command.CommandParameter{{Type: "string"}},
+			Title:      "Title",
+			Trigger:    "gq",
+			Parameters: []command.Parameter{{Type: "string"}},
 			TitleSelector: command.SelectorCapture{
 				Template:       "Title: %s",
 				Selectors:      []string{".titlefield"},

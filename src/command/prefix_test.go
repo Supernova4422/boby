@@ -21,11 +21,10 @@ func TestSetPrefix2(t *testing.T) {
 
 	testCmd := "repeat "
 	cmd1 := Command{
-		Trigger: testCmd,
-		Parameters: []CommandParameter{{Type: "string"}},
-		Exec:    Repeater,
-		Help:    "",
-		Storage: &_storage,
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "",
 	} // Repeater
 	cmd1.AddSender(&demoSender)
 
@@ -38,14 +37,13 @@ func TestSetPrefix2(t *testing.T) {
 	prefixCmd := "setprefix"
 
 	cmd2 := Command{
-		Trigger: prefixCmd,
-		Parameters: []CommandParameter{{Type: "string"}},
-		Exec:    SetPrefix,
-		Help:    "[word] | Set the prefix of all commands of this bot, for this server.",
-		Storage: &_storage,
+		Trigger:    prefixCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       SetPrefix,
+		Help:       "[word] | Set the prefix of all commands of this bot, for this server.",
 	}
 
-	cmd2.AddSender(&demoSender) 
+	cmd2.AddSender(&demoSender)
 	types = []string{}
 	for _, commandParameter := range cmd2.Parameters {
 		types = append(types, commandParameter.Type)
@@ -121,14 +119,13 @@ func TestIgnoreSetPrefix(t *testing.T) {
 
 	testCmd := "repeat "
 	cmd1 := Command{
-		Trigger: testCmd,
-		Parameters: []CommandParameter{{Type: "string"}},
-		Exec:    Repeater,
-		Help:    "",
-		Storage: &_storage,
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "",
 	}
 
-	cmd1.AddSender(&demoSender) 
+	cmd1.AddSender(&demoSender)
 	types := []string{}
 	for _, commandParameter := range cmd1.Parameters {
 		types = append(types, commandParameter.Type)
@@ -137,11 +134,10 @@ func TestIgnoreSetPrefix(t *testing.T) {
 
 	prefixCmd := "setprefix"
 	cmd2 := Command{
-		Trigger: prefixCmd,
-		Parameters: []CommandParameter{{Type: "string"}},
-		Exec:    SetPrefix,
-		Help:    "[word] | Set the prefix of all commands of this bot, for this server.",
-		Storage: &_storage,
+		Trigger:    prefixCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       SetPrefix,
+		Help:       "[word] | Set the prefix of all commands of this bot, for this server.",
 	}
 
 	cmd2.AddSender(&demoSender)

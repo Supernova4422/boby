@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/BKrajancic/boby/m/v2/src/command"
+	"github.com/BKrajancic/boby/m/v2/src/service"
+
 	// "github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 	"github.com/bwmarrin/discordgo"
@@ -32,8 +34,6 @@ func (d *DiscordSubject) Register(cmd command.Command) {
 		help = help[0:limit]
 	}
 
-	
-
 	options := []*discordgo.ApplicationCommandOption{}
 	for _, parameter := range cmd.Parameters {
 		option := discordgo.ApplicationCommandOption{
@@ -45,7 +45,7 @@ func (d *DiscordSubject) Register(cmd command.Command) {
 		options = append(options, &option)
 	}
 
-	command := discordgo.ApplicationCommand {
+	command := discordgo.ApplicationCommand{
 		Name:        cmd.Trigger,
 		Description: help,
 		Options:     options,
@@ -54,6 +54,19 @@ func (d *DiscordSubject) Register(cmd command.Command) {
 	// guildID := flag.String("guild", "", "Test guild ID. If not passed - bot registers commands globally")
 
 	commandHandler := func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		conversation := service.Conversation{
+			ServiceID:      d.ID(),
+			ConversationID: i.ChannelID,
+			GuildID:        i.GuildID,
+			Admin:          false,
+		}
+
+		user := service.User{
+			Name:      i.Member.User.ID,
+			ServiceID: d.ID(),
+		}
+		cmd.Exec(conversation, user, []interface{}{}, d.storage, cmd.RouteByID)
+
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionApplicationCommandResponseData{
@@ -61,7 +74,6 @@ func (d *DiscordSubject) Register(cmd command.Command) {
 			},
 		})
 	}
-
 
 	d.discord.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		commandHandler(s, i)
@@ -106,79 +118,79 @@ func (d *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.Messag
 
 func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 	/*
-	if m.Author == nil || m.Author.ID == s.State.User.ID {
-		return
-	}
-
-	conversation := service.Conversation{
-		ServiceID:      d.ID(),
-		ConversationID: m.ChannelID,
-		GuildID:        m.GuildID,
-		Admin:          false,
-	}
-
-	user := service.User{
-		Name:      m.Author.ID,
-		ServiceID: d.ID(),
-	}
-
-	guild := service.Guild{
-		ServiceID: d.ID(),
-		GuildID:   "",
-	}
-
-	if m.GuildID == "" {
-		guild.GuildID = "@" + m.ID
-		conversation.Admin = true
-	} else {
-		discordGuild, err := s.Guild(m.GuildID)
-		if err == nil {
-			conversation.Admin = discordGuild.OwnerID == m.Author.ID
+		if m.Author == nil || m.Author.ID == s.State.User.ID {
+			return
 		}
-		guild.GuildID = m.GuildID
 
-		userID := fmt.Sprintf("<@!%s>", m.Author.ID)
-		if (*d.storage).IsAdmin(guild, userID) {
+		conversation := service.Conversation{
+			ServiceID:      d.ID(),
+			ConversationID: m.ChannelID,
+			GuildID:        m.GuildID,
+			Admin:          false,
+		}
+
+		user := service.User{
+			Name:      m.Author.ID,
+			ServiceID: d.ID(),
+		}
+
+		guild := service.Guild{
+			ServiceID: d.ID(),
+			GuildID:   "",
+		}
+
+		if m.GuildID == "" {
+			guild.GuildID = "@" + m.ID
 			conversation.Admin = true
-		}
+		} else {
+			discordGuild, err := s.Guild(m.GuildID)
+			if err == nil {
+				conversation.Admin = discordGuild.OwnerID == m.Author.ID
+			}
+			guild.GuildID = m.GuildID
 
-		for _, role := range m.Member.Roles {
-			if conversation.Admin {
-				break
+			userID := fmt.Sprintf("<@!%s>", m.Author.ID)
+			if (*d.storage).IsAdmin(guild, userID) {
+				conversation.Admin = true
 			}
 
-			for _, guildRole := range discordGuild.Roles {
+			for _, role := range m.Member.Roles {
 				if conversation.Admin {
 					break
 				}
 
-				if role != guildRole.ID {
-					continue
-				}
-
-				adminPermissions := []int64{
-					discordgo.PermissionAdministrator,
-					discordgo.PermissionManageServer,
-					discordgo.PermissionManageWebhooks,
-				}
-				for _, permission := range adminPermissions {
-					if (guildRole.Permissions & permission) == permission {
-						conversation.Admin = true
+				for _, guildRole := range discordGuild.Roles {
+					if conversation.Admin {
 						break
 					}
+
+					if role != guildRole.ID {
+						continue
+					}
+
+					adminPermissions := []int64{
+						discordgo.PermissionAdministrator,
+						discordgo.PermissionManageServer,
+						discordgo.PermissionManageWebhooks,
+					}
+					for _, permission := range adminPermissions {
+						if (guildRole.Permissions & permission) == permission {
+							conversation.Admin = true
+							break
+						}
+					}
+				}
+
+				updatedRole := fmt.Sprintf("<@&%s>", role)
+				if (*d.storage).IsAdmin(guild, updatedRole) {
+					conversation.Admin = true
+					break
 				}
 			}
-
-			updatedRole := fmt.Sprintf("<@&%s>", role)
-			if (*d.storage).IsAdmin(guild, updatedRole) {
-				conversation.Admin = true
-				break
-			}
 		}
-	}
 
-	for _, service := range d.observers {
-		(*service).OnMessage(conversation, user, m.Content)
-	}
+		for _, service := range d.observers {
+			(*service).OnMessage(conversation, user, m.Content)
+		}
 	*/
 }

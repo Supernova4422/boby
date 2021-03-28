@@ -551,9 +551,9 @@ func TestToken(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := JSONGetterConfig{
-		Grouped: false,
-		Delay:   0,
-		Parameters: []CommandParameter{{Type: "string"}}, 
+		Grouped:    false,
+		Delay:      0,
+		Parameters: []Parameter{{Type: "string"}},
 		Message: JSONCapture{
 			Title: FieldCapture{
 				Template:  "%s",
@@ -610,9 +610,9 @@ func TestTokenWithSuffix(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := JSONGetterConfig{
-		Grouped: false,
-		Delay:   0,
-		Parameters: []CommandParameter{{Type: "string"}}, 
+		Grouped:    false,
+		Delay:      0,
+		Parameters: []Parameter{{Type: "string"}},
 		Message: JSONCapture{
 			Title: FieldCapture{
 				Template:  "%s",
@@ -670,9 +670,9 @@ func TestSpacesInMessage(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 
 	config := JSONGetterConfig{
-		Grouped: false,
-		Delay:   0,
-		Parameters: []CommandParameter{{Type: "string"}},
+		Grouped:    false,
+		Delay:      0,
+		Parameters: []Parameter{{Type: "string"}},
 
 		Message: JSONCapture{
 			Title: FieldCapture{
