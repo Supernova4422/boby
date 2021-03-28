@@ -37,6 +37,9 @@ func main() {
 	}
 
 	storage, err := loadGobStorage(path.Join(folder, "storage.gob"))
+	if err != nil {
+		panic(err)
+	}
 	prefix := "!"
 	storage.SetDefaultGuildValue("prefix", prefix)
 	if err != nil {
@@ -51,11 +54,13 @@ func main() {
 	}
 
 	discordConfig := path.Join(folder, "config.json")
-	discordSubject, discordSender, _, err := discordservice.NewDiscords(discordConfig)
+	discordSubject, discordSender, discord, err := discordservice.NewDiscords(discordConfig)
 	if err != nil {
 		panic(err)
 	}
+	discord.UpdateGameStatus(0, "Bot is reloading...")
 	defer discordSubject.Close() // Cleanly close down the Discord session.
+	discordSubject.Load()
 	discordSubject.SetStorage(&storage)
 
 	// helpTrigger := "help"
@@ -65,6 +70,8 @@ func main() {
 		commands[i].AddSender(discordSender)
 		discordSubject.Register(commands[i])
 	}
+
+	discord.UpdateGameStatus(0, "Bot is online.")
 
 	// discord.UpdateGameStatus(0, prefix+helpTrigger)
 

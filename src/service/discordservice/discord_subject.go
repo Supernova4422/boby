@@ -7,7 +7,6 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/command"
 	"github.com/BKrajancic/boby/m/v2/src/service"
 
-	// "github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 	"github.com/bwmarrin/discordgo"
 )
@@ -23,6 +22,70 @@ type DiscordSubject struct {
 // SetStorage sets an object to use for storage/retrieval purposes.
 func (d *DiscordSubject) SetStorage(storage *storage.Storage) {
 	d.storage = storage
+}
+
+// Load prepares this object for usage.
+func (d *DiscordSubject) Load() {
+	// Remove other commands
+	appID := d.discord.State.User.ID
+	cmds, err := d.discord.ApplicationCommands(appID, "")
+	if err != nil {
+		panic(err)
+	}
+
+	for _, cmd := range cmds {
+		d.discord.ApplicationCommandDelete(cmd.ApplicationID, "", cmd.ID)
+	}
+
+	// Other things
+	commandHandler := func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		conversation := service.Conversation{
+			ServiceID:      d.ID(),
+			ConversationID: i.ChannelID,
+			GuildID:        i.GuildID,
+			Admin:          false,
+		}
+
+		user := service.User{
+			Name:      i.Member.User.ID,
+			ServiceID: d.ID(),
+		}
+		input := []interface{}{}
+		for _, val := range i.Data.Options {
+			input = append(input, val.Value)
+		}
+
+		embeds := &([]*discordgo.MessageEmbed{})
+		sink := func(conversation service.Conversation, msg service.Message) {
+			embed := MsgToEmbed(msg)
+			currEmbeds := append(*embeds, &embed)
+			embeds = &currEmbeds
+			if len(*embeds) == 1 {
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionApplicationCommandResponseData{
+						Embeds: *embeds,
+					},
+				})
+			} else {
+				msg := discordgo.WebhookEdit{Embeds: *embeds}
+				s.InteractionResponseEdit(appID, i.Interaction, &msg)
+			}
+		}
+
+		target := i.Data.Name
+		for j := range d.observers {
+			if d.observers[j].Trigger == target {
+				d.observers[j].Exec(conversation, user, input, d.storage, sink)
+				break
+			}
+		}
+
+	}
+
+	d.discord.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		commandHandler(s, i)
+	})
 }
 
 // Register will add an observer that will handle discord messages being received.
@@ -52,32 +115,6 @@ func (d *DiscordSubject) Register(cmd command.Command) {
 	}
 
 	// guildID := flag.String("guild", "", "Test guild ID. If not passed - bot registers commands globally")
-
-	commandHandler := func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		conversation := service.Conversation{
-			ServiceID:      d.ID(),
-			ConversationID: i.ChannelID,
-			GuildID:        i.GuildID,
-			Admin:          false,
-		}
-
-		user := service.User{
-			Name:      i.Member.User.ID,
-			ServiceID: d.ID(),
-		}
-		cmd.Exec(conversation, user, []interface{}{}, d.storage, cmd.RouteByID)
-
-		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionApplicationCommandResponseData{
-				Content: "Hey there! Congratulations, you just executed your first slash command",
-			},
-		})
-	}
-
-	d.discord.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		commandHandler(s, i)
-	})
 
 	_, err := d.discord.ApplicationCommandCreate(
 		d.discord.State.User.ID,
