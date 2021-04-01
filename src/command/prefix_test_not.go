@@ -9,6 +9,10 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
+func Repeater2(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	sink(sender, service.Message{Description: msg[0].(string)})
+}
+
 func TestSetPrefix2(t *testing.T) {
 	// Prepare context.
 	tempStorage := storage.GetTempStorage()
@@ -23,7 +27,7 @@ func TestSetPrefix2(t *testing.T) {
 	cmd1 := Command{
 		Trigger:    testCmd,
 		Parameters: []Parameter{{Type: "string"}},
-		Exec:       Repeater,
+		Exec:       Repeater2,
 		Help:       "",
 	} // Repeater
 	cmd1.AddSender(&demoSender)
@@ -121,7 +125,7 @@ func TestIgnoreSetPrefix(t *testing.T) {
 	cmd1 := Command{
 		Trigger:    testCmd,
 		Parameters: []Parameter{{Type: "string"}},
-		Exec:       Repeater,
+		Exec:       Repeater2,
 		Help:       "",
 	}
 

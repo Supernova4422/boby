@@ -2,11 +2,11 @@ package demoservice
 
 import (
 	"fmt"
-	"strings"
 	"strconv"
+	"strings"
 
-	"github.com/BKrajancic/boby/m/v2/src/storage"
 	"github.com/BKrajancic/boby/m/v2/src/service"
+	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
 // DemoService implements the service interface, and is useful for testing purposes.
@@ -18,8 +18,8 @@ type DemoService struct {
 	users         []service.User
 	conversations []service.Conversation
 
-	commands map[string]func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message)) 
-	commandTypes map[string][]string
+	commands       map[string]func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message))
+	commandTypes   map[string][]string
 	commandRouters map[string]func(service.Conversation, service.Message)
 }
 
@@ -64,13 +64,13 @@ func (d *DemoService) Run() {
 			break
 		}
 
-		types, ok := d.commandTypes[trigger] 
-		if !ok { 
+		types, ok := d.commandTypes[trigger]
+		if !ok {
 			panic("missing commandtypes for command")
 		}
 
-		router, ok := d.commandRouters[trigger] 
-		if !ok { 
+		router, ok := d.commandRouters[trigger]
+		if !ok {
 			panic("missing router for command")
 		}
 
@@ -95,27 +95,27 @@ func (d *DemoService) Run() {
 
 func parseInput(tokens []string, parameters []string) ([]interface{}, error) {
 	var parsers = map[string]func(string) (interface{}, error){
-		"string": func (input string) (interface{}, error) {
+		"string": func(input string) (interface{}, error) {
 			return input, nil
 		},
-	
-		"int": func (input string) (interface{}, error) {
+
+		"int": func(input string) (interface{}, error) {
 			val, err := strconv.Atoi(input)
 			if err != nil {
 				return nil, err
 			}
 			return val, nil
 		},
-	
-		"bool": func (input string) (interface{}, error) {
-			if strings.ToLower(input) == "true"{
+
+		"bool": func(input string) (interface{}, error) {
+			if strings.ToLower(input) == "true" {
 				return true, nil
 			}
-	
-			if strings.ToLower(input) == "false"{
+
+			if strings.ToLower(input) == "false" {
 				return false, nil
 			}
-	
+
 			return false, fmt.Errorf("parsing error")
 		},
 	}
@@ -125,16 +125,18 @@ func parseInput(tokens []string, parameters []string) ([]interface{}, error) {
 			return nil, fmt.Errorf("err")
 		}
 
-		if parameters[len(parameters) - 1] != "string" {
-			return nil, fmt.Errorf("err")
-		}
+		if len(parameters) > 0 {
+			if parameters[len(parameters)-1] != "string" {
+				return nil, fmt.Errorf("err")
+			}
 
-		tokens[len(parameters)] = strings.Join(tokens[len(parameters):], " ")
-		tokens = tokens[0:len(parameters)]
+			tokens[len(parameters)] = strings.Join(tokens[len(parameters):], " ")
+			tokens = tokens[0:len(parameters)]
+		}
 	}
 
 	outputs := []interface{}{}
-	for i := 0; i < len(tokens); i++ {
+	for i := 0; i < len(tokens) && i < len(parameters); i++ {
 		token := tokens[i]
 		parameter := parameters[i]
 
@@ -143,7 +145,7 @@ func parseInput(tokens []string, parameters []string) ([]interface{}, error) {
 			return nil, err
 		}
 		outputs = append(outputs, value)
-	} 
+	}
 
-	return outputs, nil 
+	return outputs, nil
 }
