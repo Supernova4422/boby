@@ -7,6 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// MsgToEmbed converts a service.msg to a discordgo message embed.
 func MsgToEmbed(msg service.Message) discordgo.MessageEmbed {
 	fields := make([]*discordgo.MessageEmbedField, 0)
 	for _, field := range msg.Fields {
