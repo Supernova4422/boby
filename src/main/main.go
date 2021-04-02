@@ -11,12 +11,10 @@ import (
 	"path"
 
 	// "regexp"
-	"strconv"
+
 	"syscall"
 
-	"github.com/BKrajancic/boby/m/v2/src/command"
 	"github.com/BKrajancic/boby/m/v2/src/config"
-	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/service/discordservice"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
@@ -54,24 +52,25 @@ func main() {
 	}
 
 	discordConfig := path.Join(folder, "config.json")
-	discordSubject, discordSender, discord, err := discordservice.NewDiscords(discordConfig)
+	discordSubject, _, discord, err := discordservice.NewDiscords(discordConfig)
 	if err != nil {
 		panic(err)
 	}
 	discord.UpdateGameStatus(0, "Bot is reloading...")
 	defer discordSubject.Close() // Cleanly close down the Discord session.
-	discordSubject.Load()
 	discordSubject.SetStorage(&storage)
+	discordSubject.Load()
 
 	// helpTrigger := "help"
 	// commands = append(commands, *makeHelpCommand(&commands, helpTrigger))
 
 	for i := range commands {
-		commands[i].AddSender(discordSender)
+		// commands[i].AddSender(discordSender)
 		discordSubject.Register(commands[i])
 	}
 
-	discord.UpdateGameStatus(0, "Bot is online.")
+	discord.UpdateGameStatus(0, "Bot is online")
+	fmt.Println("online")
 
 	// discord.UpdateGameStatus(0, prefix+helpTrigger)
 
@@ -81,47 +80,6 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-}
-
-func makeHelpCommand(commands *[]command.Command, helpTrigger string) *command.Command {
-	helpCommand := &command.Command{
-		Trigger:    helpTrigger,
-		Parameters: []command.Parameter{{Type: "string"}},
-		Help:       "Provides information on how to use the bot.",
-	}
-
-	helpCommand.Exec = func(conversation service.Conversation, user service.User, _ []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
-		fields := make([]service.MessageField, 0)
-		prefix, ok := (*storage).GetGuildValue(conversation.Guild(), "prefix")
-
-		if !ok {
-			prefix = ""
-		}
-
-		for i, command := range *commands {
-			fields = append(fields, service.MessageField{
-				Field: fmt.Sprintf(
-					"%s. %s%s %s",
-					strconv.Itoa(i+1),
-					prefix,
-					command.Trigger,
-					command.HelpInput,
-				),
-				Value: command.Help,
-			})
-		}
-
-		sink(
-			conversation,
-			service.Message{
-				Title:  "Help",
-				Fields: fields,
-				Footer: "Contribute to this project at: " + command.Repo,
-			},
-		)
-	}
-
-	return helpCommand
 }
 
 // loadGobStorage loads a file used for storage.
