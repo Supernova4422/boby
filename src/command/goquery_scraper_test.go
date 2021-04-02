@@ -50,6 +50,34 @@ func htmlTestPage(name string) (string, io.ReadCloser, error) {
 	return "", nil, fmt.Errorf("error")
 }
 
+func TestReasonableCreation(t *testing.T) {
+	config := GoQueryScraperConfig{
+		Trigger:    "",
+		Parameters: []Parameter{{Type: "string"}},
+		TitleSelector: SelectorCapture{
+			Template: "%s",
+			Selectors: []string{
+				"h2",
+			},
+			HandleMultiple: "First",
+		},
+		URL: "%s",
+		ReplySelector: SelectorCapture{
+			Template: "%s",
+			Selectors: []string{
+				"h1",
+			},
+			HandleMultiple: "First",
+		},
+		Help: "This is just a test!",
+	}
+
+	_, err := config.Command()
+	if err != nil {
+		t.Fail()
+	}
+}
+
 func TestGoQueryScraperWithCapture(t *testing.T) {
 	demoSender := demoservice.DemoSender{}
 

@@ -73,7 +73,7 @@ func AdminCommands() []Command {
 			Parameters: []Parameter{
 				{
 					Name:        "prefix",
-					Description: "This feature should no longer work.",
+					Description: "Set the prefix of commands, for this server.",
 					Type:        "string",
 				},
 			},

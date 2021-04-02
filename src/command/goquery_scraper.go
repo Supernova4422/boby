@@ -132,17 +132,11 @@ func (g GoQueryScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Comm
 	}
 
 	return Command{
-		Trigger: g.Trigger,
-		Parameters: []Parameter{
-			{
-				Name:        "Word",
-				Description: "Word to translate.",
-				Type:        "string",
-			},
-		},
-		Exec:      curry,
-		Help:      g.Help,
-		HelpInput: g.HelpInput,
+		Trigger:    g.Trigger,
+		Parameters: g.Parameters,
+		Exec:       curry,
+		Help:       g.Help,
+		HelpInput:  g.HelpInput,
 	}, nil
 }
 
