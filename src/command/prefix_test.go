@@ -20,10 +20,10 @@ func TestSetPrefix2(t *testing.T) {
 	prefix0 := "!"
 	_storage.SetDefaultGuildValue("prefix", prefix0)
 
-	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
+	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID, Storage: &_storage}
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
 
-	testCmd := "repeat "
+	testCmd := "repeat"
 	cmd1 := Command{
 		Trigger:    testCmd,
 		Parameters: []Parameter{{Type: "string"}},
@@ -44,7 +44,7 @@ func TestSetPrefix2(t *testing.T) {
 		Trigger:    prefixCmd,
 		Parameters: []Parameter{{Type: "string"}},
 		Exec:       SetPrefix,
-		Help:       "[word] | Set the prefix of all commands of this bot, for this server.",
+		Help:       "Set the prefix of all commands of this bot, for this server.",
 	}
 
 	cmd2.AddSender(&demoSender)
@@ -117,11 +117,11 @@ func TestIgnoreSetPrefix(t *testing.T) {
 	prefix0 := "!"
 	_storage.SetDefaultGuildValue("prefix", prefix0)
 
-	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
+	demoServiceSubject := demoservice.DemoService{Storage: &_storage, ServiceID: demoservice.ServiceID}
 	// demoServiceSubject.Register(&bot)
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
 
-	testCmd := "repeat "
+	testCmd := "repeat"
 	cmd1 := Command{
 		Trigger:    testCmd,
 		Parameters: []Parameter{{Type: "string"}},

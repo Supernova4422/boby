@@ -53,12 +53,26 @@ func (d *DemoService) Run() {
 	// TODO
 	for i := 0; i < len(d.messages); i++ {
 		msg := d.messages[i]
+		user := d.users[i]
+		conversation := d.conversations[i]
+
 		tokens := strings.Split(msg, " ")
 		if len(tokens) == 0 {
 			break
 		}
 
-		trigger := tokens[0]
+		prefix, ok := (*d.Storage).GetGuildValue(conversation.Guild(), "prefix")
+		if !ok {
+			prefix = ""
+		}
+
+		if prefix != "" {
+			if !strings.HasPrefix(tokens[0], prefix.(string)) {
+				break
+			}
+		}
+
+		trigger := tokens[0][len(prefix.(string)):len(tokens[0])]
 		exec, ok := d.commands[trigger]
 		if !ok {
 			break
@@ -78,8 +92,6 @@ func (d *DemoService) Run() {
 			tokens = tokens[1:]
 		}
 
-		user := d.users[i]
-		conversation := d.conversations[i]
 		input, err := parseInput(tokens, types)
 		if err != nil {
 			panic(err)
