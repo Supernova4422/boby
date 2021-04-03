@@ -23,49 +23,85 @@ func AdminCommands() []Command {
 			Parameters: []Parameter{},
 			Exec:       ImAdmin,
 			Help:       "Check if the sender is an admin.",
-			HelpInput:  "[@role or @user]",
 		},
 
 		{
-			Trigger: IsAdminTrigger,
+			Trigger: IsAdminTrigger + "user",
 			Parameters: []Parameter{
 				{
-					Name:        "User_or_Role",
-					Description: "User/Role To check if is an admin",
-					Type:        "string",
+					Name:        "User",
+					Description: "User to check if is an admin",
+					Type:        "user",
 				},
 			},
-			Exec:      CheckAdmin,
-			Help:      "Check if a role/user is admin.",
-			HelpInput: "[@role or @user]",
+			Exec: CheckAdmin,
+			Help: "Check if a user is admin.",
 		},
 
 		{
-			Trigger: "setadmin",
+			Trigger: SetAdminTrigger + "user",
 			Parameters: []Parameter{
 				{
-					Name:        "User_or_Role",
-					Description: "User/Role to set as an admin",
-					Type:        "string",
+					Name:        "User",
+					Description: "User to set as an admin",
+					Type:        "user",
 				},
 			},
-			Exec:      SetAdmin,
-			Help:      "Set a role or user as an admin, therefore giving them all permissions for this bot. Users/Roles with any of the following server permissions are automatically treated as admin: 'Administrator', 'Manage Server', 'Manage Webhooks.'",
-			HelpInput: "[@role or @user]",
+			Exec: SetAdmin,
+			Help: "Set a user as an admin, therefore giving them all permissions for this bot. Users/Roles with any of the following server permissions are automatically treated as admin: 'Administrator', 'Manage Server', 'Manage Webhooks.'",
 		},
 
 		{
-			Trigger: UnsetAdminTrigger,
+			Trigger: UnsetAdminTrigger + "user",
 			Parameters: []Parameter{
 				{
-					Name:        "User_or_Role",
+					Name:        "User",
 					Description: "User/Role to unset as an admin",
-					Type:        "string",
+					Type:        "user",
 				},
 			},
 			Exec:      UnsetAdmin,
 			Help:      "Unset a role or user as an admin, therefore giving them usual permissions.",
 			HelpInput: "[@role or @user]",
+		},
+
+		{
+			Trigger: IsAdminTrigger + "role",
+			Parameters: []Parameter{
+				{
+					Name:        "Role",
+					Description: "Role To check if is an admin",
+					Type:        "role",
+				},
+			},
+			Exec: CheckAdmin,
+			Help: "Check if a role is admin.",
+		},
+
+		{
+			Trigger: SetAdminTrigger + "role",
+			Parameters: []Parameter{
+				{
+					Name:        "Role",
+					Description: "Role to set as an admin",
+					Type:        "role",
+				},
+			},
+			Exec: SetAdmin,
+			Help: "Set a role as an admin, therefore giving them all permissions for this bot. Users/Roles with any of the following server permissions are automatically treated as admin: 'Administrator', 'Manage Server', 'Manage Webhooks.'",
+		},
+
+		{
+			Trigger: UnsetAdminTrigger + "role",
+			Parameters: []Parameter{
+				{
+					Name:        "role",
+					Description: "Role to unset as an admin",
+					Type:        "role",
+				},
+			},
+			Exec: UnsetAdmin,
+			Help: "Unset a role as an admin, therefore giving them usual permissions.",
 		},
 
 		{

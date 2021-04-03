@@ -1,8 +1,6 @@
 package demoservice
 
 import (
-	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
@@ -92,7 +90,8 @@ func (d *DemoService) Run() {
 			tokens = tokens[1:]
 		}
 
-		input, err := parseInput(tokens, types)
+		parser := service.ParserBasic()
+		input, err := service.ParseInput(parser, tokens, types)
 		if err != nil {
 			panic(err)
 		}
@@ -103,61 +102,4 @@ func (d *DemoService) Run() {
 	d.messages = make([]string, 0)
 	d.conversations = make([]service.Conversation, 0)
 	d.users = make([]service.User, 0)
-}
-
-func parseInput(tokens []string, parameters []string) ([]interface{}, error) {
-	var parsers = map[string]func(string) (interface{}, error){
-		"string": func(input string) (interface{}, error) {
-			return input, nil
-		},
-
-		"int": func(input string) (interface{}, error) {
-			val, err := strconv.Atoi(input)
-			if err != nil {
-				return nil, err
-			}
-			return val, nil
-		},
-
-		"bool": func(input string) (interface{}, error) {
-			if strings.ToLower(input) == "true" {
-				return true, nil
-			}
-
-			if strings.ToLower(input) == "false" {
-				return false, nil
-			}
-
-			return false, fmt.Errorf("parsing error")
-		},
-	}
-
-	if len(tokens) != len(parameters) {
-		if len(tokens) < len(parameters) {
-			return nil, fmt.Errorf("err")
-		}
-
-		if len(parameters) > 0 {
-			if parameters[len(parameters)-1] != "string" {
-				return nil, fmt.Errorf("err")
-			}
-
-			tokens[len(parameters)] = strings.Join(tokens[len(parameters):], " ")
-			tokens = tokens[0:len(parameters)]
-		}
-	}
-
-	outputs := []interface{}{}
-	for i := 0; i < len(tokens) && i < len(parameters); i++ {
-		token := tokens[i]
-		parameter := parameters[i]
-
-		value, err := parsers[parameter](token)
-		if err != nil {
-			return nil, err
-		}
-		outputs = append(outputs, value)
-	}
-
-	return outputs, nil
 }

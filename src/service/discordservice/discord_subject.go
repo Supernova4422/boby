@@ -63,9 +63,17 @@ func (d *DiscordSubject) Register(cmd command.Command) {
 	}
 
 	options := []*discordgo.ApplicationCommandOption{}
+	types := map[string]discordgo.ApplicationCommandOptionType{
+		"string": discordgo.ApplicationCommandOptionString,
+		"int":    discordgo.ApplicationCommandOptionInteger,
+		"bool":   discordgo.ApplicationCommandOptionBoolean,
+		"user":   discordgo.ApplicationCommandOptionUser,
+		"role":   discordgo.ApplicationCommandOptionRole,
+	}
+
 	for _, parameter := range cmd.Parameters {
 		option := discordgo.ApplicationCommandOption{
-			Type:        discordgo.ApplicationCommandOptionString,
+			Type:        types[parameter.Type],
 			Name:        parameter.Name,
 			Description: parameter.Description,
 			Required:    true,
@@ -124,7 +132,7 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 		ServiceID:      d.ID(),
 		ConversationID: i.ChannelID,
 		GuildID:        i.GuildID,
-		Admin:          false,
+		Admin:          d.isAdmin(s, i.Member.User.ID, i.GuildID, i.Member.Roles),
 	}
 
 	user := service.User{
@@ -174,7 +182,7 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 		ServiceID:      d.ID(),
 		ConversationID: m.ChannelID,
 		GuildID:        m.GuildID,
-		Admin:          d.isAdmin(s, m),
+		Admin:          d.isAdmin(s, m.Author.ID, m.GuildID, m.Member.Roles),
 	}
 
 	user := service.User{
@@ -216,15 +224,8 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 		d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
 	}
 
-	input := []interface{}{}
-	target := ""
-	for i, val := range strings.Split(m.Content, " ") {
-		if i == 0 {
-			target = val
-		} else {
-			input = append(input, val) // Have to do more parsing.
-		}
-	}
+	inputSplit := strings.Split(m.Content, " ")
+	target := inputSplit[0]
 
 	prefix, ok := (*d.storage).GetGuildValue(conversation.Guild(), "prefix")
 	if !ok {
@@ -234,14 +235,39 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 	for j := range d.observers {
 		trigger := fmt.Sprintf("%s%s", prefix, d.observers[j].Trigger)
 		if trigger == target {
+			input := []interface{}{}
+			parsers := parserDiscord()
+			for i, parameter := range d.observers[j].Parameters {
+				token := inputSplit[i+1]
+				parser, ok := parsers[parameter.Type]
+				if !ok {
+					panic("couldn't find type")
+				}
+				val, err := parser(token)
+				if err != nil {
+					panic(err)
+				}
+				input = append(input, val)
+			}
+
 			d.observers[j].Exec(conversation, user, input, d.storage, sink)
 			break
 		}
 	}
 }
 
-func (d *DiscordSubject) isAdmin(s *discordgo.Session, m *discordgo.Message) bool {
-	if m.GuildID == "" {
+func parserDiscord() service.Parser {
+	parser := service.ParserBasic()
+	snipID := func(input string) (interface{}, error) {
+		return input[3 : len(input)-1], nil
+	}
+	parser["user"] = snipID
+	parser["role"] = snipID
+	return parser
+}
+
+func (d *DiscordSubject) isAdmin(s *discordgo.Session, authorID string, guildID string, roles []string) bool {
+	if guildID == "" {
 		return true
 	}
 
@@ -250,18 +276,18 @@ func (d *DiscordSubject) isAdmin(s *discordgo.Session, m *discordgo.Message) boo
 		GuildID:   "",
 	}
 
-	discordGuild, err := s.Guild(m.GuildID)
-	if err == nil && discordGuild.OwnerID == m.Author.ID {
+	discordGuild, err := s.Guild(guildID)
+	if err == nil && discordGuild.OwnerID == authorID {
 		return true
 	}
 
-	guild.GuildID = m.GuildID
-	userID := fmt.Sprintf("<@!%s>", m.Author.ID)
+	guild.GuildID = guildID
+	userID := fmt.Sprintf("<@!%s>", authorID)
 	if (*d.storage).IsAdmin(guild, userID) {
 		return true
 	}
 
-	for _, role := range m.Member.Roles {
+	for _, role := range roles {
 		for _, guildRole := range discordGuild.Roles {
 			if role != guildRole.ID {
 				continue

@@ -37,34 +37,3 @@ func (c *Command) RouteByID(conversation service.Conversation, msg service.Messa
 		}
 	}
 }
-
-/*
-This is a subject responsibility.
-// OnMessage checks if a message begins with a prefix, and if so, calls Exec.
-func (c *Command) OnMessage(conversation service.Conversation, source service.User, msg string) {
-	prefix, ok := (*c.Storage).GetGuildValue(conversation.Guild(), "prefix")
-	if ok != true {
-		return
-	}
-
-	trigger := fmt.Sprintf("%s%s", prefix, c.Trigger)
-	if strings.HasPrefix(msg, trigger) {
-		content := strings.TrimSpace(msg[len(trigger):])
-		newMatches := make([]interface{}, 0)
-
-		for _, match := range c.Pattern.FindAllStringSubmatch(content, -1) {
-			if len(match) > 1 {
-				newMatches = append(newMatches, match[1:])
-			}
-		}
-
-		c.Exec(
-			conversation,
-			source,
-			newMatches,
-			c.Storage,
-			c.RouteByID,
-		)
-	}
-}
-*/
