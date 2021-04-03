@@ -91,6 +91,8 @@ func (d *DemoService) Run() {
 		}
 
 		parser := service.ParserBasic()
+		parser["user"] = parser["string"]
+		parser["role"] = parser["string"]
 		input, err := service.ParseInput(parser, tokens, types)
 		if err != nil {
 			panic(err)

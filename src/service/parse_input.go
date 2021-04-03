@@ -65,7 +65,12 @@ func ParseInput(parser Parser, tokens []string, parameters []string) ([]interfac
 		token := tokens[i]
 		parameter := parameters[i]
 
-		value, err := parser[parameter](token)
+		typeParser, ok := parser[parameter]
+		if !ok {
+			return nil, fmt.Errorf("unsupported")
+		}
+
+		value, err := typeParser(token)
 		if err != nil {
 			return nil, err
 		}

@@ -69,7 +69,7 @@ func TestSetAdmin2(t *testing.T) {
 	demoservice.AddMessage(
 		testConversation,
 		testSender,
-		SetAdminTrigger+" "+testSender.Name,
+		SetAdminTrigger+"user"+" "+testSender.Name,
 	)
 	demoservice.Run()
 
@@ -94,7 +94,7 @@ func TestDontSetAdmin2(t *testing.T) {
 	demoservice.AddMessage(
 		testConversation,
 		testSender,
-		SetAdminTrigger+" "+testSender.Name,
+		SetAdminTrigger+"user"+" "+testSender.Name,
 	)
 	demoservice.Run()
 
@@ -120,7 +120,7 @@ func TestUnsetAdmin2(t *testing.T) {
 	demoservice.AddMessage(
 		testConversation,
 		testSender,
-		SetAdminTrigger+" "+testSender.Name,
+		SetAdminTrigger+"user"+" "+testSender.Name,
 	)
 	demoservice.Run()
 
@@ -136,7 +136,7 @@ func TestUnsetAdmin2(t *testing.T) {
 	demoservice.AddMessage(
 		testConversation,
 		testSender,
-		UnsetAdminTrigger+" "+testSender.Name,
+		UnsetAdminTrigger+"user"+" "+testSender.Name,
 	)
 	demoservice.Run()
 
@@ -156,7 +156,7 @@ func TestDontUnsetAdmin2(t *testing.T) {
 	demoservice.AddMessage(
 		testConversation,
 		testSender,
-		SetAdminTrigger+" "+testSender.Name,
+		SetAdminTrigger+"user"+" "+testSender.Name,
 	)
 	demoservice.Run()
 
@@ -172,7 +172,7 @@ func TestDontUnsetAdmin2(t *testing.T) {
 	demoservice.AddMessage(
 		testConversation,
 		testSender,
-		UnsetAdminTrigger+" "+testSender.Name,
+		UnsetAdminTrigger+"user"+" "+testSender.Name,
 	)
 	demoservice.Run()
 
@@ -193,7 +193,7 @@ func TestIsAdminCmd(t *testing.T) {
 	demoservice.AddMessage(
 		testConversation,
 		testSender,
-		IsAdminTrigger+" "+testSender.Name,
+		IsAdminTrigger+"user"+" "+testSender.Name,
 	)
 	demoservice.Run()
 
@@ -205,13 +205,13 @@ func TestIsAdminCmd(t *testing.T) {
 	demoservice.AddMessage(
 		testConversation,
 		testSender,
-		SetAdminTrigger+" "+testSender.Name,
+		SetAdminTrigger+"user"+" "+testSender.Name,
 	)
 
 	demoservice.AddMessage(
 		testConversation,
 		testSender,
-		IsAdminTrigger+" "+testSender.Name,
+		IsAdminTrigger+"user"+" "+testSender.Name,
 	)
 
 	demoservice.Run()
@@ -283,7 +283,7 @@ func TestImAdminCmdAfterSet(t *testing.T) {
 	demoservice.AddMessage(
 		testConversation,
 		testSender,
-		SetAdminTrigger+" "+testSender.Name,
+		SetAdminTrigger+"user"+" "+testSender.Name,
 	)
 
 	demoservice.AddMessage(
