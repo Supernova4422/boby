@@ -46,8 +46,6 @@ func TestGetValue(t *testing.T) {
 	}
 }
 
-
-
 func TestGetValueMissingButHasService(t *testing.T) {
 	storage := TempStorage{mutex: &sync.Mutex{}}
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}

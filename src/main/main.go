@@ -10,8 +10,6 @@ import (
 	"os/signal"
 	"path"
 
-	// "regexp"
-
 	"syscall"
 
 	"github.com/BKrajancic/boby/m/v2/src/config"
@@ -25,7 +23,6 @@ func main() {
 		fmt.Println("When running this program, an argument must be given, which is a directory containing configuration files.")
 		config.MakeExampleDir(exampleDir)
 		panic(fmt.Errorf("missing argument"))
-
 	}
 
 	folder := os.Args[1]
@@ -61,21 +58,12 @@ func main() {
 	discordSubject.SetStorage(&storage)
 	discordSubject.Load()
 
-	// helpTrigger := "help"
-	// commands = append(commands, *makeHelpCommand(&commands, helpTrigger))
-
 	for i := range commands {
-		// commands[i].AddSender(discordSender)
 		discordSubject.Register(commands[i])
 	}
 
 	discord.UpdateGameStatus(0, "Bot is online")
 	fmt.Println("online")
-
-	// discord.UpdateGameStatus(0, prefix+helpTrigger)
-
-	// Start all routines, e.g.
-	// go routine()
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)

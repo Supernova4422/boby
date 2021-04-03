@@ -14,9 +14,9 @@ type Conversation struct {
 }
 
 // Guild will convert a conversation to a Guild.
-func (c Conversation) Guild () Guild {
+func (c Conversation) Guild() Guild {
 	return Guild{
 		ServiceID: c.ServiceID,
 		GuildID:   c.GuildID,
-	} 
+	}
 }

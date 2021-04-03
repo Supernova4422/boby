@@ -11,11 +11,11 @@ const AdminKey = "Admin"
 
 // TempStorage implements the Storage interface, but data is lost on destruction.
 type TempStorage struct {
-	UserValues  map[string]map[string]map[string]interface{}
+	UserValues         map[string]map[string]map[string]interface{}
 	DefaultUserValues  map[string]interface{}
-	GuildValues map[string]map[string]map[string]interface{}
+	GuildValues        map[string]map[string]map[string]interface{}
 	DefaultGuildValues map[string]interface{}
-	mutex       *sync.Mutex
+	mutex              *sync.Mutex
 }
 
 // GetTempStorage returns a TempStorage.
@@ -32,7 +32,7 @@ func (t *TempStorage) GetGuildValue(guild service.Guild, key string) (interface{
 	serviceMap, ok := t.GuildValues[guild.ServiceID]
 	if ok == false {
 		val, ok := t.DefaultGuildValues[key]
-		return val, ok 
+		return val, ok
 	}
 
 	keyMap, ok := serviceMap[guild.GuildID]
@@ -47,7 +47,7 @@ func (t *TempStorage) GetGuildValue(guild service.Guild, key string) (interface{
 		return val, ok
 	}
 
-	return val, ok 
+	return val, ok
 }
 
 // SetGuildValue sets the value for key, for a Guild.
@@ -118,7 +118,7 @@ func (t *TempStorage) GetUserValue(user service.User, key string) (interface{}, 
 		return val, ok
 	}
 
-	return val, ok 
+	return val, ok
 }
 
 // SetUserValue sets the value for key, for a Guild.

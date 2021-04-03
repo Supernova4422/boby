@@ -108,4 +108,3 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 
 	return rateLimitedCommand
 }
-
