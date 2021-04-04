@@ -101,19 +101,19 @@ func (t *TempStorage) GetUserValue(user service.User, key string) (interface{}, 
 	defer t.mutex.Unlock()
 
 	serviceMap, ok := t.UserValues[user.ServiceID]
-	if ok == false {
+	if !ok {
 		val, ok := t.DefaultUserValues[key]
 		return val, ok
 	}
 
 	keyMap, ok := serviceMap[user.Name]
-	if ok == false {
+	if !ok {
 		val, ok := t.DefaultUserValues[key]
 		return val, ok
 	}
 
 	val, ok := keyMap[key]
-	if ok == false {
+	if !ok {
 		val, ok := t.DefaultUserValues[key]
 		return val, ok
 	}
@@ -174,7 +174,7 @@ func (t *TempStorage) UnsetAdmin(guild service.Guild, ID string) {
 	newAdmins := []string{}
 	if val, ok := t.GetGuildValue(guild, AdminKey); ok {
 		currentAdmins, ok := val.([]string)
-		if ok == false {
+		if !ok {
 			panic(ok)
 		}
 		for _, adminID := range currentAdmins {

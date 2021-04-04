@@ -36,6 +36,38 @@ func TestGetDefaultValue(t *testing.T) {
 	}
 }
 
+func TestGetDefaultUserValue(t *testing.T) {
+	storage := TempStorage{mutex: &sync.Mutex{}}
+	key := "key"
+	value := "value"
+	storage.SetDefaultUserValue(key, value)
+	storage.SetUserValue(service.User{ServiceID: "0", Name: "1"}, "key", "value")
+
+	valueOut, ok := storage.GetUserValue(
+		service.User{ServiceID: "0", Name: "0"},
+		key,
+	)
+
+	if ok == false || valueOut != value {
+		t.Fail()
+	}
+}
+
+func TestGetDefaultUserValue2(t *testing.T) {
+	storage := TempStorage{mutex: &sync.Mutex{}}
+	key := "key"
+	value := "value"
+	storage.SetDefaultUserValue(key, value)
+	user := service.User{ServiceID: "0", Name: "1"}
+	storage.SetUserValue(user, "key2", "value")
+
+	valueOut, ok := storage.GetUserValue(user, key)
+
+	if ok == false || valueOut != value {
+		t.Fail()
+	}
+}
+
 func TestGetValue(t *testing.T) {
 	storage := TempStorage{mutex: &sync.Mutex{}}
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
