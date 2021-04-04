@@ -1,4 +1,4 @@
-name: Coverage
+name: Fmt
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Get GopherBadger
-      run: go fmt ./...
+      run: gofmt -s -w .
 
     - uses: stefanzweifel/git-auto-commit-action@v4
       with:
