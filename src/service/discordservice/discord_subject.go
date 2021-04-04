@@ -35,6 +35,17 @@ func (d *DiscordSubject) Load() {
 			Exec:    d.helpExec,
 		},
 	)
+
+	appID := d.discord.State.User.ID
+	for _, guildID := range d.discord.State.Guilds {
+		for _, cmd := range d.observers {
+			command := commandToApplicationCommand(cmd)
+			_, err := d.discord.ApplicationCommandCreate(appID, guildID.ID, &command)
+			if err != nil {
+				log.Printf("Error with slash commands: %s", err)
+			}
+		}
+	}
 }
 
 // UnloadUselessCommands will unload slash commands that aren't present in the bot currently.
@@ -63,15 +74,13 @@ func (d *DiscordSubject) UnloadUselessCommands() {
 	}
 }
 
-// Register will add an observer that will handle discord messages being received.
-func (d *DiscordSubject) Register(cmd command.Command) {
+func commandToApplicationCommand(cmd command.Command) discordgo.ApplicationCommand {
 	help := cmd.Help
 	limit := 100
 	if len(help) > limit {
 		help = help[0:limit]
 	}
 
-	options := []*discordgo.ApplicationCommandOption{}
 	types := map[string]discordgo.ApplicationCommandOptionType{
 		"string": discordgo.ApplicationCommandOptionString,
 		"int":    discordgo.ApplicationCommandOptionInteger,
@@ -80,6 +89,7 @@ func (d *DiscordSubject) Register(cmd command.Command) {
 		"role":   discordgo.ApplicationCommandOptionRole,
 	}
 
+	options := []*discordgo.ApplicationCommandOption{}
 	for _, parameter := range cmd.Parameters {
 		option := discordgo.ApplicationCommandOption{
 			Type:        types[parameter.Type],
@@ -89,12 +99,17 @@ func (d *DiscordSubject) Register(cmd command.Command) {
 		}
 		options = append(options, &option)
 	}
-
 	command := discordgo.ApplicationCommand{
 		Name:        cmd.Trigger,
 		Description: help,
 		Options:     options,
 	}
+	return command
+}
+
+// Register will add an observer that will handle discord messages being received.
+func (d *DiscordSubject) Register(cmd command.Command) {
+	command := commandToApplicationCommand(cmd)
 
 	appID := d.discord.State.User.ID
 	cmds, err := d.discord.ApplicationCommands(appID, "")

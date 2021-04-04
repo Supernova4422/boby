@@ -64,11 +64,12 @@ func main() {
 	discord.UpdateGameStatus(0, "Bot is reloading...")
 	defer discordSubject.Close() // Cleanly close down the Discord session.
 	discordSubject.SetStorage(&storage)
-	discordSubject.Load()
 
 	for i := range commands {
 		discordSubject.Register(commands[i])
 	}
+
+	discordSubject.Load()
 	discordSubject.UnloadUselessCommands()
 
 	discord.UpdateGameStatus(0, "Bot is online")
