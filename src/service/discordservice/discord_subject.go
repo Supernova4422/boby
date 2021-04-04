@@ -2,6 +2,7 @@ package discordservice
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -26,10 +27,8 @@ func (d *DiscordSubject) SetStorage(storage *storage.Storage) {
 
 // Load prepares this object for usage.
 func (d *DiscordSubject) Load() {
-	d.unloadExistingCommands()
 	d.discord.AddHandler(d.onSlashCommand)
-	d.observers = append(
-		d.observers,
+	d.Register(
 		command.Command{
 			Trigger: "help",
 			Help:    "Provides information on how to use the bot.",
@@ -41,8 +40,7 @@ func (d *DiscordSubject) Load() {
 	// d.discord.AddHandler(d.onMessage)
 }
 
-func (d *DiscordSubject) unloadExistingCommands() {
-	// Remove other commands
+func (d *DiscordSubject) UnloadUselessCommands() {
 	appID := d.discord.State.User.ID
 	cmds, err := d.discord.ApplicationCommands(appID, "")
 	if err != nil {
@@ -50,7 +48,20 @@ func (d *DiscordSubject) unloadExistingCommands() {
 	}
 
 	for _, cmd := range cmds {
-		d.discord.ApplicationCommandDelete(cmd.ApplicationID, "", cmd.ID)
+		found := false
+		for _, observer := range d.observers {
+			found = observer.Trigger == cmd.Name
+			if found {
+				break
+			}
+		}
+
+		if !found {
+			err := d.discord.ApplicationCommandDelete(cmd.ApplicationID, "", cmd.ID)
+			if err != nil {
+				panic(err)
+			}
+		}
 	}
 }
 
@@ -87,16 +98,38 @@ func (d *DiscordSubject) Register(cmd command.Command) {
 		Options:     options,
 	}
 
-	// guildID := flag.String("guild", "", "Test guild ID. If not passed - bot registers commands globally")
-
-	_, err := d.discord.ApplicationCommandCreate(
-		d.discord.State.User.ID,
-		"",
-		&command,
-	)
+	appID := d.discord.State.User.ID
+	cmds, err := d.discord.ApplicationCommands(appID, "")
 	if err != nil {
-		fmt.Printf("%s", err)
-		panic(err)
+		log.Printf("Error with slash commands: %s", err)
+	}
+
+	found := false
+	for _, existingCmd := range cmds {
+		if existingCmd.Name == cmd.Trigger {
+			_, err := d.discord.ApplicationCommandEdit(
+				existingCmd.ApplicationID,
+				"",
+				existingCmd.ID,
+				&command,
+			)
+			if err == nil {
+				found = true
+			} else {
+				log.Printf("Error with slash commands: %s", err)
+			}
+		}
+	}
+
+	if !found {
+		_, err := d.discord.ApplicationCommandCreate(
+			d.discord.State.User.ID,
+			"",
+			&command,
+		)
+		if err != nil {
+			log.Printf("Error with slash commands: %s", err)
+		}
 	}
 
 	d.observers = append(d.observers, cmd)
@@ -109,7 +142,6 @@ func (*DiscordSubject) ID() string {
 
 // Close will safely close all objects that are managed by this object.
 func (d *DiscordSubject) Close() {
-	d.unloadExistingCommands()
 	d.discord.Close()
 }
 

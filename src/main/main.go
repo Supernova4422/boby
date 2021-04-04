@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"path"
 
+	"log"
 	"syscall"
 
 	"github.com/BKrajancic/boby/m/v2/src/config"
@@ -18,15 +19,22 @@ import (
 )
 
 func main() {
+	f, err := os.OpenFile("logging.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer f.Close()
+	log.SetOutput(f)
+
 	exampleDir := "example"
 	if len(os.Args) == 1 {
-		fmt.Println("When running this program, an argument must be given, which is a directory containing configuration files.")
+		log.Println("When running this program, an argument must be given, which is a directory containing configuration files.")
 		config.MakeExampleDir(exampleDir)
 		panic(fmt.Errorf("missing argument"))
 	}
 
 	folder := os.Args[1]
-	_, err := os.Stat(folder)
+	_, err = os.Stat(folder)
 	if os.IsNotExist(err) {
 		panic(err)
 	}
@@ -43,7 +51,7 @@ func main() {
 
 	commands, err := config.ConfiguredBot(folder, &storage)
 	if err != nil {
-		fmt.Println("An error occurred when loading the configuration files.")
+		log.Panicln("An error occurred when loading the configuration files.")
 		config.MakeExampleDir(exampleDir)
 		panic(err)
 	}
@@ -61,9 +69,10 @@ func main() {
 	for i := range commands {
 		discordSubject.Register(commands[i])
 	}
+	discordSubject.UnloadUselessCommands()
 
 	discord.UpdateGameStatus(0, "Bot is online")
-	fmt.Println("online")
+	log.Println("bot has loaded")
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)

@@ -3,8 +3,8 @@ package discordservice
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/bwmarrin/discordgo"
@@ -27,36 +27,36 @@ func getConfig(filepath string) (*DiscordConfig, error) {
 		example := &DiscordConfig{Token: tokenDefault}
 		bytes, err := json.Marshal(example)
 		if err != nil {
-			fmt.Printf("Unable to create an example json (haven't even tried creating a file yet).")
+			log.Printf("Unable to create an example json (haven't even tried creating a file yet).")
 			return nil, err
 		}
 
 		file, err := os.Create(filepath)
 		if err != nil {
-			fmt.Printf("Unable to create file: %s", filepath)
+			log.Printf("Unable to create file: %s", filepath)
 			return nil, err
 		}
 		defer file.Close()
 
 		_, err = file.Write(bytes)
 		if err != nil {
-			fmt.Printf("Unable to write to file: %s", filepath)
+			log.Printf("Unable to write to file: %s", filepath)
 			return nil, err
 		}
-		fmt.Printf("Wrote an example to %s", filepath)
+		log.Printf("Wrote an example to %s", filepath)
 		return nil, errors.New("did not exist")
 	}
 
 	bytes, err := ioutil.ReadFile(filepath)
 	if err != nil {
-		fmt.Printf("Unable to read file: %s", filepath)
+		log.Printf("Unable to read file: %s", filepath)
 		return nil, err
 	}
 
 	var config DiscordConfig
 	json.Unmarshal(bytes, &config)
 	if config.Token == tokenDefault {
-		fmt.Printf("Demo JSON has not been updated to have a valid token! A user should edit: %s", filepath)
+		log.Printf("Demo JSON has not been updated to have a valid token! A user should edit: %s", filepath)
 		return nil, errors.New("default file used")
 	}
 
