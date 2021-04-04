@@ -40,6 +40,7 @@ func (d *DiscordSubject) Load() {
 	// d.discord.AddHandler(d.onMessage)
 }
 
+// UnloadUselessCommands will unload slash commands that aren't present in the bot currently.
 func (d *DiscordSubject) UnloadUselessCommands() {
 	appID := d.discord.State.User.ID
 	cmds, err := d.discord.ApplicationCommands(appID, "")

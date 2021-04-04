@@ -12,7 +12,7 @@ import (
 // (as an interface) or will return an error.
 type Parser map[string]func(string) (interface{}, error)
 
-// ParsersBasic returns a Parser for input parsing.
+// ParserBasic returns a Parser for input parsing.
 func ParserBasic() Parser {
 	var parsers = map[string]func(string) (interface{}, error){
 		"string": func(input string) (interface{}, error) {
