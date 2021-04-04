@@ -1,4 +1,4 @@
-name: Coverage
+name: Fmt
 
 on:
   push:
