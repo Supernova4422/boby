@@ -35,9 +35,6 @@ func (d *DiscordSubject) Load() {
 			Exec:    d.helpExec,
 		},
 	)
-	// d.discord.AddHandler(d.messageUpdate)
-	// d.discord.AddHandler(d.messageCreate)
-	// d.discord.AddHandler(d.onMessage)
 }
 
 // UnloadUselessCommands will unload slash commands that aren't present in the bot currently.

@@ -194,7 +194,6 @@ func (j JSONGetterConfig) jsonGetterFunc(sender service.Conversation, user servi
 		msgURL += j.Token.MakeToken(strings.Join(output, ""))
 	}
 
-	fmt.Print(msgURL)
 	if jsonReader, err := jsonGetter(msgURL); err == nil {
 		defer jsonReader.Close()
 		if buf, err := ioutil.ReadAll(jsonReader); err == nil {
