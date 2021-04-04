@@ -55,7 +55,7 @@ func ParseInput(parser Parser, tokens []string, parameters []string) ([]interfac
 				return nil, fmt.Errorf("err")
 			}
 
-			tokens[len(parameters)] = strings.Join(tokens[len(parameters):], " ")
+			tokens[len(parameters)-1] = strings.Join(tokens[len(parameters)-1:], " ")
 			tokens = tokens[0:len(parameters)]
 		}
 	}

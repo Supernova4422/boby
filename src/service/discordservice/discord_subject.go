@@ -261,29 +261,26 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 
 	prefix, ok := (*d.storage).GetGuildValue(conversation.Guild(), "prefix")
 	if !ok {
+		log.Fatal("guild prefix was not found, nor was a default, exiting")
 		return
 	}
 
 	for j := range d.observers {
 		trigger := fmt.Sprintf("%s%s", prefix, d.observers[j].Trigger)
 		if trigger == target {
-			input := []interface{}{}
 			parsers := parserDiscord()
-			for i, parameter := range d.observers[j].Parameters {
-				token := inputSplit[i+1]
-				parser, ok := parsers[parameter.Type]
-				if !ok {
-					panic("couldn't find type")
-				}
-				val, err := parser(token)
-				if err != nil {
-					panic(err)
-				}
-				input = append(input, val)
+			parameters := []string{}
+			for _, parameter := range d.observers[j].Parameters {
+				parameters = append(parameters, parameter.Type)
+			}
+
+			input, err := service.ParseInput(parsers, inputSplit[1:], parameters)
+			if err != nil {
+				log.Printf("error when parsing input: %s", err)
+				return
 			}
 
 			d.observers[j].Exec(conversation, user, input, d.storage, sink)
-			break
 		}
 	}
 }
