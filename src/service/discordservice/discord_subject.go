@@ -25,12 +25,15 @@ func (d *DiscordSubject) SetStorage(storage *storage.Storage) {
 	d.storage = storage
 }
 
+// updateGuildCommandsForAll adds this bot's slash commands to each of the bot's connected guilds.
 func (d *DiscordSubject) updateGuildCommandsForAll() {
 	for _, guild := range d.discord.State.Guilds {
 		d.updateGuildCommands(guild.ID)
 	}
 }
 
+// updateGuildCommands will add the bot's commands as slash commands for a guild.
+// If no guildID is provided, the slash commands are registered globally.
 func (d *DiscordSubject) updateGuildCommands(guildID string) {
 	appID := d.discord.State.User.ID
 	cmds, err := d.discord.ApplicationCommands(appID, guildID)
@@ -67,6 +70,7 @@ func (d *DiscordSubject) updateGuildCommands(guildID string) {
 	}
 }
 
+// guildCreate executes upon joining a guild.
 func (d *DiscordSubject) guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 	d.updateGuildCommands(event.Guild.ID)
 }
