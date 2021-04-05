@@ -23,7 +23,7 @@ func TestSetAdmin(t *testing.T) {
 		Admin:          true,
 	}
 
-	SetAdmin(testConversation, testSender, [][]string{{userID}}, &_storage, demoSender.SendMessage)
+	SetAdmin(testConversation, testSender, []interface{}{userID}, &_storage, demoSender.SendMessage)
 
 	if _storage.IsAdmin(guild, userID) == false {
 		t.Errorf("Message was different!")
@@ -45,7 +45,7 @@ func TestDontSetAdmin(t *testing.T) {
 		Admin:          false,
 	}
 
-	SetAdmin(testConversation, testSender, [][]string{{userID}}, &_storage, demoSender.SendMessage)
+	SetAdmin(testConversation, testSender, []interface{}{userID}, &_storage, demoSender.SendMessage)
 
 	if _storage.IsAdmin(guild, userID) {
 		t.Errorf("Message was different!")

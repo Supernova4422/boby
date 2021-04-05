@@ -9,33 +9,40 @@ import (
 	"os"
 	"os/signal"
 	"path"
-	"regexp"
-	"strconv"
+
+	"log"
 	"syscall"
 
-	"github.com/BKrajancic/boby/m/v2/src/command"
 	"github.com/BKrajancic/boby/m/v2/src/config"
-	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/service/discordservice"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
 func main() {
+	f, err := os.OpenFile("logging.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer f.Close()
+	log.SetOutput(f)
+
 	exampleDir := "example"
 	if len(os.Args) == 1 {
-		fmt.Println("When running this program, an argument must be given, which is a directory containing configuration files.")
+		log.Println("When running this program, an argument must be given, which is a directory containing configuration files.")
 		config.MakeExampleDir(exampleDir)
 		panic(fmt.Errorf("missing argument"))
-
 	}
 
 	folder := os.Args[1]
-	_, err := os.Stat(folder)
+	_, err = os.Stat(folder)
 	if os.IsNotExist(err) {
 		panic(err)
 	}
 
 	storage, err := loadGobStorage(path.Join(folder, "storage.gob"))
+	if err != nil {
+		panic(err)
+	}
 	prefix := "!"
 	storage.SetDefaultGuildValue("prefix", prefix)
 	if err != nil {
@@ -44,77 +51,33 @@ func main() {
 
 	commands, err := config.ConfiguredBot(folder, &storage)
 	if err != nil {
-		fmt.Println("An error occurred when loading the configuration files.")
+		log.Panicln("An error occurred when loading the configuration files.")
 		config.MakeExampleDir(exampleDir)
 		panic(err)
 	}
 
 	discordConfig := path.Join(folder, "config.json")
-	discordSubject, discordSender, discord, err := discordservice.NewDiscords(discordConfig)
+	discordSubject, _, discord, err := discordservice.NewDiscords(discordConfig)
 	if err != nil {
 		panic(err)
 	}
+	discord.UpdateGameStatus(0, "Bot is reloading...")
 	defer discordSubject.Close() // Cleanly close down the Discord session.
 	discordSubject.SetStorage(&storage)
 
-	helpTrigger := "help"
-	commands = append(commands, *makeHelpCommand(&commands, helpTrigger))
-
 	for i := range commands {
-		commands[i].AddSender(discordSender)
-		commands[i].Storage = &storage
-		discordSubject.Register(&commands[i])
+		discordSubject.Register(commands[i])
 	}
 
-	discord.UpdateGameStatus(0, prefix+helpTrigger)
+	discordSubject.Load()
+	discordSubject.UnloadUselessCommands()
 
-	// Start all routines, e.g.
-	// go routine()
+	discord.UpdateGameStatus(0, "Bot is online")
+	log.Println("bot has loaded")
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-}
-
-func makeHelpCommand(commands *[]command.Command, helpTrigger string) *command.Command {
-	helpCommand := &command.Command{
-		Trigger: helpTrigger,
-		Pattern: regexp.MustCompile("(.*)"),
-		Help:    "Provides information on how to use the bot.",
-	}
-
-	helpCommand.Exec = func(conversation service.Conversation, user service.User, _ [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
-		fields := make([]service.MessageField, 0)
-		prefix, ok := (*storage).GetGuildValue(conversation.Guild(), "prefix")
-
-		if ok == false {
-			prefix = "" 
-		}
-
-		for i, command := range *commands {
-			fields = append(fields, service.MessageField{
-				Field: fmt.Sprintf(
-					"%s. %s%s %s",
-					strconv.Itoa(i+1),
-					prefix,
-					command.Trigger,
-					command.HelpInput,
-				),
-				Value: command.Help,
-			})
-		}
-
-		sink(
-			conversation,
-			service.Message{
-				Title:  "Help",
-				Fields: fields,
-				Footer: "Contribute to this project at: " + command.Repo,
-			},
-		)
-	}
-
-	return helpCommand
 }
 
 // loadGobStorage loads a file used for storage.

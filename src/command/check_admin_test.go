@@ -24,7 +24,7 @@ func TestCheckAdmin(t *testing.T) {
 		Admin:          true,
 	}
 
-	CheckAdmin(testConversation, testSender, [][]string{{userID}}, &_storage, demoSender.SendMessage)
+	CheckAdmin(testConversation, testSender, []interface{}{userID}, &_storage, demoSender.SendMessage)
 
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Description != userID+" is an admin." {
@@ -47,7 +47,7 @@ func TestCheckNotAdmin(t *testing.T) {
 		Admin:          true,
 	}
 
-	CheckAdmin(testConversation, testSender, [][]string{{userID}}, &_storage, demoSender.SendMessage)
+	CheckAdmin(testConversation, testSender, []interface{}{userID}, &_storage, demoSender.SendMessage)
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Description != userID+" is not an admin." {
 		t.Errorf("Admin should be able to unset admins")

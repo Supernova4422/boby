@@ -4,8 +4,8 @@ package test
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"testing"
@@ -55,7 +55,7 @@ func GetTestInputs(filepath string) ([]ConfigTest, error) {
 	var configTests []ConfigTest
 	bytes, err := ioutil.ReadFile(filepath)
 	if err != nil {
-		fmt.Printf("Unable to read file: %s", filepath)
+		log.Printf("Unable to read file: %s", filepath)
 		return configTests, nil
 	}
 
@@ -82,6 +82,7 @@ func TestConfig(t *testing.T) {
 			if err == nil {
 				demoService := demoservice.DemoService{
 					ServiceID: demoservice.ServiceID,
+					Storage:   &_storage,
 				}
 
 				demoSender := demoservice.DemoSender{
@@ -89,8 +90,12 @@ func TestConfig(t *testing.T) {
 				}
 
 				for i := range commands {
-					demoService.Register(&commands[i])
 					commands[i].AddSender(&demoSender)
+					types := []string{}
+					for _, commandParameter := range commands[i].Parameters {
+						types = append(types, commandParameter.Type)
+					}
+					demoService.Register(commands[i].Trigger, types, commands[i].Exec, commands[i].RouteByID)
 				}
 
 				inputTest, _ := GetTestInputs(inputFp)

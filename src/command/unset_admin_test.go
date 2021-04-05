@@ -24,7 +24,7 @@ func TestUnsetAdmin(t *testing.T) {
 		Admin:          true,
 	}
 
-	UnsetAdmin(testConversation, testSender, [][]string{{userID}}, &_storage, demoSender.SendMessage)
+	UnsetAdmin(testConversation, testSender, []interface{}{userID}, &_storage, demoSender.SendMessage)
 
 	if _storage.IsAdmin(guild, userID) {
 		t.Errorf("Admin should be able to unset admins")
@@ -47,7 +47,7 @@ func TestDontUnsetAdmin(t *testing.T) {
 		Admin:          false,
 	}
 
-	UnsetAdmin(testConversation, testSender, [][]string{}, &_storage, demoSender.SendMessage)
+	UnsetAdmin(testConversation, testSender, []interface{}{}, &_storage, demoSender.SendMessage)
 
 	if _storage.IsAdmin(guild, userID) == false {
 		t.Errorf("Non-Admin should not be able to unset")

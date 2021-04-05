@@ -1,9 +1,5 @@
 package command
 
-import (
-	"regexp"
-)
-
 // ImAdminTrigger is a trigger to use for an ImAdmin command.
 const ImAdminTrigger = "imadmin"
 
@@ -23,40 +19,100 @@ const Repo = "https://github.com/BKrajancic/boby"
 func AdminCommands() []Command {
 	return []Command{
 		{
-			Trigger:   ImAdminTrigger,
-			Pattern:   regexp.MustCompile("(.*)"),
-			Exec:      ImAdmin,
-			Help:      "Check if the sender is an admin.",
-			HelpInput: "[@role or @user]",
+			Trigger:    ImAdminTrigger,
+			Parameters: []Parameter{},
+			Exec:       ImAdmin,
+			Help:       "Check if the sender is an admin.",
 		},
 
 		{
-			Trigger:   IsAdminTrigger,
-			Pattern:   regexp.MustCompile("(.*)"),
-			Exec:      CheckAdmin,
-			Help:      "Check if a role or user is an admin.",
-			HelpInput: "[@role or @user]",
+			Trigger: IsAdminTrigger + "user",
+			Parameters: []Parameter{
+				{
+					Name:        "User",
+					Description: "User to check if is an admin",
+					Type:        "user",
+				},
+			},
+			Exec: CheckAdmin,
+			Help: "Check if a user is admin.",
 		},
 
 		{
-			Trigger:   "setadmin",
-			Pattern:   regexp.MustCompile("(.*)"),
-			Exec:      SetAdmin,
-			Help:      "Set a role or user as an admin, therefore giving them all permissions for this bot. Users/Roles with any of the following server permissions are automatically treated as admin: 'Administrator', 'Manage Server', 'Manage Webhooks.'",
-			HelpInput: "[@role or @user]",
+			Trigger: SetAdminTrigger + "user",
+			Parameters: []Parameter{
+				{
+					Name:        "User",
+					Description: "User to set as an admin",
+					Type:        "user",
+				},
+			},
+			Exec: SetAdmin,
+			Help: "Set a user as an admin, therefore giving them all permissions for this bot. Users/Roles with any of the following server permissions are automatically treated as admin: 'Administrator', 'Manage Server', 'Manage Webhooks.'",
 		},
 
 		{
-			Trigger:   UnsetAdminTrigger,
-			Pattern:   regexp.MustCompile("(.*)"),
+			Trigger: UnsetAdminTrigger + "user",
+			Parameters: []Parameter{
+				{
+					Name:        "User",
+					Description: "User/Role to unset as an admin",
+					Type:        "user",
+				},
+			},
 			Exec:      UnsetAdmin,
 			Help:      "Unset a role or user as an admin, therefore giving them usual permissions.",
 			HelpInput: "[@role or @user]",
 		},
 
 		{
-			Trigger:   "setprefix",
-			Pattern:   regexp.MustCompile("(.*)"),
+			Trigger: IsAdminTrigger + "role",
+			Parameters: []Parameter{
+				{
+					Name:        "Role",
+					Description: "Role To check if is an admin",
+					Type:        "role",
+				},
+			},
+			Exec: CheckAdmin,
+			Help: "Check if a role is admin.",
+		},
+
+		{
+			Trigger: SetAdminTrigger + "role",
+			Parameters: []Parameter{
+				{
+					Name:        "Role",
+					Description: "Role to set as an admin",
+					Type:        "role",
+				},
+			},
+			Exec: SetAdmin,
+			Help: "Set a role as an admin, therefore giving them all permissions for this bot. Users/Roles with any of the following server permissions are automatically treated as admin: 'Administrator', 'Manage Server', 'Manage Webhooks.'",
+		},
+
+		{
+			Trigger: UnsetAdminTrigger + "role",
+			Parameters: []Parameter{
+				{
+					Name:        "role",
+					Description: "Role to unset as an admin",
+					Type:        "role",
+				},
+			},
+			Exec: UnsetAdmin,
+			Help: "Unset a role as an admin, therefore giving them usual permissions.",
+		},
+
+		{
+			Trigger: "setprefix",
+			Parameters: []Parameter{
+				{
+					Name:        "prefix",
+					Description: "Set the prefix of commands, for this server.",
+					Type:        "string",
+				},
+			},
 			Exec:      SetPrefix,
 			Help:      "Set the prefix of all commands of this bot, for this server.",
 			HelpInput: "[word]",

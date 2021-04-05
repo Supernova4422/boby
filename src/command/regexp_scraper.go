@@ -19,7 +19,7 @@ import (
 // That Command will process a HTML based on a regexp, to send responses.
 type RegexpScraperConfig struct {
 	Trigger       string
-	Capture       string
+	Parameters    []Parameter
 	TitleTemplate string // Title template that will be replaced by regex captures (using %s).
 	TitleCapture  string // Regex captures for title replacement.
 	URL           string // A url to scrape from, can contain one "%s" which is replaced with the first capture group.
@@ -51,7 +51,7 @@ func (r RegexpScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Comma
 	webpageCapture := regexp.MustCompile(r.ReplyCapture)
 	titleCapture := regexp.MustCompile(r.TitleCapture)
 
-	curry := func(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 		scraper(r.URL,
 			webpageCapture,
 			r.TitleTemplate,
@@ -65,31 +65,26 @@ func (r RegexpScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Comma
 		)
 	}
 
-	regex, err := regexp.Compile(r.Capture)
-	if err != nil {
-		return Command{}, err
-	}
-
 	return Command{
-		Trigger:   r.Trigger,
-		Pattern:   regex,
-		Exec:      curry,
-		Help:      r.Help,
-		HelpInput: r.HelpInput,
+		Trigger:    r.Trigger,
+		Parameters: r.Parameters,
+		Exec:       curry,
+		Help:       r.Help,
+		HelpInput:  r.HelpInput,
 	}, nil
 }
 
 // scraper returns the received message
-func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate string, titleCapture *regexp.Regexp, sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message), htmlGetter HTMLGetter) {
+func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate string, titleCapture *regexp.Regexp, sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message), htmlGetter HTMLGetter) {
 	substitutions := strings.Count(urlTemplate, "%s")
 	urlPage := urlTemplate
 	if substitutions > 0 {
-		if msg == nil || len(msg) == 0 || len(msg[0]) < substitutions {
+		if len(msg) == 0 || len(msg) < substitutions {
 			sink(sender, service.Message{Description: "An error when building the url."})
 			return
 		}
-		for _, capture := range msg[0] {
-			urlPage = fmt.Sprintf(urlPage, url.PathEscape(capture))
+		for _, capture := range msg {
+			urlPage = fmt.Sprintf(urlPage, url.PathEscape(capture.(string)))
 		}
 	}
 
@@ -122,7 +117,7 @@ func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate st
 		allCaptures[i] = strings.Join(captures[1:], " ")
 	}
 
-	reply := fmt.Sprintf("%s", strings.Join(allCaptures, "\n"))
+	reply := strings.Join(allCaptures, "\n")
 	replyTitle := titleTemplate
 
 	if strings.Contains(replyTitle, "%s") {

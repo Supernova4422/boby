@@ -11,12 +11,13 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/service/demoservice"
 	"github.com/BKrajancic/boby/m/v2/src/utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestMakeScraper(t *testing.T) {
 	config := RegexpScraperConfig{
 		Trigger:      "!",
-		Capture:      "(.*)",
+		Parameters:   []Parameter{{Type: "string"}},
 		URL:          "%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
@@ -53,7 +54,7 @@ func TestScraperWithCapture(t *testing.T) {
 
 	config := RegexpScraperConfig{
 		Trigger:      testCmd,
-		Capture:      "(.*)",
+		Parameters:   []Parameter{{Type: "string"}},
 		URL:          "%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
@@ -63,7 +64,7 @@ func TestScraperWithCapture(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Heading One") {
@@ -74,7 +75,7 @@ func TestScraperWithCapture(t *testing.T) {
 		t.Errorf("Sender was different!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"tables"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, []interface{}{"tables"}, nil, demoSender.SendMessage)
 	resultMessage, resultConversation = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Tables") {
 		t.Errorf("Message was different!")
@@ -99,7 +100,7 @@ func TestScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 
 	config := RegexpScraperConfig{
 		Trigger:       testCmd,
-		Capture:       "(.*)",
+		Parameters:    []Parameter{{Type: "string"}},
 		URL:           "%s",
 		ReplyCapture:  "<h1>([^<]*)</h1>",
 		TitleTemplate: "Title",
@@ -110,7 +111,7 @@ func TestScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Title != config.TitleTemplate {
@@ -135,7 +136,7 @@ func TestScraperWithTitleCapture(t *testing.T) {
 
 	config := RegexpScraperConfig{
 		Trigger:       testCmd,
-		Capture:       "(.*)",
+		Parameters:    []Parameter{{Type: "string"}},
 		URL:           "%s",
 		ReplyCapture:  "<h1>([^<]*)</h1>",
 		TitleTemplate: "%s",
@@ -147,7 +148,7 @@ func TestScraperWithTitleCapture(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Title != "Heading Two 2nd Heading Two" {
@@ -172,7 +173,7 @@ func TestScraperNoCapture(t *testing.T) {
 
 	config := RegexpScraperConfig{
 		Trigger:      testCmd,
-		Capture:      "(.*)",
+		Parameters:   []Parameter{{Type: "string"}},
 		URL:          "usual",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}
@@ -182,7 +183,7 @@ func TestScraperNoCapture(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, []interface{}{""}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Heading One\nLast Heading One") {
@@ -197,7 +198,7 @@ func TestScraperNoCapture(t *testing.T) {
 func TestGetRegexScraperConfigs(t *testing.T) {
 	configIn := []RegexpScraperConfig{{
 		Trigger:      "test",
-		Capture:      "(.*)",
+		Parameters:   []Parameter{{Type: "string"}},
 		URL:          "%s",
 		ReplyCapture: "<h1>([^<]*)</h1>",
 	}}
@@ -217,27 +218,14 @@ func TestGetRegexScraperConfigs(t *testing.T) {
 	}
 
 	for i := range configIn {
-		if configIn[i] != configOut[i] {
+
+		if !cmp.Equal(configIn[i], configOut[i]) {
 			t.Fail()
 		}
 	}
 
 	if err != nil {
 		t.Errorf("An error occurred when making a reasonable scraper!")
-	}
-}
-
-func TestInvalidRegexp(t *testing.T) {
-	config := RegexpScraperConfig{
-		Trigger:      "test",
-		Capture:      "(",
-		URL:          "%s",
-		ReplyCapture: "<h1>([^<]*)</h1>",
-	}
-	_, err := config.CommandWithHTMLGetter(htmlGetRemembered(""))
-
-	if err == nil {
-		t.Fail()
 	}
 }
 
@@ -275,7 +263,7 @@ func TestScraperNoSubstitutions(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, []interface{}{}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "An error when building the url.") {
@@ -309,7 +297,7 @@ func TestScraperNoMatches(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{"usual"}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Could not extract data from the webpage") {
@@ -343,7 +331,7 @@ func TestBadURL(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, []interface{}{""}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "An error occurred retrieving the webpage.") {
@@ -377,7 +365,7 @@ func TestScraperInvalidReader(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, [][]string{{""}}, nil, demoSender.SendMessage)
+	scraper.Exec(testConversation, testSender, []interface{}{""}, nil, demoSender.SendMessage)
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "An error occurred when processing") {

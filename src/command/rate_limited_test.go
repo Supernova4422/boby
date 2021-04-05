@@ -1,7 +1,6 @@
 package command
 
 import (
-	"regexp"
 	"testing"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
@@ -10,8 +9,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func Repeater(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
-	sink(sender, service.Message{Description: msg[0][0]})
+func Repeater(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	sink(sender, service.Message{Description: msg[0].(string)})
 }
 
 func TestCleanHistory(t *testing.T) {
@@ -108,10 +107,10 @@ func TestRateLimitedCommand(t *testing.T) {
 	testCmd := "repeat"
 
 	replyCommand := Command{
-		Trigger: testCmd,
-		Pattern: regexp.MustCompile("(.*)"),
-		Exec:    Repeater,
-		Help:    "Help",
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
 	}
 
 	limitMsg := "You hit the limit"
@@ -127,7 +126,7 @@ func TestRateLimitedCommand(t *testing.T) {
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
 	replyMsg := "Hello"
-	msg := [][]string{{replyMsg}}
+	msg := []interface{}{replyMsg}
 
 	rateLimitedCommand.Exec(
 		testConversation, testSender,
@@ -163,10 +162,10 @@ func TestRateLimitedCommandDisaster(t *testing.T) {
 	testCmd := "repeat"
 
 	replyCommand := Command{
-		Trigger: testCmd,
-		Pattern: regexp.MustCompile("(.*)"),
-		Exec:    Repeater,
-		Help:    "Help",
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
 	}
 
 	limitMsg := "You hit the limit"
@@ -184,7 +183,7 @@ func TestRateLimitedCommandDisaster(t *testing.T) {
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
 	replyMsg := "Hello"
-	msg := [][]string{{replyMsg}}
+	msg := []interface{}{replyMsg}
 
 	defer func() {
 		if r := recover(); r == nil {
@@ -210,10 +209,10 @@ func TestRateLimitedCommandWithGobStorage(t *testing.T) {
 	testCmd := "repeat"
 
 	replyCommand := Command{
-		Trigger: testCmd,
-		Pattern: regexp.MustCompile("(.*)"),
-		Exec:    Repeater,
-		Help:    "Help",
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
 	}
 
 	limitMsg := "You hit the limit"
@@ -229,7 +228,7 @@ func TestRateLimitedCommandWithGobStorage(t *testing.T) {
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
 	replyMsg := "Hello"
-	msg := [][]string{{replyMsg}}
+	msg := []interface{}{replyMsg}
 
 	rateLimitedCommand.Exec(
 		testConversation, testSender,
@@ -265,10 +264,10 @@ func TestRateLimitedCommandMinute(t *testing.T) {
 	testCmd := "repeat"
 
 	replyCommand := Command{
-		Trigger: testCmd,
-		Pattern: regexp.MustCompile("(.*)"),
-		Exec:    Repeater,
-		Help:    "Help",
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
 	}
 
 	limitMsg := "You hit the limit"
@@ -284,7 +283,7 @@ func TestRateLimitedCommandMinute(t *testing.T) {
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
 	replyMsg := "Hello"
-	msg := [][]string{{replyMsg}}
+	msg := []interface{}{replyMsg}
 
 	rateLimitedCommand.Exec(
 		testConversation, testSender,
@@ -320,10 +319,10 @@ func TestRateLimitedCommandHour(t *testing.T) {
 	testCmd := "repeat"
 
 	replyCommand := Command{
-		Trigger: testCmd,
-		Pattern: regexp.MustCompile("(.*)"),
-		Exec:    Repeater,
-		Help:    "Help",
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
 	}
 
 	limitMsg := "You hit the limit"
@@ -339,7 +338,7 @@ func TestRateLimitedCommandHour(t *testing.T) {
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
 	replyMsg := "Hello"
-	msg := [][]string{{replyMsg}}
+	msg := []interface{}{replyMsg}
 
 	rateLimitedCommand.Exec(
 		testConversation, testSender,
@@ -368,10 +367,10 @@ func TestRateLimitedUseless(t *testing.T) {
 	testCmd := "repeat"
 
 	replyCommand := Command{
-		Trigger: testCmd,
-		Pattern: regexp.MustCompile("(.*)"),
-		Exec:    Repeater,
-		Help:    "Help",
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
 	}
 
 	limitMsg := "You hit the limit"
@@ -392,10 +391,10 @@ func TestRateLimitedNotUseless(t *testing.T) {
 	testCmd := "repeat"
 
 	replyCommand := Command{
-		Trigger: testCmd,
-		Pattern: regexp.MustCompile("(.*)"),
-		Exec:    Repeater,
-		Help:    "Help",
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
 	}
 
 	limitMsg := "You hit the limit"

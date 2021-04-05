@@ -2,13 +2,16 @@ package command
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/service/demoservice"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
+
+func Repeater2(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	sink(sender, service.Message{Description: msg[0].(string)})
+}
 
 func TestSetPrefix2(t *testing.T) {
 	// Prepare context.
@@ -17,31 +20,39 @@ func TestSetPrefix2(t *testing.T) {
 	prefix0 := "!"
 	_storage.SetDefaultGuildValue("prefix", prefix0)
 
-	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
+	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID, Storage: &_storage}
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
 
-	testCmd := "repeat "
+	testCmd := "repeat"
 	cmd1 := Command{
-		Trigger: testCmd,
-		Pattern: regexp.MustCompile("(.*)"),
-		Exec:    Repeater,
-		Help:    "",
-		Storage: &_storage,
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater2,
+		Help:       "",
 	} // Repeater
 	cmd1.AddSender(&demoSender)
-	demoServiceSubject.Register(&cmd1)
+
+	types := []string{}
+	for _, commandParameter := range cmd1.Parameters {
+		types = append(types, commandParameter.Type)
+	}
+	demoServiceSubject.Register(cmd1.Trigger, types, cmd1.Exec, cmd1.RouteByID)
 
 	prefixCmd := "setprefix"
 
 	cmd2 := Command{
-		Trigger: prefixCmd,
-		Pattern: regexp.MustCompile("(.*)"),
-		Exec:    SetPrefix,
-		Help:    "[word] | Set the prefix of all commands of this bot, for this server.",
-		Storage: &_storage,
+		Trigger:    prefixCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       SetPrefix,
+		Help:       "Set the prefix of all commands of this bot, for this server.",
 	}
+
 	cmd2.AddSender(&demoSender)
-	demoServiceSubject.Register(&cmd2)
+	types = []string{}
+	for _, commandParameter := range cmd2.Parameters {
+		types = append(types, commandParameter.Type)
+	}
+	demoServiceSubject.Register(cmd2.Trigger, types, cmd2.Exec, cmd2.RouteByID)
 
 	// Message to repeat.
 	testConversation := service.Conversation{
@@ -106,31 +117,39 @@ func TestIgnoreSetPrefix(t *testing.T) {
 	prefix0 := "!"
 	_storage.SetDefaultGuildValue("prefix", prefix0)
 
-	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID}
+	demoServiceSubject := demoservice.DemoService{Storage: &_storage, ServiceID: demoservice.ServiceID}
 	// demoServiceSubject.Register(&bot)
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
 
-	testCmd := "repeat "
+	testCmd := "repeat"
 	cmd1 := Command{
-		Trigger: testCmd,
-		Pattern: regexp.MustCompile("(.*)"),
-		Exec:    Repeater,
-		Help:    "",
-		Storage: &_storage,
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater2,
+		Help:       "",
 	}
+
 	cmd1.AddSender(&demoSender)
-	demoServiceSubject.Register(&cmd1)
+	types := []string{}
+	for _, commandParameter := range cmd1.Parameters {
+		types = append(types, commandParameter.Type)
+	}
+	demoServiceSubject.Register(cmd1.Trigger, types, cmd1.Exec, cmd1.RouteByID)
 
 	prefixCmd := "setprefix"
 	cmd2 := Command{
-		Trigger: prefixCmd,
-		Pattern: regexp.MustCompile("(.*)"),
-		Exec:    SetPrefix,
-		Help:    "[word] | Set the prefix of all commands of this bot, for this server.",
-		Storage: &_storage,
+		Trigger:    prefixCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       SetPrefix,
+		Help:       "[word] | Set the prefix of all commands of this bot, for this server.",
 	}
+
 	cmd2.AddSender(&demoSender)
-	demoServiceSubject.Register(&cmd2)
+	types = []string{}
+	for _, commandParameter := range cmd2.Parameters {
+		types = append(types, commandParameter.Type)
+	}
+	demoServiceSubject.Register(cmd2.Trigger, types, cmd2.Exec, cmd2.RouteByID)
 
 	// Message to repeat.
 	testConversation := service.Conversation{

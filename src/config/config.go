@@ -3,8 +3,8 @@ package config
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 
@@ -19,26 +19,26 @@ const goqueryFilepath = "goquery_scraper_config.json"
 
 // MakeExampleDir makes an example folder with example config files.
 func MakeExampleDir(dir string) error {
-	fmt.Printf(
+	log.Printf(
 		"A Folder \"%s\" will be created, which contains example configuration files.\n",
 		dir,
 	)
-	fmt.Println("The configuration files can be edited, and the folder can be used to run this software.")
-	fmt.Printf("For information on editing configuration files, "+
+	log.Println("The configuration files can be edited, and the folder can be used to run this software.")
+	log.Printf("For information on editing configuration files, "+
 		"make sure to read the documentation at %s, or this project's readme.md file.",
 		command.Repo)
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.Mkdir(dir, 0755)
 	} else {
-		fmt.Printf("\nThe folder \"%s\" already exists, example configuration files will not be created.", dir)
+		log.Printf("\nThe folder \"%s\" already exists, example configuration files will not be created.", dir)
 		return err
 	}
 
 	jsonGetters := []command.JSONGetterConfig{
 		{
-			Trigger: "cmd",
-			Capture: "(.*)",
+			Trigger:    "cmd",
+			Parameters: []command.Parameter{{Type: "string"}},
 			Message: command.JSONCapture{
 				Title: command.FieldCapture{
 					Template:  "Title: %s",
@@ -77,7 +77,7 @@ func MakeExampleDir(dir string) error {
 	regexpGetters := []command.RegexpScraperConfig{
 		{
 			Trigger:       "rx",
-			Capture:       "(.*)",
+			Parameters:    []command.Parameter{{Type: "string"}},
 			TitleTemplate: "Title: %s",
 			TitleCapture:  "<h1>(.*)</h1>",
 			ReplyCapture:  "<h1>(.*)</h1>",
@@ -89,9 +89,9 @@ func MakeExampleDir(dir string) error {
 
 	goqueryGetters := []command.GoQueryScraperConfig{
 		{
-			Title:   "Title",
-			Trigger: "gq",
-			Capture: "(@.*)",
+			Title:      "Title",
+			Trigger:    "gq",
+			Parameters: []command.Parameter{{Type: "string"}},
 			TitleSelector: command.SelectorCapture{
 				Template:       "Title: %s",
 				Selectors:      []string{".titlefield"},

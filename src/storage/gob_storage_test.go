@@ -71,9 +71,9 @@ func TestGobSetGetGuildValue(t *testing.T) {
 	writer := TruncatableBuffer{bytesOut}
 	storage := GobStorage{
 		TempStorage: GetTempStorage(),
-		writer:      writer,
 		mutex:       &sync.Mutex{},
 	}
+	storage.SetWriter(writer)
 
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
 	k0 := "k0"
@@ -218,6 +218,26 @@ func TestGobGetUserValue(t *testing.T) {
 	}
 }
 
+func TestCantEncode(t *testing.T) {
+	bytesOut := bytes.NewBuffer([]byte{})
+	writer := TruncatableBuffer{bytesOut}
+	tempstorage := GetTempStorage()
+	tempstorage.UserValues = nil
+	storage := GobStorage{
+		TempStorage: tempstorage,
+		writer:      writer,
+		mutex:       &sync.Mutex{},
+	}
+
+	guild := service.Guild{ServiceID: "0", GuildID: "0"}
+	key1 := "key1"
+	value := []*string{nil}
+	storage.SetGuildValue(guild, key1, value)
+	err := storage.SaveToFile()
+	if err == nil {
+		t.Fail()
+	}
+}
 func TestGobGetValueMissingButHasService(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}

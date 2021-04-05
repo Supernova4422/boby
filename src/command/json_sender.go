@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/url"
-	"regexp"
 	"strings"
 	"time"
 
@@ -17,17 +16,17 @@ import (
 
 // JSONGetterConfig can be used to extract from JSON into a message.
 type JSONGetterConfig struct {
-	Trigger   string          // What a message must begin with to trigger this command.
-	Capture   string          // Capture is a regexp, that is used to capture everything following 'trigger.'
-	Message   JSONCapture     // The primary title and body of a message.
-	Fields    []JSONCapture   // A message is composed of several fields. Captures is used to make fields of a message.
-	Grouped   bool            // If true, only a single message is sent, if false each entry in .
-	URL       string          // URL to retrieve a JSON from.
-	Help      string          // Message shown when help command is used.
-	HelpInput string          // Message shown used to explain what expected user input is following trigger.
-	Delay     int             // If grouped is false, what is the delay between each message sent.
-	Token     TokenMaker      // Often an API requires a calculated API, Token is used to help create a token and append to a URL prior to requests.
-	RateLimit RateLimitConfig // RateLimit places a limit on how frequently a user can send messages.
+	Trigger    string          // What a message must begin with to trigger this command.
+	Parameters []Parameter     // Capture is a regexp, that is used to capture everything following 'trigger.'
+	Message    JSONCapture     // The primary title and body of a message.
+	Fields     []JSONCapture   // A message is composed of several fields. Captures is used to make fields of a message.
+	Grouped    bool            // If true, only a single message is sent, if false each entry in .
+	URL        string          // URL to retrieve a JSON from.
+	Help       string          // Message shown when help command is used.
+	HelpInput  string          // Message shown used to explain what expected user input is following trigger.
+	Delay      int             // If grouped is false, what is the delay between each message sent.
+	Token      TokenMaker      // Often an API requires a calculated API, Token is used to help create a token and append to a URL prior to requests.
+	RateLimit  RateLimitConfig // RateLimit places a limit on how frequently a user can send messages.
 }
 
 // MessagesFromJSON accepts a dict (which usually represents a JSON) and returns a sequence of messages based on the configuration.
@@ -140,7 +139,7 @@ type JSONGetter = func(string) (out io.ReadCloser, err error)
 
 // Command uses the config to make a Command that processes messages.
 func (j JSONGetterConfig) Command(jsonGetter JSONGetter) (Command, error) {
-	curry := func(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 		j.jsonGetterFunc(
 			sender,
 			user,
@@ -151,60 +150,58 @@ func (j JSONGetterConfig) Command(jsonGetter JSONGetter) (Command, error) {
 		)
 	}
 
-	regex, err := regexp.Compile(j.Capture)
-	if err != nil {
-		return Command{}, err
-	}
-
 	return Command{
-		Trigger:   j.Trigger,
-		Pattern:   regex,
-		Exec:      curry,
-		Help:      j.Help,
-		HelpInput: j.HelpInput,
+		Trigger:    j.Trigger,
+		Parameters: j.Parameters,
+		Exec:       curry,
+		Help:       j.Help,
+		HelpInput:  j.HelpInput,
 	}, nil
 }
 
 // jsonGetterFunc processes a message.
-func (j JSONGetterConfig) jsonGetterFunc(sender service.Conversation, user service.User, msg [][]string, storage *storage.Storage, sink func(service.Conversation, service.Message), jsonGetter JSONGetter) {
+func (j JSONGetterConfig) jsonGetterFunc(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message), jsonGetter JSONGetter) {
 	substitutions := strings.Count(j.URL, "%s")
-	noCapture := msg == nil || len(msg) == 0
+	noCapture := len(msg) == 0
 
-	if (substitutions > 0) && (noCapture || len(msg[0]) < substitutions) {
+	if (substitutions > 0) && (noCapture || len(msg) < substitutions) {
 		sink(sender, service.Message{Description: "An error occurred when building the url."})
 		return
 	}
 
 	if noCapture {
-		msg = [][]string{{""}}
+		msg = []interface{}{""}
 	}
 
-	for _, capture := range msg {
-		msgURL := j.URL
+	msgURL := j.URL
 
-		replacements := strings.Count(msgURL, "%s")
+	replacements := strings.Count(msgURL, "%s")
 
-		// HACK: noCapture is pretty hacky.
-		if noCapture == false {
-			for i, word := range capture {
-				if i == replacements {
-					break
-				}
-				msgURL = strings.Replace(msgURL, "%s", url.PathEscape(word), 1)
+	// HACK: noCapture is pretty hacky.
+	if !noCapture {
+		for i, word := range msg {
+			if i == replacements {
+				break
 			}
-			msgURL += j.Token.MakeToken(strings.Join(capture, ""))
+			msgURL = strings.Replace(msgURL, "%s", url.PathEscape(word.(string)), 1)
 		}
 
-		fmt.Print(msgURL)
-		if jsonReader, err := jsonGetter(msgURL); err == nil {
-			defer jsonReader.Close()
-			if buf, err := ioutil.ReadAll(jsonReader); err == nil {
-				dict := make(map[string]interface{})
-				if err := json.Unmarshal(buf, &dict); err == nil {
-					for _, msg := range j.MessagesFromJSON(dict) {
-						sink(sender, msg)
-						time.Sleep(time.Duration(j.Delay) * time.Second)
-					}
+		output := []string{}
+		for _, item := range msg {
+			output = append(output, item.(string))
+		}
+
+		msgURL += j.Token.MakeToken(strings.Join(output, ""))
+	}
+
+	if jsonReader, err := jsonGetter(msgURL); err == nil {
+		defer jsonReader.Close()
+		if buf, err := ioutil.ReadAll(jsonReader); err == nil {
+			dict := make(map[string]interface{})
+			if err := json.Unmarshal(buf, &dict); err == nil {
+				for _, msg := range j.MessagesFromJSON(dict) {
+					sink(sender, msg)
+					time.Sleep(time.Duration(j.Delay) * time.Second)
 				}
 			}
 		}
