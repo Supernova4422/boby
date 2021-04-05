@@ -1,8 +1,7 @@
 mode: set
-github.com/BKrajancic/boby/m/v2/src/command/admin.go:19.32,121.2 1 1
-github.com/BKrajancic/boby/m/v2/src/command/check_admin.go:9.160,15.48 2 1
-github.com/BKrajancic/boby/m/v2/src/command/check_admin.go:15.48,17.3 1 1
-github.com/BKrajancic/boby/m/v2/src/command/check_admin.go:17.8,19.3 1 1
+github.com/BKrajancic/boby/m/v2/src/command/im_admin.go:9.157,10.18 1 1
+github.com/BKrajancic/boby/m/v2/src/command/im_admin.go:10.18,12.3 1 1
+github.com/BKrajancic/boby/m/v2/src/command/im_admin.go:12.8,14.3 1 1
 github.com/BKrajancic/boby/m/v2/src/command/json_sender.go:33.102,37.33 3 1
 github.com/BKrajancic/boby/m/v2/src/command/json_sender.go:45.2,45.15 1 1
 github.com/BKrajancic/boby/m/v2/src/command/json_sender.go:70.2,70.8 1 1
@@ -78,10 +77,12 @@ github.com/BKrajancic/boby/m/v2/src/command/rate_limited.go:82.10,82.29 1 1
 github.com/BKrajancic/boby/m/v2/src/command/rate_limited.go:82.29,84.5 1 1
 github.com/BKrajancic/boby/m/v2/src/command/rate_limited.go:84.10,86.5 1 1
 github.com/BKrajancic/boby/m/v2/src/command/rate_limited.go:96.9,99.4 2 1
-github.com/BKrajancic/boby/m/v2/src/command/set_admin.go:9.158,10.18 1 1
-github.com/BKrajancic/boby/m/v2/src/command/set_admin.go:10.18,18.3 3 1
 github.com/BKrajancic/boby/m/v2/src/command/set_prefix.go:15.159,16.18 1 1
 github.com/BKrajancic/boby/m/v2/src/command/set_prefix.go:16.18,28.3 3 1
+github.com/BKrajancic/boby/m/v2/src/command/admin.go:19.32,121.2 1 1
+github.com/BKrajancic/boby/m/v2/src/command/check_admin.go:9.160,15.48 2 1
+github.com/BKrajancic/boby/m/v2/src/command/check_admin.go:15.48,17.3 1 1
+github.com/BKrajancic/boby/m/v2/src/command/check_admin.go:17.8,19.3 1 1
 github.com/BKrajancic/boby/m/v2/src/command/command.go:27.52,29.2 1 1
 github.com/BKrajancic/boby/m/v2/src/command/command.go:33.85,34.39 1 1
 github.com/BKrajancic/boby/m/v2/src/command/command.go:34.39,35.46 1 1
@@ -139,9 +140,8 @@ github.com/BKrajancic/boby/m/v2/src/command/goquery_scraper.go:245.21,247.3 1 1
 github.com/BKrajancic/boby/m/v2/src/command/goquery_scraper.go:254.81,256.16 2 1
 github.com/BKrajancic/boby/m/v2/src/command/goquery_scraper.go:260.2,261.47 2 1
 github.com/BKrajancic/boby/m/v2/src/command/goquery_scraper.go:256.16,258.3 1 1
-github.com/BKrajancic/boby/m/v2/src/command/im_admin.go:9.157,10.18 1 1
-github.com/BKrajancic/boby/m/v2/src/command/im_admin.go:10.18,12.3 1 1
-github.com/BKrajancic/boby/m/v2/src/command/im_admin.go:12.8,14.3 1 1
+github.com/BKrajancic/boby/m/v2/src/command/unset_admin.go:9.160,10.18 1 1
+github.com/BKrajancic/boby/m/v2/src/command/unset_admin.go:10.18,18.3 3 1
 github.com/BKrajancic/boby/m/v2/src/command/regexp_scraper.go:34.79,36.16 2 1
 github.com/BKrajancic/boby/m/v2/src/command/regexp_scraper.go:40.2,41.47 2 1
 github.com/BKrajancic/boby/m/v2/src/command/regexp_scraper.go:36.16,38.3 1 1
@@ -170,8 +170,8 @@ github.com/BKrajancic/boby/m/v2/src/command/regexp_scraper.go:125.41,126.46 1 1
 github.com/BKrajancic/boby/m/v2/src/command/regexp_scraper.go:126.46,127.28 1 1
 github.com/BKrajancic/boby/m/v2/src/command/regexp_scraper.go:130.5,130.34 1 1
 github.com/BKrajancic/boby/m/v2/src/command/regexp_scraper.go:127.28,129.6 1 1
-github.com/BKrajancic/boby/m/v2/src/command/unset_admin.go:9.160,10.18 1 1
-github.com/BKrajancic/boby/m/v2/src/command/unset_admin.go:10.18,18.3 3 1
+github.com/BKrajancic/boby/m/v2/src/command/set_admin.go:9.158,10.18 1 1
+github.com/BKrajancic/boby/m/v2/src/command/set_admin.go:10.18,18.3 3 1
 github.com/BKrajancic/boby/m/v2/src/service/conversation.go:17.37,22.2 1 1
 github.com/BKrajancic/boby/m/v2/src/service/parse_input.go:16.27,18.53 1 1
 github.com/BKrajancic/boby/m/v2/src/service/parse_input.go:42.2,42.16 1 1
