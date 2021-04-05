@@ -25,9 +25,57 @@ func (d *DiscordSubject) SetStorage(storage *storage.Storage) {
 	d.storage = storage
 }
 
+func (d *DiscordSubject) updateGuildCommandsForAll() {
+	for _, guild := range d.discord.State.Guilds {
+		d.updateGuildCommands(guild.ID)
+	}
+}
+
+func (d *DiscordSubject) updateGuildCommands(guildID string) {
+	appID := d.discord.State.User.ID
+	cmds, err := d.discord.ApplicationCommands(appID, guildID)
+	if err != nil {
+		log.Printf("Error with slash commands: %s", err)
+	}
+	for _, cmd := range d.observers {
+		command := commandToApplicationCommand(cmd)
+		found := false
+		for _, existingCmd := range cmds {
+			if existingCmd.Name == cmd.Trigger {
+				_, err := d.discord.ApplicationCommandEdit(
+					existingCmd.ApplicationID,
+					guildID,
+					existingCmd.ID,
+					&command,
+				)
+				if err == nil {
+					found = true
+					log.Printf("Skipping already existing slash command for guild '%s': %s", guildID, err)
+					break
+				} else {
+					log.Printf("Error with slash command for guild '%s': %s", guildID, err)
+				}
+			}
+		}
+
+		if !found {
+			_, err := d.discord.ApplicationCommandCreate(appID, guildID, &command)
+			if err != nil {
+				log.Printf("Error with slash command for guild '%s': %s", guildID, err)
+			}
+		}
+	}
+}
+
+func (d *DiscordSubject) guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
+	d.updateGuildCommands(event.Guild.ID)
+}
+
 // Load prepares this object for usage.
 func (d *DiscordSubject) Load() {
+	d.discord.AddHandler(d.guildCreate)
 	d.discord.AddHandler(d.onSlashCommand)
+
 	d.Register(
 		command.Command{
 			Trigger: "help",
@@ -36,16 +84,8 @@ func (d *DiscordSubject) Load() {
 		},
 	)
 
-	appID := d.discord.State.User.ID
-	for _, guildID := range d.discord.State.Guilds {
-		for _, cmd := range d.observers {
-			command := commandToApplicationCommand(cmd)
-			_, err := d.discord.ApplicationCommandCreate(appID, guildID.ID, &command)
-			if err != nil {
-				log.Printf("Error with slash commands: %s", err)
-			}
-		}
-	}
+	d.updateGuildCommandsForAll()
+	d.updateGuildCommands("") // Global slash commands.
 }
 
 // UnloadUselessCommands will unload slash commands that aren't present in the bot currently.
@@ -109,42 +149,6 @@ func commandToApplicationCommand(cmd command.Command) discordgo.ApplicationComma
 
 // Register will add an observer that will handle discord messages being received.
 func (d *DiscordSubject) Register(cmd command.Command) {
-	command := commandToApplicationCommand(cmd)
-
-	appID := d.discord.State.User.ID
-	cmds, err := d.discord.ApplicationCommands(appID, "")
-	if err != nil {
-		log.Printf("Error with slash commands: %s", err)
-	}
-
-	found := false
-	for _, existingCmd := range cmds {
-		if existingCmd.Name == cmd.Trigger {
-			_, err := d.discord.ApplicationCommandEdit(
-				existingCmd.ApplicationID,
-				"",
-				existingCmd.ID,
-				&command,
-			)
-			if err == nil {
-				found = true
-			} else {
-				log.Printf("Error with slash commands: %s", err)
-			}
-		}
-	}
-
-	if !found {
-		_, err := d.discord.ApplicationCommandCreate(
-			d.discord.State.User.ID,
-			"",
-			&command,
-		)
-		if err != nil {
-			log.Printf("Error with slash commands: %s", err)
-		}
-	}
-
 	d.observers = append(d.observers, cmd)
 }
 

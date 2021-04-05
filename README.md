@@ -45,5 +45,11 @@ It would be desirable if your commit had the following:
 1. golint returns no issues.
 2. Tests coverage includes new and modified code. This repository is aiming for as high code coverage as possible, excluding the folders "service/discordservice" (because this code is  coupled to a 3rd party library, making testing difficult), "utils" and "main" (because they include side effects).  
 
+## Adding bot to discord
+To add your bot to a discord server with all the necesssary permissions, use the following
+URL template:
+
+> `https://discord.com/oauth2/authorize?client_id=<client_id>&permissions=0&scope=applications.commands%20bot`
+
 ## Logging TODOs and Issues
 TODOs and issues are tracked using github's issue tracker.
