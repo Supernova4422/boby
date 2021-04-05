@@ -5,7 +5,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/gob"
-	"fmt"
 	"os"
 	"os/signal"
 	"path"
@@ -28,9 +27,8 @@ func main() {
 
 	exampleDir := "example"
 	if len(os.Args) == 1 {
-		log.Println("When running this program, an argument must be given, which is a directory containing configuration files.")
 		config.MakeExampleDir(exampleDir)
-		panic(fmt.Errorf("missing argument"))
+		log.Panicf("missing argument")
 	}
 
 	folder := os.Args[1]
@@ -45,21 +43,17 @@ func main() {
 	}
 	prefix := "!"
 	storage.SetDefaultGuildValue("prefix", prefix)
-	if err != nil {
-		panic(err)
-	}
 
 	commands, err := config.ConfiguredBot(folder, &storage)
 	if err != nil {
-		log.Panicln("An error occurred when loading the configuration files.")
 		config.MakeExampleDir(exampleDir)
-		panic(err)
+		log.Panicf("An error occurred when loading the configuration files: %s", err)
 	}
 
 	discordConfig := path.Join(folder, "config.json")
 	discordSubject, _, discord, err := discordservice.NewDiscords(discordConfig)
 	if err != nil {
-		panic(err)
+		log.Panicf("An error occurred when loading discord: %s", err)
 	}
 	discord.UpdateGameStatus(0, "Bot is reloading...")
 	defer discordSubject.Close() // Cleanly close down the Discord session.
