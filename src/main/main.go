@@ -66,7 +66,7 @@ func main() {
 	discordSubject.Load()
 	discordSubject.UnloadUselessCommands()
 
-	discord.UpdateGameStatus(0, "Bot is online")
+	discord.UpdateGameStatus(0, "/help")
 	log.Println("bot has loaded")
 
 	sc := make(chan os.Signal, 1)
