@@ -231,11 +231,16 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 		return
 	}
 
+	memberRoles := []string{}
+	if m.Member != nil {
+		memberRoles = m.Member.Roles
+	}
+
 	conversation := service.Conversation{
 		ServiceID:      d.ID(),
 		ConversationID: m.ChannelID,
 		GuildID:        m.GuildID,
-		Admin:          d.isAdmin(s, m.Author.ID, m.GuildID, m.Member.Roles),
+		Admin:          d.isAdmin(s, m.Author.ID, m.GuildID, memberRoles),
 	}
 
 	user := service.User{
