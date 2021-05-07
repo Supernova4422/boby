@@ -1,6 +1,7 @@
 package command
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
@@ -291,7 +292,7 @@ func TestRateLimitedCommandMinute(t *testing.T) {
 	)
 
 	resultMessage, _ := demoSender.PopMessage()
-	if resultMessage.Description != replyMsg {
+	if !strings.HasPrefix(resultMessage.Description, replyMsg) {
 		t.Fail()
 	}
 
@@ -303,7 +304,7 @@ func TestRateLimitedCommandMinute(t *testing.T) {
 	}
 
 	resultMessage, _ = demoSender.PopMessage()
-	if resultMessage.Description != limitMsg {
+	if !strings.HasPrefix(resultMessage.Description, limitMsg) {
 		t.Fail()
 	}
 }
@@ -358,7 +359,7 @@ func TestRateLimitedCommandHour(t *testing.T) {
 	}
 
 	resultMessage, _ = demoSender.PopMessage()
-	if resultMessage.Description != limitMsg {
+	if !strings.HasPrefix(resultMessage.Description, limitMsg) {
 		t.Fail()
 	}
 }
