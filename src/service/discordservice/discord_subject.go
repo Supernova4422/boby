@@ -248,7 +248,6 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 	}
 
 	sink := func(destination service.Conversation, msg service.Message) {
-
 		fields := make([]*discordgo.MessageEmbedField, 0)
 		for _, field := range msg.Fields {
 			value := field.Value
