@@ -35,9 +35,6 @@ func MsgToEmbed(msg service.Message) discordgo.MessageEmbed {
 		Description: desc,
 		Fields:      fields,
 	}
-	if msg.Footer != "" {
-		embed.Footer = &discordgo.MessageEmbedFooter{Text: msg.Footer}
-	}
 
 	return embed
 }
