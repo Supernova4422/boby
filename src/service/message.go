@@ -6,7 +6,6 @@ type Message struct {
 	Title       string
 	Description string
 	Fields      []MessageField
-	Footer      string
 }
 
 // A MessageField stores a field and value pair.

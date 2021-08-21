@@ -198,16 +198,20 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 		ServiceID: d.ID(),
 	}
 	input := []interface{}{}
+	footerText := "Requested by " + i.Member.User.Username + ": /" + i.Data.Name
 	for _, val := range i.Data.Options {
 		input = append(input, val.Value)
+		footerText += " " + val.StringValue()
 	}
 
 	embeds := &([]*discordgo.MessageEmbed{})
 
 	sink := func(conversation service.Conversation, msg service.Message) {
 		embed := MsgToEmbed(msg)
+		embed.Footer = &discordgo.MessageEmbedFooter{Text: footerText}
 		currEmbeds := append(*embeds, &embed)
 		embeds = &currEmbeds
+
 		if len(*embeds) == 1 {
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -280,8 +284,9 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 			Description: desc,
 			Fields:      fields,
 		}
-		if msg.Footer != "" {
-			embed.Footer = &discordgo.MessageEmbedFooter{Text: msg.Footer}
+
+		embed.Footer = &discordgo.MessageEmbedFooter{
+			Text: "Requested by " + m.Author.Username + ": " + m.Content,
 		}
 
 		d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
@@ -395,12 +400,16 @@ func (d *DiscordSubject) helpExec(conversation service.Conversation, user servic
 		})
 	}
 
+	fields = append(fields, service.MessageField{
+		Field: "Contribute to this project at: ",
+		Value: command.Repo,
+	})
+
 	sink(
 		conversation,
 		service.Message{
 			Title:  "Help",
 			Fields: fields,
-			Footer: "Contribute to this project at: " + command.Repo,
 		},
 	)
 }

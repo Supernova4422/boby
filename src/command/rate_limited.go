@@ -3,6 +3,7 @@ package command
 import (
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
@@ -72,25 +73,24 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 
 		if r.rateLimited(now, history) {
 			remaining := r.timeRemaining(now, history)
-			var footer string
+			var countdown string
 			if remaining > 60*60 {
-				footer = fmt.Sprintf(
+				countdown = fmt.Sprintf(
 					"%d Hours and %d seconds remaining",
 					(remaining/60)/60,
 					remaining/60,
 				)
 			} else if remaining > 60 {
-				footer = fmt.Sprintf("%d Minutes remaining", remaining/60)
+				countdown = fmt.Sprintf("%d Minutes remaining", remaining/60)
 			} else {
-				footer = fmt.Sprintf("%d Seconds remaining", remaining)
+				countdown = fmt.Sprintf("%d Seconds remaining", remaining)
 			}
 
 			sink(
 				sender,
 				service.Message{
 					Title:       "Please try again later.",
-					Description: r.Body,
-					Footer:      footer,
+					Description: strings.Join([]string{r.Body, countdown}, "\n"),
 				},
 			)
 		} else {
