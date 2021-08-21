@@ -185,20 +185,24 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 	if i.Member != nil {
 		memberRoles = i.Member.Roles
 	}
+	discordUser := i.User
+	if discordUser == nil {
+		discordUser = i.Member.User
+	}
 
 	conversation := service.Conversation{
 		ServiceID:      d.ID(),
 		ConversationID: i.ChannelID,
 		GuildID:        i.GuildID,
-		Admin:          d.isAdmin(s, i.User.ID, i.GuildID, memberRoles),
+		Admin:          d.isAdmin(s, discordUser.ID, i.GuildID, memberRoles),
 	}
 
 	user := service.User{
-		Name:      i.User.ID,
+		Name:      discordUser.ID,
 		ServiceID: d.ID(),
 	}
 	input := []interface{}{}
-	footerText := "Requested by " + i.Member.User.Username + ": /" + i.Data.Name
+	footerText := "Requested by " + discordUser.Username + ": /" + i.Data.Name
 	for _, val := range i.Data.Options {
 		input = append(input, val.Value)
 		footerText += " " + val.StringValue()
