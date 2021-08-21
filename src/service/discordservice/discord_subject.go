@@ -181,15 +181,20 @@ func (d *DiscordSubject) messageCreate(s *discordgo.Session, m *discordgo.Messag
 }
 
 func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	memberRoles := []string{}
+	if i.Member != nil {
+		memberRoles = i.Member.Roles
+	}
+
 	conversation := service.Conversation{
 		ServiceID:      d.ID(),
 		ConversationID: i.ChannelID,
 		GuildID:        i.GuildID,
-		Admin:          d.isAdmin(s, i.Member.User.ID, i.GuildID, i.Member.Roles),
+		Admin:          d.isAdmin(s, i.User.ID, i.GuildID, memberRoles),
 	}
 
 	user := service.User{
-		Name:      i.Member.User.ID,
+		Name:      i.User.ID,
 		ServiceID: d.ID(),
 	}
 	input := []interface{}{}
@@ -231,11 +236,16 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 		return
 	}
 
+	memberRoles := []string{}
+	if m.Member != nil {
+		memberRoles = m.Member.Roles
+	}
+
 	conversation := service.Conversation{
 		ServiceID:      d.ID(),
 		ConversationID: m.ChannelID,
 		GuildID:        m.GuildID,
-		Admin:          d.isAdmin(s, m.Author.ID, m.GuildID, m.Member.Roles),
+		Admin:          d.isAdmin(s, m.Author.ID, m.GuildID, memberRoles),
 	}
 
 	user := service.User{
