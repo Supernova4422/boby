@@ -29,7 +29,7 @@ func AdminCommands() []Command {
 			Trigger: IsAdminTrigger + "user",
 			Parameters: []Parameter{
 				{
-					Name:        "User",
+					Name:        "user",
 					Description: "User to check if is an admin",
 					Type:        "user",
 				},
@@ -42,7 +42,7 @@ func AdminCommands() []Command {
 			Trigger: SetAdminTrigger + "user",
 			Parameters: []Parameter{
 				{
-					Name:        "User",
+					Name:        "user",
 					Description: "User to set as an admin",
 					Type:        "user",
 				},
@@ -55,7 +55,7 @@ func AdminCommands() []Command {
 			Trigger: UnsetAdminTrigger + "user",
 			Parameters: []Parameter{
 				{
-					Name:        "User",
+					Name:        "user",
 					Description: "User/Role to unset as an admin",
 					Type:        "user",
 				},
@@ -69,7 +69,7 @@ func AdminCommands() []Command {
 			Trigger: IsAdminTrigger + "role",
 			Parameters: []Parameter{
 				{
-					Name:        "Role",
+					Name:        "role",
 					Description: "Role To check if is an admin",
 					Type:        "role",
 				},
@@ -82,7 +82,7 @@ func AdminCommands() []Command {
 			Trigger: SetAdminTrigger + "role",
 			Parameters: []Parameter{
 				{
-					Name:        "Role",
+					Name:        "role",
 					Description: "Role to set as an admin",
 					Type:        "role",
 				},
