@@ -202,7 +202,7 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 		ServiceID: d.ID(),
 	}
 	input := []interface{}{}
-	footerText := "Requested by " + discordUser.Username + ": /" + i.Data.Name
+	footerText := "Requested by " + i.Member.Nick + ": /" + i.Data.Name
 	for _, val := range i.Data.Options {
 		input = append(input, val.Value)
 		footerText += " " + val.StringValue()
@@ -215,24 +215,29 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 		embed.Footer = &discordgo.MessageEmbedFooter{Text: footerText}
 		currEmbeds := append(*embeds, &embed)
 		embeds = &currEmbeds
-
-		if len(*embeds) == 1 {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionApplicationCommandResponseData{
-					Embeds: *embeds,
-				},
-			})
-		} else {
-			msg := discordgo.WebhookEdit{Embeds: *embeds}
-			appID := d.discord.State.User.ID
-			s.InteractionResponseEdit(appID, i.Interaction, &msg)
+		response := discordgo.WebhookEdit{
+			Content: " ",
+			Embeds:  *embeds,
 		}
+		appID := d.discord.State.User.ID
+		s.InteractionResponseEdit(appID, i.Interaction, &response)
 	}
 
 	target := i.Data.Name
 	for j := range d.observers {
 		if d.observers[j].Trigger == target {
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionApplicationCommandResponseData{
+					Embeds: ([]*discordgo.MessageEmbed{
+						{
+							Description: "Processing Command.",
+							Footer:      &discordgo.MessageEmbedFooter{Text: footerText},
+						},
+					}),
+				},
+			})
+
 			d.observers[j].Exec(conversation, user, input, d.storage, sink)
 			break
 		}
