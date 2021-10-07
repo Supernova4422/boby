@@ -227,15 +227,7 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 	for j := range d.observers {
 		if d.observers[j].Trigger == target {
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionApplicationCommandResponseData{
-					Embeds: ([]*discordgo.MessageEmbed{
-						{
-							Description: "Processing Command.",
-							Footer:      &discordgo.MessageEmbedFooter{Text: footerText},
-						},
-					}),
-				},
+				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 			})
 
 			d.observers[j].Exec(conversation, user, input, d.storage, sink)
