@@ -110,16 +110,22 @@ func TestConfig(t *testing.T) {
 					demoService.AddMessage(testConversation, testSender, input.Input)
 					demoService.Run()
 					for _, expect := range input.Expect {
-						resultMessage, _ := demoSender.PopMessage()
-						results = append(results, resultMessage)
-						if !MessageInList(resultMessage, expect) {
-							t.Errorf("Failed on msg: %s", input.Input)
-							msg, _ := json.Marshal(resultMessage)
-							t.Log(string(msg))
-							msgExpect, _ := json.Marshal(expect)
-							t.Log(string(msgExpect))
+						if demoSender.IsEmpty() {
+							t.Errorf("No responses on msg: %s", input.Input)
 							t.Fail()
+						} else {
+							resultMessage, _ := demoSender.PopMessage()
+							results = append(results, resultMessage)
+							if !MessageInList(resultMessage, expect) {
+								t.Errorf("Failed on msg: %s", input.Input)
+								msg, _ := json.Marshal(resultMessage)
+								t.Log(string(msg))
+								msgExpect, _ := json.Marshal(expect)
+								t.Log(string(msgExpect))
+								t.Fail()
+							}
 						}
+
 					}
 					if demoSender.IsEmpty() == false {
 						t.Errorf("Too many responses from: %s", input.Input)
