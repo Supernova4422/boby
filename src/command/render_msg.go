@@ -3,6 +3,7 @@ package command
 import (
 	"image"
 	"image/color"
+	"image/draw"
 	"image/png"
 	"io/ioutil"
 	"os"
@@ -11,67 +12,69 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
-
-	"golang.org/x/image/math/fixed"
 )
 
-// TODO Error handling.
+func renderText(text string) (draw.Image, error) {
+	content, err := ioutil.ReadFile("Quivira.otf")
+	if err != nil {
+		return nil, err
+	}
+
+	f, err := opentype.Parse(content)
+	if err != nil {
+		return nil, err
+	}
+
+	face, err := opentype.NewFace(f, &opentype.FaceOptions{
+		Size:    20,
+		DPI:     72,
+		Hinting: font.HintingNone,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	d := &font.Drawer{
+		Src:  image.NewUniform(color.RGBA{255, 255, 255, 255}),
+		Face: face,
+	}
+
+	// Draw it to get the width needed for the image, then redo it.
+	bound, _ := d.BoundString(text)
+	d.Dst = image.NewGray(image.Rect(
+		bound.Min.X.Floor(),
+		bound.Min.Y.Floor(),
+		bound.Max.X.Ceil(),
+		bound.Max.Y.Ceil()),
+	)
+	d.DrawString(text)
+
+	return d.Dst, nil
+}
+
 func RenderText(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 	if len(msg) == 0 {
 		return
 	}
 
-	content, err := ioutil.ReadFile("Quivira.otf")
+	image, err := renderText(msg[0].(string))
 	if err != nil {
-		panic(err)
+		sink(sender, service.Message{Title: "An error has occured"})
+	} else {
+		file, err := os.Create("hello-go.png")
+		if err != nil {
+			panic(err)
+		}
+
+		defer file.Close()
+		if err := png.Encode(file, image); err != nil {
+			panic(err)
+		}
+
+		sink(
+			sender, service.Message{
+				Title: "Message received.",
+			},
+		)
 	}
-
-	f, err := opentype.Parse(content)
-	if err != nil {
-		panic(err)
-	}
-
-	face, err := opentype.NewFace(f, &opentype.FaceOptions{
-		Size:    12,
-		DPI:     72,
-		Hinting: font.HintingNone,
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	margin := 20 * 64
-	margins := fixed.Point26_6{
-		X: fixed.Int26_6(margin), // Used to be 20
-		Y: fixed.Int26_6(margin), // used to be 30
-	}
-
-	d := &font.Drawer{
-		Dst:  image.NewRGBA(image.Rect(0, 0, 300, 300)),
-		Src:  image.NewUniform(color.RGBA{0, 0, 0, 255}),
-		Face: face,
-		Dot:  margins,
-	}
-
-	d.DrawString(msg[0].(string))
-
-	d.Dst = image.NewRGBA(image.Rect(0, 0, d.Dot.X.Ceil()+margin, d.Dot.Y.Ceil()+margin))
-	d.Dot = margins
-	d.DrawString(msg[0].(string))
-
-	file, err := os.Create("hello-go.png")
-	if err != nil {
-		panic(err)
-	}
-
-	defer file.Close()
-	if err := png.Encode(file, d.Dst); err != nil {
-		panic(err)
-	}
-
-	sink(
-		sender, service.Message{
-			Title: "Message received.",
-		},
-	)
 }
