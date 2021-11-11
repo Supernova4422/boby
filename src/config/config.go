@@ -209,7 +209,7 @@ func ConfiguredBot(configDir string, storage *storage.Storage) ([]command.Comman
 	}
 
 	// TODO: Helptext is hardcoded for discord, and is therefore a leaky abstraction.
-	render_cmd := command.Command{
+	renderCmd := command.Command{
 		Trigger: "render",
 		Parameters: []command.Parameter{{
 			Type:        "string",
@@ -220,7 +220,7 @@ func ConfiguredBot(configDir string, storage *storage.Storage) ([]command.Comman
 		HelpInput: "input help",
 		Exec:      command.RenderText,
 	}
-	commands = append(commands, render_cmd)
+	commands = append(commands, renderCmd)
 
 	return commands, nil
 }

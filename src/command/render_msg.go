@@ -51,6 +51,7 @@ func renderText(face font.Face, text string) (draw.Image, error) {
 	return d.Dst, nil
 }
 
+// RenderText renders a message as an image then replies with the image.
 func RenderText(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 	if len(msg) == 0 {
 		return

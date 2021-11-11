@@ -246,6 +246,7 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 	}
 }
 
+// SendImage sends an embed with an image to channelID.“
 func (d *DiscordSubject) SendImage(image draw.Image, channelID string, s *discordgo.Session, embed *discordgo.MessageEmbed) {
 	var buffer bytes.Buffer
 	err := png.Encode(&buffer, image)
