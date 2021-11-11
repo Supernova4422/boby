@@ -4,9 +4,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"image/png"
 	"io/ioutil"
-	"os"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
@@ -14,7 +12,7 @@ import (
 	"golang.org/x/image/font/opentype"
 )
 
-func renderText(text string) (draw.Image, error) {
+func getFont() (font.Face, error) {
 	content, err := ioutil.ReadFile("Quivira.otf")
 	if err != nil {
 		return nil, err
@@ -30,10 +28,11 @@ func renderText(text string) (draw.Image, error) {
 		DPI:     72,
 		Hinting: font.HintingNone,
 	})
-	if err != nil {
-		return nil, err
-	}
 
+	return face, err
+}
+
+func renderText(face font.Face, text string) (draw.Image, error) {
 	d := &font.Drawer{
 		Src:  image.NewUniform(color.RGBA{255, 255, 255, 255}),
 		Face: face,
@@ -57,23 +56,19 @@ func RenderText(sender service.Conversation, user service.User, msg []interface{
 		return
 	}
 
-	image, err := renderText(msg[0].(string))
+	face, err := getFont()
+	if err != nil {
+		return
+	}
+
+	image, err := renderText(face, msg[0].(string))
 	if err != nil {
 		sink(sender, service.Message{Title: "An error has occured"})
 	} else {
-		file, err := os.Create("hello-go.png")
-		if err != nil {
-			panic(err)
-		}
-
-		defer file.Close()
-		if err := png.Encode(file, image); err != nil {
-			panic(err)
-		}
-
 		sink(
 			sender, service.Message{
-				Title: "Message received.",
+				Title: "Rendered text.",
+				Image: image,
 			},
 		)
 	}
