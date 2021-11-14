@@ -21,8 +21,8 @@ RUN go build -o ${binary_filepath} ${binary_dir}
 
 RUN apt-get -y update
 RUN apt-get -y install gdebi wget
-ARG wkhtmltox=https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb
-# ARG wkhtmltox=https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.raspberrypi.buster_armhf.deb
+# ARG wkhtmltox=https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb
+ARG wkhtmltox=https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.raspberrypi.buster_armhf.deb
 RUN wget -O wkhtmltox.deb ${wkhtmltox}
 RUN gdebi --n wkhtmltox.deb
 
