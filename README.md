@@ -30,7 +30,7 @@ For properly understanding configuration files, make sure to view the files:
 2. [json_sender](https://github.com/BKrajancic/boby/blob/main/src/command/json_sender.go)
 3. [regexp_scraper](https://github.com/BKrajancic/boby/blob/main/src/command/regexp_scraper.go)
 
-Any of these files can be ignored by replacing their contents with `[]`.
+Any of these files can be ignored by replacing its contents with `[]`.
 
 Feel free to send a message if you are having issues running the bot. Unfortunately, this isn't an easy bot to configure.
 
