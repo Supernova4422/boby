@@ -19,7 +19,7 @@ func TestRenderText(t *testing.T) {
 	renderText(face, "hello world")
 }
 
-func TestMsgSend(t *testing.T) {
+func DontTestMsgSend(t *testing.T) {
 	demoSender := demoservice.DemoSender{
 		ServiceID: "0",
 	}
