@@ -1,19 +1,23 @@
 package command
 
 import (
+	"bytes"
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
 	"io/ioutil"
+	"log"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
+	"github.com/ninetwentyfour/go-wkhtmltoimage"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
 
 func getFont() (font.Face, error) {
-	content, err := ioutil.ReadFile("Quivira.otf")
+	content, err := ioutil.ReadFile("noto kufi arabic.ttf")
 	if err != nil {
 		return nil, err
 	}
@@ -57,12 +61,26 @@ func RenderText(sender service.Conversation, user service.User, msg []interface{
 		return
 	}
 
-	face, err := getFont()
+	html := `<!DOCTYPE html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-16">
+<html>
+    <body>
+        <p>%s</p>
+    </body>
+</html>
+`
+	options := wkhtmltoimage.ImageOptions{
+		BinaryPath: "/usr/local/bin/wkhtmltoimage",
+		Input:      "-",
+		Format:     "png",
+		Html:       fmt.Sprintf(html, msg[0].(string)),
+	}
+	out, err := wkhtmltoimage.GenerateImage(&options)
 	if err != nil {
-		return
+		log.Fatal(err)
 	}
 
-	image, err := renderText(face, msg[0].(string))
+	image, _, err := image.Decode(bytes.NewReader(out))
 	if err != nil {
 		sink(sender, service.Message{Title: "An error has occured"})
 	} else {

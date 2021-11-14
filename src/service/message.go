@@ -1,6 +1,6 @@
 package service
 
-import "image/draw"
+import "image"
 
 // A Message is sent using a Sender.
 type Message struct {
@@ -8,7 +8,7 @@ type Message struct {
 	Title       string
 	Description string
 	Fields      []MessageField
-	Image       draw.Image
+	Image       image.Image
 }
 
 // A MessageField stores a field and value pair.
