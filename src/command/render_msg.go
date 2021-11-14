@@ -59,22 +59,22 @@ func RenderText(sender service.Conversation, user service.User, msg []interface{
 		log.Fatal(err)
 	}
 
-	break_now := false
+	breakNow := false
 	img, _, err := image.Decode(bytes.NewReader(out))
 	for x := img.Bounds().Max.X - 1; x > img.Bounds().Min.X; x-- {
 		for y := img.Bounds().Max.Y - 1; y > img.Bounds().Min.Y; y-- {
 			col := img.At(x, y)
 			r, g, b, a := col.RGBA()
 			if r != 65535 || g != 65535 || b != 65535 || a != 65535 {
-				new_box := image.Rect(img.Bounds().Min.X, img.Bounds().Min.Y, x+5, img.Bounds().Max.Y)
-				m := image.NewRGBA(new_box)
-				draw.Draw(m, new_box, img, image.Pt(0, 0), draw.Src)
+				newBox := image.Rect(img.Bounds().Min.X, img.Bounds().Min.Y, x+5, img.Bounds().Max.Y)
+				m := image.NewRGBA(newBox)
+				draw.Draw(m, newBox, img, image.Pt(0, 0), draw.Src)
 				img = m
-				break_now = true
+				breakNow = true
 				break
 			}
 		}
-		if break_now {
+		if breakNow {
 			break
 		}
 	}
