@@ -6,35 +6,13 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"io/ioutil"
 	"log"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 	"github.com/ninetwentyfour/go-wkhtmltoimage"
 	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
 )
-
-func getFont() (font.Face, error) {
-	content, err := ioutil.ReadFile("noto kufi arabic.ttf")
-	if err != nil {
-		return nil, err
-	}
-
-	f, err := opentype.Parse(content)
-	if err != nil {
-		return nil, err
-	}
-
-	face, err := opentype.NewFace(f, &opentype.FaceOptions{
-		Size:    20,
-		DPI:     72,
-		Hinting: font.HintingNone,
-	})
-
-	return face, err
-}
 
 func renderText(face font.Face, text string) (draw.Image, error) {
 	d := &font.Drawer{
@@ -69,6 +47,7 @@ func RenderText(sender service.Conversation, user service.User, msg []interface{
     </body>
 </html>
 `
+	// TODO ENSURE wkhtmltoimage exists!
 	options := wkhtmltoimage.ImageOptions{
 		BinaryPath: "/usr/local/bin/wkhtmltoimage",
 		Input:      "-",
@@ -80,14 +59,32 @@ func RenderText(sender service.Conversation, user service.User, msg []interface{
 		log.Fatal(err)
 	}
 
-	image, _, err := image.Decode(bytes.NewReader(out))
+	break_now := false
+	img, _, err := image.Decode(bytes.NewReader(out))
+	for x := img.Bounds().Max.X - 1; x > img.Bounds().Min.X; x-- {
+		for y := img.Bounds().Max.Y - 1; y > img.Bounds().Min.Y; y-- {
+			col := img.At(x, y)
+			r, g, b, a := col.RGBA()
+			if r != 65535 || g != 65535 || b != 65535 || a != 65535 {
+				new_box := image.Rect(img.Bounds().Min.X, img.Bounds().Min.Y, x+5, img.Bounds().Max.Y)
+				m := image.NewRGBA(new_box)
+				draw.Draw(m, new_box, img, image.Pt(0, 0), draw.Src)
+				img = m
+				break_now = true
+				break
+			}
+		}
+		if break_now {
+			break
+		}
+	}
 	if err != nil {
 		sink(sender, service.Message{Title: "An error has occured"})
 	} else {
 		sink(
 			sender, service.Message{
 				Title: "Rendered text.",
-				Image: image,
+				Image: img,
 			},
 		)
 	}
