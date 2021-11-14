@@ -3,6 +3,7 @@ package command
 import (
 	"bytes"
 	"fmt"
+	"html"
 	"image"
 	"image/color"
 	"image/draw"
@@ -39,7 +40,7 @@ func RenderText(sender service.Conversation, user service.User, msg []interface{
 		return
 	}
 
-	html := `<!DOCTYPE html>
+	template := `<!DOCTYPE html>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-16">
 <html>
     <body>
@@ -52,7 +53,7 @@ func RenderText(sender service.Conversation, user service.User, msg []interface{
 		BinaryPath: "/usr/local/bin/wkhtmltoimage",
 		Input:      "-",
 		Format:     "png",
-		Html:       fmt.Sprintf(html, msg[0].(string)),
+		Html:       fmt.Sprintf(template, html.EscapeString(msg[0].(string))),
 	}
 	out, err := wkhtmltoimage.GenerateImage(&options)
 	if err != nil {
