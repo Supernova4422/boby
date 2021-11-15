@@ -1,7 +1,10 @@
 package discordservice
 
 import (
+	"bytes"
 	"fmt"
+	"image"
+	"image/png"
 	"log"
 	"strconv"
 	"strings"
@@ -221,6 +224,9 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 		}
 		appID := d.discord.State.User.ID
 		s.InteractionResponseEdit(appID, i.Interaction, &response)
+		if msg.Image != nil {
+			d.SendImage(msg.Image, i.ChannelID, s, &discordgo.MessageEmbed{})
+		}
 	}
 
 	target := i.Data.Name
@@ -231,9 +237,41 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 			})
 
 			d.observers[j].Exec(conversation, user, input, d.storage, sink)
+
+			if len(*embeds) == 0 {
+				s.InteractionResponseDelete(d.discord.State.User.ID, i.Interaction)
+			}
 			break
 		}
 	}
+}
+
+// SendImage sends an embed with an image to channelID.“
+func (d *DiscordSubject) SendImage(image image.Image, channelID string, s *discordgo.Session, embed *discordgo.MessageEmbed) {
+	var buffer bytes.Buffer
+	err := png.Encode(&buffer, image)
+	if err != nil {
+		panic(err)
+	}
+
+	filename := "filename.png"
+	embed.Image = &discordgo.MessageEmbedImage{
+		URL: "attachment://" + filename,
+	}
+
+	s.ChannelMessageSendComplex(
+		channelID,
+		&discordgo.MessageSend{
+			Embed: embed,
+			Files: []*discordgo.File{
+				{
+					Name:        filename,
+					Reader:      &buffer,
+					ContentType: "image/png",
+				},
+			},
+		},
+	)
 }
 
 func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
@@ -290,7 +328,11 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 			Text: "Requested by " + m.Author.Username + ": " + m.Content,
 		}
 
-		d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
+		if msg.Image != nil {
+			d.SendImage(msg.Image, destination.ConversationID, s, &embed)
+		} else {
+			d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
+		}
 	}
 
 	inputSplit := strings.Split(m.Content, " ")
