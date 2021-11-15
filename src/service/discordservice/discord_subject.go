@@ -205,7 +205,13 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 		ServiceID: d.ID(),
 	}
 	input := []interface{}{}
-	footerText := "Requested by " + i.Member.Nick + ": /" + i.Data.Name
+	nick := ""
+	if i.Member == nil {
+		nick = i.User.Username
+	} else {
+		nick = i.Member.Nick
+	}
+	footerText := "Requested by " + nick + ": /" + i.Data.Name
 	for _, val := range i.Data.Options {
 		input = append(input, val.Value)
 		footerText += " " + val.StringValue()
