@@ -2,6 +2,7 @@
 import subprocess
 import pathlib
 import argparse
+import random
 
 # By appending "|| true" execution is allowed to continue even when 0 isn't returned.
 
@@ -24,10 +25,18 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     name = args.name
-    tag = "latest"
+    tag = str(random.randint(0, 99999))
     mount_src = args.mount.absolute()
     mount_dest = "/config"
     project_path = pathlib.Path(pathlib.Path(__file__).parent).absolute()
+
+    subprocess.run(
+        args=[
+            "docker", "build",
+            "-t", "{}:{}".format(name, tag),
+            "-f", "dockerfile", str(project_path)],
+        check=True
+    )
 
     subprocess.run(
         args=["docker", "stop", name],
@@ -39,18 +48,23 @@ if __name__ == "__main__":
         check=False
     )
 
-    subprocess.run(
-        args=["docker", "rmi", "{}:{}".format(name, tag)],
-        check=False
+    out = subprocess.run(
+        args=[
+            "docker", "images", name,
+            "--no-trunc",
+            "--filter", "before={}:{}".format(name, tag),
+            "--format", "{{.Tag}}"
+        ],
+        check=False,
+        stdout=subprocess.PIPE
     )
 
-    subprocess.run(
-        args=[
-            "docker", "build",
-            "-t", "{}:{}".format(name, tag),
-            "-f", "dockerfile", str(project_path)],
-        check=True
-    )
+    other_tags = out.stdout.decode().splitlines()
+    for other_tag in other_tags:
+        subprocess.run(
+            args=["docker", "rmi", "{}:{}".format(name, other_tag)],
+            check=False
+        )
 
     subprocess.run(
         args=[
@@ -62,3 +76,4 @@ if __name__ == "__main__":
             "-d", "{}:{}".format(name, tag)],
         check=True
     )
+
