@@ -22,5 +22,15 @@ RUN go build -o ${binary_filepath} ${binary_dir}
 RUN apt-get -y update
 RUN apt-get -y install inkscape
 
+RUN apt-get -y install logrotate
+
+RUN echo '"/config/logging/logging.log" {\n\
+    copytruncate \n\
+    maxage 30 \n\
+    compress \n\
+    delaycompress \n\
+    rotate 3 \n\
+    size 500M \n\
+} \n' > "/etc/logrotate.conf"
 
 CMD $binary_filepath "$config_path"
