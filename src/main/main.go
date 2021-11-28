@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"path/filepath"
 
 	"log"
 	"syscall"
@@ -18,12 +19,6 @@ import (
 )
 
 func main() {
-	f, err := os.OpenFile("logging.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("error opening file: %v", err)
-	}
-	defer f.Close()
-	log.SetOutput(f)
 
 	exampleDir := "example"
 	if len(os.Args) == 1 {
@@ -32,10 +27,25 @@ func main() {
 	}
 
 	folder := os.Args[1]
-	_, err = os.Stat(folder)
+	_, err := os.Stat(folder)
 	if os.IsNotExist(err) {
-		panic(err)
+		log.Panic(err)
 	}
+
+	loggingDir := filepath.Join(folder, "logging")
+	_, err = os.Stat(loggingDir)
+	if err != nil && os.IsNotExist(err) {
+		os.MkdirAll(loggingDir, 0755)
+	}
+
+	f, err := os.OpenFile(filepath.Join(loggingDir, "logging.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer f.Close()
+	log.SetOutput(f)
+
+	log.Println("Successfully setup logging to file.")
 
 	storage, err := loadGobStorage(path.Join(folder, "storage.gob"))
 	if err != nil {
