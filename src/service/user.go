@@ -8,6 +8,7 @@ type User struct {
 	ServiceID string
 }
 
+// ToString makes a string representation.
 func (u *User) ToString() string {
 	return fmt.Sprintf("%s,%s", u.Name, u.ServiceID)
 }

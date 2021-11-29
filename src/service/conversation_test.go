@@ -16,3 +16,8 @@ func TestConversationToGuild(t *testing.T) {
 		t.Fail()
 	}
 }
+func TestToString(t *testing.T) {
+	conversation := Conversation{}
+	conversation.ToString()
+	// Don't care about output, just don't want a crash.
+}

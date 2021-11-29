@@ -30,19 +30,19 @@ func (t *TempStorage) GetGuildValue(guild service.Guild, key string) (interface{
 	defer t.mutex.Unlock()
 
 	serviceMap, ok := t.GuildValues[guild.ServiceID]
-	if ok == false {
+	if !ok {
 		val, ok := t.DefaultGuildValues[key]
 		return val, ok
 	}
 
 	keyMap, ok := serviceMap[guild.GuildID]
-	if ok == false {
+	if !ok {
 		val, ok := t.DefaultGuildValues[key]
 		return val, ok
 	}
 
 	val, ok := keyMap[key]
-	if ok == false {
+	if !ok {
 		val, ok := t.DefaultGuildValues[key]
 		return val, ok
 	}

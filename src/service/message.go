@@ -26,6 +26,7 @@ func (m *MessageField) toString() string {
 	return fmt.Sprintf("%s,%s,%s,%v", m.Field, m.Value, m.URL, m.Inline)
 }
 
+// ToString makes a string representation of this message.
 func (m *Message) ToString() string {
 	fieldsString := ""
 	for i, field := range m.Fields {
