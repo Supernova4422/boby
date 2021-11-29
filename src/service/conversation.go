@@ -1,5 +1,7 @@
 package service
 
+import "fmt"
+
 // A Conversation is a place where things talk to each other.
 // This can be used to identify the source or destination of a message.
 //
@@ -19,4 +21,9 @@ func (c Conversation) Guild() Guild {
 		ServiceID: c.ServiceID,
 		GuildID:   c.GuildID,
 	}
+}
+
+// ToString returns a string representation
+func (c Conversation) ToString() string {
+	return fmt.Sprintf("%s,%s,%s,%v", c.ServiceID, c.ConversationID, c.GuildID, c.Admin)
 }

@@ -56,10 +56,10 @@ func (d *DiscordSubject) updateGuildCommands(guildID string) {
 				)
 				if err == nil {
 					found = true
-					log.Printf("Skipping already existing slash command for guild '%s': %s", guildID, err)
+					log.Printf("Skipping already existing slash command for guild '%s': %s", guildID, cmd.Trigger)
 					break
 				} else {
-					log.Printf("Error with slash command for guild '%s': %s", guildID, err)
+					log.Printf("Error with slash command %s for guild '%s': %s", cmd.Trigger, guildID, err)
 				}
 			}
 		}
@@ -212,14 +212,19 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 		nick = i.Member.Nick
 	}
 	footerText := "Requested by " + nick + ": /" + i.Data.Name
+	msgAsString := ""
 	for _, val := range i.Data.Options {
 		input = append(input, val.Value)
-		footerText += " " + val.StringValue()
+		msgAsString += " " + val.StringValue()
 	}
+
+	footerText += msgAsString
 
 	embeds := &([]*discordgo.MessageEmbed{})
 
 	sink := func(conversation service.Conversation, msg service.Message) {
+		log.Println(fmt.Sprintf("/ Response,%s,%s", conversation.ToString(), msg.ToString()))
+
 		embed := MsgToEmbed(msg)
 		embed.Footer = &discordgo.MessageEmbedFooter{Text: footerText}
 		currEmbeds := append(*embeds, &embed)
@@ -242,6 +247,7 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 			})
 
+			log.Printf("/ Command,%s,%s,/%s %s", conversation.ToString(), user.ToString(), i.Data.Name, msgAsString)
 			d.observers[j].Exec(conversation, user, input, d.storage, sink)
 
 			if len(*embeds) == 0 {
@@ -257,7 +263,7 @@ func (d *DiscordSubject) SendImage(image image.Image, channelID string, s *disco
 	var buffer bytes.Buffer
 	err := png.Encode(&buffer, image)
 	if err != nil {
-		panic(err)
+		log.Fatalf("error when processing image %s", err)
 	}
 
 	filename := "filename.png"
@@ -303,6 +309,8 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 	}
 
 	sink := func(destination service.Conversation, msg service.Message) {
+		log.Printf("Prefix response,%s", msg.ToString())
+
 		fields := make([]*discordgo.MessageEmbedField, 0)
 		for _, field := range msg.Fields {
 			value := field.Value
@@ -364,6 +372,8 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 				log.Printf("error when parsing input: %s", err)
 				return
 			}
+
+			log.Printf("Prefix command,%s,%s", conversation.ToString(), m.Content)
 
 			d.observers[j].Exec(conversation, user, input, d.storage, sink)
 		}
