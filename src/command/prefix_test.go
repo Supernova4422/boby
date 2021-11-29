@@ -194,6 +194,12 @@ func TestIgnoreSetPrefix(t *testing.T) {
 	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s %s", prefix2, testCmd, testMsg))
 	demoServiceSubject.AddMessage(testConversation, testSender, fmt.Sprintf("%s%s %s", prefix0, testCmd, testMsg))
 	demoServiceSubject.Run()
+
+	resultMessage, _ = demoSender.PopMessage()
+	if resultMessage.Description != "Command failed because you are not an admin." {
+		t.Errorf("Message was different!")
+	}
+
 	if demoSender.IsEmpty() == false {
 		t.Errorf("There are extra messages")
 	}
