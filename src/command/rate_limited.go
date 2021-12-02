@@ -70,14 +70,14 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 			if val, ok := (*storage).GetGlobalValue(r.ID); ok {
 				history, ok = val.([]int64)
 				if !ok {
-					log.Fatal("interface type wasn't usable")
+					log.Panic("interface type wasn't usable")
 				}
 			}
 		} else {
 			if val, ok := (*storage).GetUserValue(user, r.ID); ok {
 				history, ok = val.([]int64)
 				if !ok {
-					log.Fatal("interface type wasn't usable")
+					log.Panic("interface type wasn't usable")
 				}
 			}
 		}
