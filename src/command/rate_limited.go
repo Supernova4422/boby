@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 	"time"
@@ -16,6 +17,7 @@ type RateLimitConfig struct {
 	SecondsPerInterval int64  // How long is an interval, in seconds.
 	Body               string // Reply when limit is reached.
 	ID                 string // An ID used for storage purposes.
+	Global             bool
 }
 
 // rateLimited returns true if a message should be rate limited.
@@ -64,10 +66,19 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 		now := time.Now().Unix()
 		history := []int64{}
 
-		if val, ok := (*storage).GetUserValue(user, r.ID); ok {
-			history, ok = val.([]int64)
-			if !ok {
-				panic(fmt.Errorf("interface type wasn't usable"))
+		if r.Global {
+			if val, ok := (*storage).GetGlobalValue(r.ID); ok {
+				history, ok = val.([]int64)
+				if !ok {
+					log.Fatal("interface type wasn't usable")
+				}
+			}
+		} else {
+			if val, ok := (*storage).GetUserValue(user, r.ID); ok {
+				history, ok = val.([]int64)
+				if !ok {
+					log.Fatal("interface type wasn't usable")
+				}
 			}
 		}
 
@@ -94,7 +105,11 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 				},
 			)
 		} else {
-			(*storage).SetUserValue(user, r.ID, append(history, now))
+			if r.Global {
+				(*storage).SetGlobalValue(r.ID, append(history, now))
+			} else {
+				(*storage).SetUserValue(user, r.ID, append(history, now))
+			}
 			command.Exec(sender, user, msg, storage, sink)
 		}
 	}

@@ -15,6 +15,7 @@ type TempStorage struct {
 	DefaultUserValues  map[string]interface{}
 	GuildValues        map[string]map[string]map[string]interface{}
 	DefaultGuildValues map[string]interface{}
+	GlobalValues       map[string]interface{}
 	mutex              *sync.Mutex
 }
 
@@ -184,4 +185,19 @@ func (t *TempStorage) UnsetAdmin(guild service.Guild, ID string) {
 		}
 	}
 	t.SetGuildValue(guild, AdminKey, newAdmins)
+}
+
+// SetGlobalValue sets a value that applies to globally.
+func (t *TempStorage) SetGlobalValue(key string, value interface{}) {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+	t.GlobalValues[key] = value
+}
+
+// GetGlobalValue sets a value that applies to globally.
+func (t *TempStorage) GetGlobalValue(key string) (interface{}, bool) {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+	keyMap, ok := t.GlobalValues[key]
+	return keyMap, ok
 }

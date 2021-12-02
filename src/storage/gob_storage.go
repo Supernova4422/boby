@@ -129,3 +129,17 @@ func (g *GobStorage) UnsetAdmin(guild service.Guild, userID string) {
 	g.TempStorage.UnsetAdmin(guild, userID)
 	g.SaveToFile()
 }
+
+// SetGlobalValue sets a value that applies to globally.
+func (g *GobStorage) SetGlobalValue(key string, value interface{}) {
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+	g.TempStorage.SetGlobalValue(key, value)
+}
+
+// GetGlobalValue sets a value that applies to globally.
+func (g *GobStorage) GetGlobalValue(key string) (interface{}, bool) {
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+	return g.TempStorage.GetGlobalValue(key)
+}

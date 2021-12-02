@@ -16,6 +16,7 @@ import (
 const jsonFilepath = "json_getter_config.json"
 const regexpFilepath = "regexp_scraper_config.json"
 const goqueryFilepath = "goquery_scraper_config.json"
+const oxfordFilepath = "oxford_config.json"
 
 // MakeExampleDir makes an example folder with example config files.
 func MakeExampleDir(dir string) error {
@@ -202,6 +203,25 @@ func ConfiguredBot(configDir string, storage *storage.Storage) ([]command.Comman
 
 	for _, goqueryScraperConfig := range goqueryScraperConfigs {
 		scraperCommand, err := goqueryScraperConfig.Command()
+		if err != nil {
+			return commands, err
+		}
+		commands = append(commands, scraperCommand)
+	}
+
+	// Oxford
+	file, err = os.Open(path.Join(configDir, oxfordFilepath))
+	if err != nil {
+		return commands, err
+	}
+
+	oxfordConfigs, err := command.GetOxfordConfigs(bufio.NewReader(file))
+	if err != nil {
+		return commands, err
+	}
+
+	for _, oxfordConfig := range oxfordConfigs {
+		scraperCommand, err := oxfordConfig.Command()
 		if err != nil {
 			return commands, err
 		}
