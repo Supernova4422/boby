@@ -191,6 +191,11 @@ func (t *TempStorage) UnsetAdmin(guild service.Guild, ID string) {
 func (t *TempStorage) SetGlobalValue(key string, value interface{}) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
+
+	if t.GlobalValues == nil {
+		t.GlobalValues = make(map[string]interface{})
+	}
+
 	t.GlobalValues[key] = value
 }
 
@@ -198,6 +203,11 @@ func (t *TempStorage) SetGlobalValue(key string, value interface{}) {
 func (t *TempStorage) GetGlobalValue(key string) (interface{}, bool) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
+
+	if t.GlobalValues == nil {
+		t.GlobalValues = make(map[string]interface{})
+	}
+
 	keyMap, ok := t.GlobalValues[key]
 	return keyMap, ok
 }

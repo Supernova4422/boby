@@ -204,3 +204,26 @@ func TestSetAdminDisaster(t *testing.T) {
 
 	storage.SetAdmin(guild, "Test")
 }
+
+func TestGetGlobalValueBeforeSet(t *testing.T) {
+	storage := TempStorage{mutex: &sync.Mutex{}}
+	_, ok := storage.GetGlobalValue("FAIL")
+	if ok {
+		t.Fail()
+	}
+}
+
+func TestGetGlobalValueSetandGet(t *testing.T) {
+	storage := TempStorage{mutex: &sync.Mutex{}}
+	key := "key"
+	value := "value"
+	storage.SetGlobalValue(key, value)
+	result, ok := storage.GetGlobalValue(key)
+	if !ok {
+		t.Fail()
+	}
+
+	if value != result {
+		t.Fail()
+	}
+}
