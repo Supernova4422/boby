@@ -169,7 +169,8 @@ func ConfiguredBot(configDir string, storage *storage.Storage) ([]command.Comman
 		if err != nil {
 			return commands, err
 		}
-		commands = append(commands, jsonGetter.RateLimit.GetRateLimitedCommand(command))
+		newCommand := jsonGetter.RateLimit.GetRateLimitedCommand(command)
+		commands = append(commands, newCommand)
 	}
 
 	// Get regex scraper.
@@ -221,11 +222,12 @@ func ConfiguredBot(configDir string, storage *storage.Storage) ([]command.Comman
 	}
 
 	for _, oxfordConfig := range oxfordConfigs {
-		scraperCommand, err := oxfordConfig.Command()
+		oxfordCommand, oxfordCommandInfo, err := oxfordConfig.Command()
 		if err != nil {
 			return commands, err
 		}
-		commands = append(commands, scraperCommand)
+		commands = append(commands, oxfordCommand)
+		commands = append(commands, oxfordCommandInfo)
 	}
 
 	// TODO: Helptext is hardcoded for discord, and is therefore a leaky abstraction.

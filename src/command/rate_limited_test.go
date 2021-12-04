@@ -58,12 +58,13 @@ func TestTimeRemaining(t *testing.T) {
 		TimesPerInterval:   2,
 	}
 
-	remaining := r.timeRemaining(10, history)
+	remaining := r.timeRemaining(20, history)
 	if remaining != 3 {
 		t.Fail()
 	}
 
-	if r.timeRemaining(20, history) != 0 {
+	timeRemaining := r.timeRemaining(20, history)
+	if timeRemaining != 0 {
 		t.Fail()
 	}
 }

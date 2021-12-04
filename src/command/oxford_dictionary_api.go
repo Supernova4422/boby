@@ -15,13 +15,17 @@ import (
 
 // OxfordDictionaryConfig can be turned into a scraper that uses GoQuery.
 type OxfordDictionaryConfig struct {
-	AppId          string
-	AppKey         string
-	Trigger        string
-	HelpText       string
-	HelpInput      string
-	SourceLanguage string
-	TargetLanguage string
+	AppId              string
+	AppKey             string
+	Trigger            string
+	HelpText           string
+	HelpInput          string
+	SourceLanguage     string
+	TargetLanguage     string
+	TimesPerInterval   int
+	SecondsPerInterval int
+	Body               string
+	ID                 string
 }
 
 // GetOxfordConfigs retrieves an array of OxfordDictionaryConfig by parsing JSON from a buffer.
@@ -36,7 +40,7 @@ func GetOxfordConfigs(reader io.Reader) ([]OxfordDictionaryConfig, error) {
 	return config, json.Unmarshal(bytes, &config)
 }
 
-func (o *OxfordDictionaryConfig) Command() (Command, error) {
+func (o *OxfordDictionaryConfig) Command() (Command, Command, error) {
 	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 		url := fmt.Sprintf("https://od-api.oxforddictionaries.com/api/v2/translations/%s/%s/%s?strictMatch=false", o.SourceLanguage, o.TargetLanguage, url.PathEscape(msg[0].(string)))
 		req, err := http.NewRequest("GET", url, nil)
@@ -134,16 +138,16 @@ func (o *OxfordDictionaryConfig) Command() (Command, error) {
 	}
 
 	config := RateLimitConfig{
-		// TimesPerInterval:   1000 / 30,
-		// SecondsPerInterval: 60 * 60 * 24,
-		TimesPerInterval:   2,
-		SecondsPerInterval: 60,
-		Body:               "Please wait",
-		ID:                 "OXFORD_" + cmd.Trigger,
+		TimesPerInterval:   o.TimesPerInterval,
+		SecondsPerInterval: int64(o.SecondsPerInterval),
+		Body:               o.Body,
+		ID:                 o.ID,
 		Global:             true,
 	}
 
-	return config.GetRateLimitedCommand(cmd), nil
+	actual := config.GetRateLimitedCommand(cmd)
+	info := config.GetRateLimitedCommandInfo(cmd)
+	return actual, info, nil
 }
 
 type ResponseStruct struct {

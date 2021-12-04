@@ -135,6 +135,7 @@ func (g *GobStorage) SetGlobalValue(key string, value interface{}) {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
 	g.TempStorage.SetGlobalValue(key, value)
+	g.SaveToFile()
 }
 
 // GetGlobalValue sets a value that applies to globally.
