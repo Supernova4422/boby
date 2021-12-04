@@ -14,6 +14,8 @@ The primary implementation of this bot is known as FLD-Bot, which has been added
 1. Filipino learning and discussion
 2. Tagalog.com
 
+And more!
+
 # Getting Started
 To use to this project, the only required software is a working go environment. For installation instructions, see [this page.](https://golang.org/doc/install)
 
