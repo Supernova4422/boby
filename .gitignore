@@ -1,2 +1,5 @@
 config.json
 dockerfile
+src/main/config/**
+.devcontainer/devcontainer.json
+.vscode/launch.json
