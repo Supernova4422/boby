@@ -15,7 +15,7 @@ import (
 
 // OxfordDictionaryConfig can be turned into a scraper that uses GoQuery.
 type OxfordDictionaryConfig struct {
-	AppId              string
+	AppID              string
 	AppKey             string
 	Trigger            string
 	HelpText           string
@@ -40,6 +40,8 @@ func GetOxfordConfigs(reader io.Reader) ([]OxfordDictionaryConfig, error) {
 	return config, json.Unmarshal(bytes, &config)
 }
 
+// Command returns a Command representation of this configuration.
+// This can be used to translate from a source language to a target language.
 func (o *OxfordDictionaryConfig) Command() (Command, Command, error) {
 	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 		url := fmt.Sprintf("https://od-api.oxforddictionaries.com/api/v2/translations/%s/%s/%s?strictMatch=false", o.SourceLanguage, o.TargetLanguage, url.PathEscape(msg[0].(string)))
@@ -55,7 +57,7 @@ func (o *OxfordDictionaryConfig) Command() (Command, Command, error) {
 			return
 		}
 
-		req.Header.Set("app_id", o.AppId)
+		req.Header.Set("app_id", o.AppID)
 		req.Header.Set("app_key", o.AppKey)
 		client := &http.Client{}
 		resp, err := client.Do(req)
@@ -148,73 +150,4 @@ func (o *OxfordDictionaryConfig) Command() (Command, Command, error) {
 	actual := config.GetRateLimitedCommand(cmd)
 	info := config.GetRateLimitedCommandInfo(cmd)
 	return actual, info, nil
-}
-
-type ResponseStruct struct {
-	ID       string `json:"id"`
-	Metadata struct {
-		Operation string `json:"operation"`
-		Provider  string `json:"provider"`
-		Schema    string `json:"schema"`
-	} `json:"metadata"`
-	Results []struct {
-		ID             string `json:"id"`
-		Language       string `json:"language"`
-		LexicalEntries []struct {
-			Entries []struct {
-				Etymologies    []string `json:"etymologies"`
-				Pronunciations []struct {
-					AudioFile        string   `json:"audioFile,omitempty"`
-					Dialects         []string `json:"dialects"`
-					PhoneticNotation string   `json:"phoneticNotation"`
-					PhoneticSpelling string   `json:"phoneticSpelling"`
-				} `json:"pronunciations"`
-				Senses []struct {
-					Definitions []string `json:"definitions"`
-					Examples    []struct {
-						Text string `json:"text"`
-					} `json:"examples"`
-					ID              string `json:"id"`
-					SemanticClasses []struct {
-						ID   string `json:"id"`
-						Text string `json:"text"`
-					} `json:"semanticClasses"`
-					ShortDefinitions []string `json:"shortDefinitions"`
-					Subsenses        []struct {
-						Definitions []string `json:"definitions"`
-						Examples    []struct {
-							Text string `json:"text"`
-						} `json:"examples"`
-						ID              string `json:"id"`
-						SemanticClasses []struct {
-							ID   string `json:"id"`
-							Text string `json:"text"`
-						} `json:"semanticClasses"`
-						ShortDefinitions []string `json:"shortDefinitions"`
-					} `json:"subsenses,omitempty"`
-					Synonyms []struct {
-						Language string `json:"language"`
-						Text     string `json:"text"`
-					} `json:"synonyms"`
-					ThesaurusLinks []struct {
-						EntryID string `json:"entry_id"`
-						SenseID string `json:"sense_id"`
-					} `json:"thesaurusLinks"`
-				} `json:"senses"`
-			} `json:"entries"`
-			Language        string `json:"language"`
-			LexicalCategory struct {
-				ID   string `json:"id"`
-				Text string `json:"text"`
-			} `json:"lexicalCategory"`
-			Phrases []struct {
-				ID   string `json:"id"`
-				Text string `json:"text"`
-			} `json:"phrases"`
-			Text string `json:"text"`
-		} `json:"lexicalEntries"`
-		Type string `json:"type"`
-		Word string `json:"word"`
-	} `json:"results"`
-	Word string `json:"word"`
 }

@@ -1,5 +1,6 @@
 package command
 
+// OxfordTranslateResponseStruct is the response from the Oxford Dictionary api when requesting a translation.
 type OxfordTranslateResponseStruct struct {
 	Metadata struct {
 	} `json:"metadata"`
