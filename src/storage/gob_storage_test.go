@@ -494,3 +494,50 @@ func TestGobTypeChange(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestGobGetGlobalValueBeforeSet(t *testing.T) {
+	bytesOut := bytes.NewBuffer([]byte{})
+	writer := TruncatableBuffer{bytesOut}
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
+		writer:      writer,
+		mutex:       &sync.Mutex{},
+	}
+	_, ok := storage.GetGlobalValue("FAIL")
+	if ok {
+		t.Fail()
+	}
+
+	// Assert nothing is done
+	storage, err := LoadFromBuffer(writer)
+	if err == nil {
+		t.Fail()
+	}
+}
+
+func TestGobGetGlobalValueSetandGet(t *testing.T) {
+	bytesOut := bytes.NewBuffer([]byte{})
+	writer := TruncatableBuffer{bytesOut}
+	storage := GobStorage{
+		TempStorage: GetTempStorage(),
+		mutex:       &sync.Mutex{},
+	}
+	storage.SetWriter(writer)
+
+	key := "key"
+	value := "value"
+	storage.SetGlobalValue(key, value)
+	result, ok := storage.GetGlobalValue(key)
+	if !ok || value != result {
+		t.Fail()
+	}
+
+	storage, err := LoadFromBuffer(writer)
+	if err != nil {
+		t.Fail()
+	}
+
+	if !ok || value != result {
+		t.Fail()
+	}
+}

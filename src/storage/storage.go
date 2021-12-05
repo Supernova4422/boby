@@ -17,4 +17,7 @@ type Storage interface {
 	IsAdmin(guild service.Guild, UserID string) bool
 	SetAdmin(guild service.Guild, UserID string)
 	UnsetAdmin(guild service.Guild, UserID string)
+
+	SetGlobalValue(key string, value interface{})
+	GetGlobalValue(key string) (interface{}, bool)
 }
