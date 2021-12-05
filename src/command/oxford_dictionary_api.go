@@ -86,7 +86,7 @@ func (o *OxfordDictionaryConfig) Command() (Command, Command, error) {
 			sink(sender, service.Message{
 				Title:       "Unable to find word",
 				Description: "Please check the spelling, and try again.",
-				URL:         "https://www.oxfordlearnersdictionaries.com/",
+				URL:         "https://languages.oup.com/",
 			})
 			return
 		}
@@ -123,7 +123,7 @@ func (o *OxfordDictionaryConfig) Command() (Command, Command, error) {
 		sink(sender, service.Message{
 			Title:       "Translation: " + msg[0].(string),
 			Description: val,
-			URL:         "https://www.oxfordlearnersdictionaries.com/",
+			URL:         "https://languages.oup.com/",
 		})
 	}
 
