@@ -109,7 +109,16 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 // the given command.
 func (r RateLimitConfig) GetRateLimitedCommandInfo(command Command) Command {
 	if r.SecondsPerInterval == 0 && r.TimesPerInterval == 0 {
-		return command
+		rateLimitedCommand := command
+		rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+			sink(
+				sender,
+				service.Message{
+					Title: "This command has unlimited usage.",
+				},
+			)
+		}
+		return rateLimitedCommand
 	}
 
 	command.Trigger = "info" + command.Trigger
@@ -144,7 +153,7 @@ func (r RateLimitConfig) GetRateLimitedCommandInfo(command Command) Command {
 }
 
 // GetRateLimitHistory returns the history of usages for this command by a user, according to storage.
-// 'now' refers to the current time, this is useful because subsequent calls need a relative time.
+// 'now' refers to the current time, this is in unix time with seconds precisionn.
 func (r RateLimitConfig) GetRateLimitHistory(storage *storage.Storage, user service.User) (now int64, history []int64) {
 	if r.Global {
 		if val, ok := (*storage).GetGlobalValue(r.ID); ok {
@@ -162,12 +171,13 @@ func (r RateLimitConfig) GetRateLimitHistory(storage *storage.Storage, user serv
 		}
 	}
 
+	now = time.Now().Unix()
 	return now, history
 }
 
 func (r RateLimitConfig) timeRemainingToString(remaining time.Duration) string {
 	var countdown string
-	if remaining.Hours() > 24 {
+	if remaining.Hours() >= 24 {
 		countdown = fmt.Sprintf("%.2f Days", math.Ceil(remaining.Hours()/24))
 	} else if remaining.Hours() >= 1 {
 		countdown = fmt.Sprintf("%.2f Hours", math.Ceil(remaining.Hours()))

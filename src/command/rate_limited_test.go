@@ -435,6 +435,20 @@ func TestRateLimitedUseless(t *testing.T) {
 	if replyCommand.Help != rateLimitedCommand.Help {
 		t.Fail()
 	}
+
+	rateLimitedCommandInfo := rateLimitConfig.GetRateLimitedCommandInfo(replyCommand)
+	demoSender := demoservice.DemoSender{}
+	tempStorage := storage.GetTempStorage()
+	var _storage storage.Storage = &tempStorage
+	rateLimitedCommandInfo.Exec(
+		service.Conversation{}, service.User{},
+		[]interface{}{"string"}, &_storage, demoSender.SendMessage,
+	)
+
+	resultMessage, _ := demoSender.PopMessage()
+	if resultMessage.Title != "This command has unlimited usage." {
+		t.Fail()
+	}
 }
 
 func TestRateLimitedNotUseless(t *testing.T) {
@@ -595,6 +609,250 @@ func TestRateLimitedCommandGlobal(t *testing.T) {
 	// Since this is a global command, a good user also gets punished.
 	resultMessage, _ = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, limitMsg) {
+		t.Fail()
+	}
+}
+
+func TestRateLimitedInfoCommandSecond(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+	// Message to repeat.
+	testConversation := service.Conversation{
+		ServiceID:      "0",
+		ConversationID: "0",
+	}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+	testCmd := "repeat"
+
+	replyCommand := Command{
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
+	}
+
+	limitMsg := "You hit the limit"
+	rateLimitConfig := RateLimitConfig{
+		TimesPerInterval:   1,
+		SecondsPerInterval: 1,
+		Body:               limitMsg,
+		ID:                 "cmd",
+	}
+
+	tempStorage := storage.GetTempStorage()
+	var _storage storage.Storage = &tempStorage
+
+	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
+	rateLimitedInfoCommand := rateLimitConfig.GetRateLimitedCommandInfo(replyCommand)
+	replyMsg := "Hello"
+	msg := []interface{}{replyMsg}
+
+	rateLimitedInfoCommand.Exec(
+		testConversation, testSender,
+		msg, &_storage, demoSender.SendMessage,
+	)
+	resultMessage, _ := demoSender.PopMessage()
+	if !strings.HasPrefix(resultMessage.Description, "0/1 per 1.00 Seconds remaining.") {
+		t.Fail()
+	}
+
+	for i := 0; i < 3; i++ {
+		rateLimitedCommand.Exec(
+			testConversation, testSender,
+			msg, &_storage, demoSender.SendMessage,
+		)
+		demoSender.PopMessage()
+	}
+
+	rateLimitedInfoCommand.Exec(
+		testConversation, testSender,
+		msg, &_storage, demoSender.SendMessage,
+	)
+
+	resultMessage, _ = demoSender.PopMessage()
+	if !strings.HasPrefix(resultMessage.Description, "1/1 per 1.00 Seconds remaining.") {
+		t.Fail()
+	}
+}
+
+func TestRateLimitedInfoCommandMinute(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+	// Message to repeat.
+	testConversation := service.Conversation{
+		ServiceID:      "0",
+		ConversationID: "0",
+	}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+	testCmd := "repeat"
+
+	replyCommand := Command{
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
+	}
+
+	limitMsg := "You hit the limit"
+	rateLimitConfig := RateLimitConfig{
+		TimesPerInterval:   1,
+		SecondsPerInterval: 60,
+		Body:               limitMsg,
+		ID:                 "cmd",
+	}
+
+	tempStorage := storage.GetTempStorage()
+	var _storage storage.Storage = &tempStorage
+
+	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
+	rateLimitedInfoCommand := rateLimitConfig.GetRateLimitedCommandInfo(replyCommand)
+	replyMsg := "Hello"
+	msg := []interface{}{replyMsg}
+
+	rateLimitedInfoCommand.Exec(
+		testConversation, testSender,
+		msg, &_storage, demoSender.SendMessage,
+	)
+	resultMessage, _ := demoSender.PopMessage()
+	if !strings.HasPrefix(resultMessage.Description, "0/1 per 1.00 Minutes remaining.") {
+		t.Fail()
+	}
+
+	for i := 0; i < 3; i++ {
+		rateLimitedCommand.Exec(
+			testConversation, testSender,
+			msg, &_storage, demoSender.SendMessage,
+		)
+		demoSender.PopMessage()
+	}
+
+	rateLimitedInfoCommand.Exec(
+		testConversation, testSender,
+		msg, &_storage, demoSender.SendMessage,
+	)
+
+	resultMessage, _ = demoSender.PopMessage()
+	if !strings.HasPrefix(resultMessage.Description, "1/1 per 1.00 Minutes remaining.") {
+		t.Fail()
+	}
+}
+
+func TestRateLimitedInfoCommandHour(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+	// Message to repeat.
+	testConversation := service.Conversation{
+		ServiceID:      "0",
+		ConversationID: "0",
+	}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+	testCmd := "repeat"
+
+	replyCommand := Command{
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
+	}
+
+	limitMsg := "You hit the limit"
+	rateLimitConfig := RateLimitConfig{
+		TimesPerInterval:   1,
+		SecondsPerInterval: 60 * 60,
+		Body:               limitMsg,
+		ID:                 "cmd",
+	}
+
+	tempStorage := storage.GetTempStorage()
+	var _storage storage.Storage = &tempStorage
+
+	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
+	rateLimitedInfoCommand := rateLimitConfig.GetRateLimitedCommandInfo(replyCommand)
+	replyMsg := "Hello"
+	msg := []interface{}{replyMsg}
+
+	rateLimitedInfoCommand.Exec(
+		testConversation, testSender,
+		msg, &_storage, demoSender.SendMessage,
+	)
+	resultMessage, _ := demoSender.PopMessage()
+	if !strings.HasPrefix(resultMessage.Description, "0/1 per 1.00 Hours remaining.") {
+		t.Fail()
+	}
+
+	for i := 0; i < 3; i++ {
+		rateLimitedCommand.Exec(
+			testConversation, testSender,
+			msg, &_storage, demoSender.SendMessage,
+		)
+		demoSender.PopMessage()
+	}
+
+	rateLimitedInfoCommand.Exec(
+		testConversation, testSender,
+		msg, &_storage, demoSender.SendMessage,
+	)
+
+	resultMessage, _ = demoSender.PopMessage()
+	if !strings.HasPrefix(resultMessage.Description, "1/1 per 1.00 Hours remaining.") {
+		t.Fail()
+	}
+}
+
+func TestRateLimitedInfoCommandDays(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+	// Message to repeat.
+	testConversation := service.Conversation{
+		ServiceID:      "0",
+		ConversationID: "0",
+	}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+	testCmd := "repeat"
+
+	replyCommand := Command{
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
+	}
+
+	limitMsg := "You hit the limit"
+	rateLimitConfig := RateLimitConfig{
+		TimesPerInterval:   1,
+		SecondsPerInterval: 60 * 60 * 24,
+		Body:               limitMsg,
+		ID:                 "cmd",
+	}
+
+	tempStorage := storage.GetTempStorage()
+	var _storage storage.Storage = &tempStorage
+
+	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
+	rateLimitedInfoCommand := rateLimitConfig.GetRateLimitedCommandInfo(replyCommand)
+	replyMsg := "Hello"
+	msg := []interface{}{replyMsg}
+
+	rateLimitedInfoCommand.Exec(
+		testConversation, testSender,
+		msg, &_storage, demoSender.SendMessage,
+	)
+	resultMessage, _ := demoSender.PopMessage()
+	if !strings.HasPrefix(resultMessage.Description, "0/1 per 1.00 Days remaining.") {
+		t.Fail()
+	}
+
+	for i := 0; i < 3; i++ {
+		rateLimitedCommand.Exec(
+			testConversation, testSender,
+			msg, &_storage, demoSender.SendMessage,
+		)
+		demoSender.PopMessage()
+	}
+
+	rateLimitedInfoCommand.Exec(
+		testConversation, testSender,
+		msg, &_storage, demoSender.SendMessage,
+	)
+
+	resultMessage, _ = demoSender.PopMessage()
+	if !strings.HasPrefix(resultMessage.Description, "1/1 per 1.00 Days remaining.") {
 		t.Fail()
 	}
 }
