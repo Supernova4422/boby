@@ -58,13 +58,13 @@ func TestTimeRemaining(t *testing.T) {
 		TimesPerInterval:   2,
 	}
 
-	remaining := r.timeRemaining(20, history)
-	if remaining != 3 {
+	remaining := r.timeRemaining(10, history)
+	if remaining.Seconds() != 3 {
 		t.Fail()
 	}
 
 	timeRemaining := r.timeRemaining(20, history)
-	if timeRemaining != 0 {
+	if timeRemaining.Seconds() != 0 {
 		t.Fail()
 	}
 }
@@ -80,7 +80,7 @@ func TestTimeRemainingUnordered(t *testing.T) {
 	}
 
 	remaining := r.timeRemaining(10, history)
-	if remaining != 3 {
+	if remaining.Seconds() != 3 {
 		t.Fail()
 	}
 }

@@ -79,7 +79,7 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 				sender,
 				service.Message{
 					Title:       "Please try again later.",
-					Description: remainingAsString,
+					Description: r.Body + " " + remainingAsString,
 				},
 			)
 		} else {
