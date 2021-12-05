@@ -43,8 +43,13 @@ func GetOxfordConfigs(reader io.Reader) ([]OxfordDictionaryConfig, error) {
 // Command returns a Command representation of this configuration.
 // This can be used to translate from a source language to a target language.
 func (o *OxfordDictionaryConfig) Command() (Command, Command, error) {
+	sourceLang := o.SourceLanguage
+	targetLang := o.TargetLanguage
+	appID := o.AppID
+	appKey := o.AppKey
+
 	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
-		url := fmt.Sprintf("https://od-api.oxforddictionaries.com/api/v2/translations/%s/%s/%s?strictMatch=false", o.SourceLanguage, o.TargetLanguage, url.PathEscape(msg[0].(string)))
+		url := fmt.Sprintf("https://od-api.oxforddictionaries.com/api/v2/translations/%s/%s/%s?strictMatch=false", sourceLange, targetLang, url.PathEscape(msg[0].(string)))
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
 			log.Println(fmt.Sprintf("Oxford API error 1: %s", err))
@@ -57,8 +62,8 @@ func (o *OxfordDictionaryConfig) Command() (Command, Command, error) {
 			return
 		}
 
-		req.Header.Set("app_id", o.AppID)
-		req.Header.Set("app_key", o.AppKey)
+		req.Header.Set("app_id", appID)
+		req.Header.Set("app_key", appKey)
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
