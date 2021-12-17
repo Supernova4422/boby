@@ -3,6 +3,7 @@ package command
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/service/demoservice"
@@ -853,6 +854,79 @@ func TestRateLimitedInfoCommandDays(t *testing.T) {
 
 	resultMessage, _ = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "1/1 per 1.00 Days remaining.") {
+		t.Fail()
+	}
+}
+
+func TestRateLimitedInfoCommandSecondOld(t *testing.T) {
+	demoSender := demoservice.DemoSender{}
+	// Message to repeat.
+	testConversation := service.Conversation{
+		ServiceID:      "0",
+		ConversationID: "0",
+	}
+	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
+	testCmd := "repeat"
+
+	replyCommand := Command{
+		Trigger:    testCmd,
+		Parameters: []Parameter{{Type: "string"}},
+		Exec:       Repeater,
+		Help:       "Help",
+	}
+
+	limitMsg := "You hit the limit"
+	rateLimitConfig := RateLimitConfig{
+		TimesPerInterval:   1,
+		SecondsPerInterval: 1,
+		Body:               limitMsg,
+		ID:                 "cmd",
+	}
+
+	tempStorage := storage.GetTempStorage()
+	var _storage storage.Storage = &tempStorage
+
+	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
+	rateLimitedInfoCommand := rateLimitConfig.GetRateLimitedCommandInfo(replyCommand)
+	replyMsg := "Hello"
+	msg := []interface{}{replyMsg}
+
+	rateLimitedInfoCommand.Exec(
+		testConversation, testSender,
+		msg, &_storage, demoSender.SendMessage,
+	)
+	resultMessage, _ := demoSender.PopMessage()
+	if !strings.HasPrefix(resultMessage.Description, "0/1 per 1.00 Seconds remaining.") {
+		t.Fail()
+	}
+
+	for i := 0; i < 3; i++ {
+		rateLimitedCommand.Exec(
+			testConversation, testSender,
+			msg, &_storage, demoSender.SendMessage,
+		)
+		demoSender.PopMessage()
+	}
+
+	rateLimitedInfoCommand.Exec(
+		testConversation, testSender,
+		msg, &_storage, demoSender.SendMessage,
+	)
+
+	resultMessage, _ = demoSender.PopMessage()
+	if !strings.HasPrefix(resultMessage.Description, "1/1 per 1.00 Seconds remaining.") {
+		t.Fail()
+	}
+
+	time.Sleep(2 * time.Second)
+
+	rateLimitedInfoCommand.Exec(
+		testConversation, testSender,
+		msg, &_storage, demoSender.SendMessage,
+	)
+
+	resultMessage, _ = demoSender.PopMessage()
+	if !strings.HasPrefix(resultMessage.Description, "0/1 per 1.00 Seconds remaining.") {
 		t.Fail()
 	}
 }

@@ -83,11 +83,7 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 				},
 			)
 		} else {
-			if r.Global {
-				(*storage).SetGlobalValue(r.ID, append(history, now))
-			} else {
-				(*storage).SetUserValue(user, r.ID, append(history, now))
-			}
+			r.SetRateLimitHistory(append(history, now), storage, user)
 			command.Exec(sender, user, msg, storage, sink)
 		}
 	}
@@ -129,6 +125,7 @@ func (r RateLimitConfig) GetRateLimitedCommandInfo(command Command) Command {
 	rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
 		now, history := r.GetRateLimitHistory(storage, user)
 		durationAsStr, _ := time.ParseDuration(strconv.FormatInt(r.SecondsPerInterval, 10) + "s")
+		history = r.cleanHistory(now, history)
 		interval := r.timeRemainingToString(durationAsStr)
 		if r.rateLimited(now, history) {
 			sink(
@@ -172,7 +169,19 @@ func (r RateLimitConfig) GetRateLimitHistory(storage *storage.Storage, user serv
 	}
 
 	now = time.Now().Unix()
+	history = r.cleanHistory(now, history)
+	r.SetRateLimitHistory(history, storage, user)
+
 	return now, history
+}
+
+// SetRateLimitHistory sets the history.
+func (r RateLimitConfig) SetRateLimitHistory(history []int64, storage *storage.Storage, user service.User) {
+	if r.Global {
+		(*storage).SetGlobalValue(r.ID, history)
+	} else {
+		(*storage).SetUserValue(user, r.ID, history)
+	}
 }
 
 func (r RateLimitConfig) timeRemainingToString(remaining time.Duration) string {
