@@ -1,6 +1,6 @@
 ![Build](https://github.com/BKrajancic/boby/workflows/Build/badge.svg)
 ![Test](https://github.com/BKrajancic/boby/workflows/Test/badge.svg)
-![Lint](https://github.com/BKrajancic/boby/workflows/Lint/badge.svg)
+![Lint](https://github.com/BKrajancic/boby/workflows/golangci-lint/badge.svg)
 ![Vet](https://github.com/BKrajancic/boby/workflows/Vet/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/BKrajancic/boby/internal)](https://goreportcard.com/report/github.com/BKrajancic/boby/internal)
 
