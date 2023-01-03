@@ -12,6 +12,7 @@ import (
 	"strings"
 )
 
+// Config is the configuration for the font downloader tool.
 type Config struct {
 	Token string
 	Font  string
@@ -36,7 +37,7 @@ func loadConfig() (Config, error) {
 	return config, nil
 }
 
-// Get_all_with_substr will download all fonts that contain substr.
+// GetAllWithSubstr will download all fonts that contain substr.
 // All fonts are downloaded to a folder with name "substr."
 func GetAllWithSubstr(token string, substr string) error {
 	homeDir, err := os.UserHomeDir()
