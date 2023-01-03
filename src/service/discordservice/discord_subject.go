@@ -211,8 +211,10 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 	} else {
 		nick = i.Member.Nick
 	}
-	footerText := "Requested by " + nick + ": /" + i.Data.Name
-	for _, val := range i.Data.Options {
+
+	target := i.ApplicationCommandData().Name
+	footerText := "Requested by " + nick + ": /" + target
+	for _, val := range i.ApplicationCommandData().Options {
 		input = append(input, val.Value)
 		footerText += " " + val.StringValue()
 	}
@@ -224,18 +226,17 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 		embed.Footer = &discordgo.MessageEmbedFooter{Text: footerText}
 		currEmbeds := append(*embeds, &embed)
 		embeds = &currEmbeds
+		whitespace := " "
 		response := discordgo.WebhookEdit{
-			Content: " ",
-			Embeds:  *embeds,
+			Content: &whitespace,
+			Embeds:  embeds,
 		}
-		appID := d.discord.State.User.ID
-		s.InteractionResponseEdit(appID, i.Interaction, &response)
+		s.InteractionResponseEdit(i.Interaction, &response)
 		if msg.Image != nil {
 			d.SendImage(msg.Image, i.ChannelID, s, &discordgo.MessageEmbed{})
 		}
 	}
 
-	target := i.Data.Name
 	for j := range d.observers {
 		if d.observers[j].Trigger == target {
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -245,7 +246,7 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 			d.observers[j].Exec(conversation, user, input, d.storage, sink)
 
 			if len(*embeds) == 0 {
-				s.InteractionResponseDelete(d.discord.State.User.ID, i.Interaction)
+				s.InteractionResponseDelete(i.Interaction)
 			}
 			break
 		}
