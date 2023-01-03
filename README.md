@@ -2,7 +2,7 @@
 ![Test](https://github.com/BKrajancic/boby/workflows/Test/badge.svg)
 ![Lint](https://github.com/BKrajancic/boby/workflows/golangci-lint/badge.svg)
 ![Vet](https://github.com/BKrajancic/boby/workflows/Vet/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/BKrajancic/boby/internal)](https://goreportcard.com/report/github.com/BKrajancic/boby/internal)
+[![Go Report Card](https://goreportcard.com/badge/github.com/BKrajancic/boby)](https://goreportcard.com/report/github.com/BKrajancic/boby)
 
 <a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-82%25-brightgreen.svg?longCache=true&style=flat)</a>
 
