@@ -60,7 +60,7 @@ func main() {
 	if err != nil {
 		log.Println("Unable to set the game status", err)
 	}
-	
+
 	defer discordSubject.Close() // Cleanly close down the Discord session.
 	discordSubject.SetStorage(&storage)
 
