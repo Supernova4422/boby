@@ -6,7 +6,7 @@ import (
 )
 
 // SetAdmin will set the value to be considered an admin (CheckAdmin will return true).
-func SetAdmin(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+func SetAdmin(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
 	if sender.Admin {
 		guild := service.Guild{
 			ServiceID: sender.ServiceID,

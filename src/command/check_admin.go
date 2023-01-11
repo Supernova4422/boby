@@ -6,7 +6,7 @@ import (
 )
 
 // CheckAdmin will let you know if you're an admin.
-func CheckAdmin(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+func CheckAdmin(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
 	guild := service.Guild{
 		ServiceID: sender.ServiceID,
 		GuildID:   sender.GuildID,

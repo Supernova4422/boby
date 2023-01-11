@@ -221,7 +221,7 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 
 	embeds := &([]*discordgo.MessageEmbed{})
 
-	sink := func(conversation service.Conversation, msg service.Message) {
+	sink := func(conversation service.Conversation, msg service.Message) error {
 		embed := MsgToEmbed(msg)
 		embed.Footer = &discordgo.MessageEmbedFooter{Text: footerText}
 		currEmbeds := append(*embeds, &embed)
@@ -234,12 +234,14 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 
 		_, err := s.InteractionResponseEdit(i.Interaction, &response)
 		if err != nil {
-			d.handleError("Error when editing interaction", err)
+			return fmt.Errorf("Error when editing interaction", err)
 		}
 
 		if msg.Image != nil {
-			d.SendImage(msg.Image, i.ChannelID, s, &discordgo.MessageEmbed{})
+			return d.SendImage(msg.Image, i.ChannelID, s, &discordgo.MessageEmbed{})
 		}
+
+		return nil
 	}
 
 	for j := range d.observers {
@@ -266,11 +268,11 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 }
 
 // SendImage sends an embed with an image to channelID.“
-func (d *DiscordSubject) SendImage(image image.Image, channelID string, s *discordgo.Session, embed *discordgo.MessageEmbed) {
+func (d *DiscordSubject) SendImage(image image.Image, channelID string, s *discordgo.Session, embed *discordgo.MessageEmbed) error {
 	var buffer bytes.Buffer
 	err := png.Encode(&buffer, image)
 	if err != nil {
-		d.handleError("Error when encoding png", err)
+		return fmt.Errorf("Error when encoding png: %s", err)
 	}
 
 	filename := "filename.png"
@@ -291,6 +293,12 @@ func (d *DiscordSubject) SendImage(image image.Image, channelID string, s *disco
 			},
 		},
 	)
+
+	if err != nil {
+		return fmt.Errorf("Error when sending message with image: %s", err)
+	}
+
+	return nil
 }
 
 func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
@@ -315,7 +323,7 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 		ServiceID: d.ID(),
 	}
 
-	sink := func(destination service.Conversation, msg service.Message) {
+	sink := func(destination service.Conversation, msg service.Message) error {
 		fields := make([]*discordgo.MessageEmbedField, 0)
 		for _, field := range msg.Fields {
 			value := field.Value
@@ -348,11 +356,11 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 		}
 
 		if msg.Image != nil {
-			d.SendImage(msg.Image, destination.ConversationID, s, &embed)
-		} else {
-			_, err := d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
-			d.handleError("Error when sending message, response", err)
+			return d.SendImage(msg.Image, destination.ConversationID, s, &embed)
 		}
+
+		_, err := d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
+		return fmt.Errorf("Error when sending message response: %s", err)
 	}
 
 	inputSplit := strings.Split(m.Content, " ")

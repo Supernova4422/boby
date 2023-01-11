@@ -8,11 +8,11 @@ import (
 
 // A Command is how a User interacts with a bot.
 type Command struct {
-	Trigger    string                                                                                                                 // Messages starting with Trigger are processed by this Command.
-	Parameters []Parameter                                                                                                            // What text to capture following a trigger.
-	Help       string                                                                                                                 // What this command does.
-	HelpInput  string                                                                                                                 // Arguments following the trigger.
-	Exec       func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message)) // The command's processing. The last parameter sends a reply, and is expected to be used at least once (if the command is unsuccessful, report an error).
+	Trigger    string                                                                                                                       // Messages starting with Trigger are processed by this Command.
+	Parameters []Parameter                                                                                                                  // What text to capture following a trigger.
+	Help       string                                                                                                                       // What this command does.
+	HelpInput  string                                                                                                                       // Arguments following the trigger.
+	Exec       func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message) error) // The command's processing. The last parameter sends a reply, and is expected to be used at least once (if the command is unsuccessful, report an error).
 	observers  []service.Sender
 }
 

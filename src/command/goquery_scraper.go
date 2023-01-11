@@ -120,7 +120,7 @@ func (g GoQueryScraperConfig) Command() (Command, error) {
 
 // CommandWithHTMLGetter makes a scraper Command from a config, retrieving HTML pages using HTMLGetter.
 func (g GoQueryScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Command, error) {
-	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
 		g.onMessage(
 			sender,
 			user,
@@ -141,7 +141,7 @@ func (g GoQueryScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Comm
 }
 
 // onMessage processes the request, and sends out messages.
-func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message), htmlGetter HTMLGetter) {
+func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error, htmlGetter HTMLGetter) {
 	substitutions := strings.Count(g.URL, "%s")
 	if (substitutions > 0) && (len(msg) == 0 || len(msg) < substitutions) {
 		sink(
