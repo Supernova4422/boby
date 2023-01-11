@@ -53,7 +53,8 @@ func getConfig(filepath string) (*DiscordConfig, error) {
 		return nil, err
 	}
 
-	err := json.Unmarshal(bytes, &config)
+	var config DiscordConfig
+	err = json.Unmarshal(bytes, &config)
 	if err != nil {
 		log.Printf("Unable to unmarshal file: %s", filepath)
 		return nil, err
