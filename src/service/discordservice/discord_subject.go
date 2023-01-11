@@ -478,5 +478,6 @@ func (d *DiscordSubject) helpExec(conversation service.Conversation, user servic
 }
 
 func (d *DiscordSubject) handleError(message string, err error) {
+	log.Println(message)
 	log.Fatal(err)
 }
