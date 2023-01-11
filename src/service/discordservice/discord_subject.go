@@ -100,7 +100,7 @@ func (d *DiscordSubject) UnloadUselessCommands() {
 	appID := d.discord.State.User.ID
 	cmds, err := d.discord.ApplicationCommands(appID, "")
 	if err != nil {
-		panic(err)
+		d.handleError("Error when retrieving application commands", err)
 	}
 
 	for _, cmd := range cmds {
@@ -115,7 +115,7 @@ func (d *DiscordSubject) UnloadUselessCommands() {
 		if !found {
 			err := d.discord.ApplicationCommandDelete(cmd.ApplicationID, "", cmd.ID)
 			if err != nil {
-				panic(err)
+				d.handleError("Error when deleting application command", err)
 			}
 		}
 	}
@@ -231,7 +231,12 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 			Content: &whitespace,
 			Embeds:  embeds,
 		}
-		s.InteractionResponseEdit(i.Interaction, &response)
+
+		_, err := s.InteractionResponseEdit(i.Interaction, &response)
+		if err != nil {
+			d.handleError("Error when editing interaction", err)
+		}
+
 		if msg.Image != nil {
 			d.SendImage(msg.Image, i.ChannelID, s, &discordgo.MessageEmbed{})
 		}
@@ -239,14 +244,21 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 
 	for j := range d.observers {
 		if d.observers[j].Trigger == target {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 			})
+
+			if err != nil {
+				d.handleError("Error when responding to interaction", err)
+			}
 
 			d.observers[j].Exec(conversation, user, input, d.storage, sink)
 
 			if len(*embeds) == 0 {
-				s.InteractionResponseDelete(i.Interaction)
+				err = s.InteractionResponseDelete(i.Interaction)
+				if err != nil {
+					d.handleError("Error when deleting interaction", err)
+				}
 			}
 			break
 		}
@@ -258,7 +270,7 @@ func (d *DiscordSubject) SendImage(image image.Image, channelID string, s *disco
 	var buffer bytes.Buffer
 	err := png.Encode(&buffer, image)
 	if err != nil {
-		panic(err)
+		d.handleError("Error when encoding png", err)
 	}
 
 	filename := "filename.png"
@@ -266,7 +278,7 @@ func (d *DiscordSubject) SendImage(image image.Image, channelID string, s *disco
 		URL: "attachment://" + filename,
 	}
 
-	s.ChannelMessageSendComplex(
+	_, err = s.ChannelMessageSendComplex(
 		channelID,
 		&discordgo.MessageSend{
 			Embed: embed,
@@ -338,7 +350,8 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 		if msg.Image != nil {
 			d.SendImage(msg.Image, destination.ConversationID, s, &embed)
 		} else {
-			d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
+			_, err := d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
+			d.handleError("Error when sending message, response", err)
 		}
 	}
 
@@ -462,4 +475,8 @@ func (d *DiscordSubject) helpExec(conversation service.Conversation, user servic
 			Fields: fields,
 		},
 	)
+}
+
+func (d *DiscordSubject) handleError(message string, err error) {
+	log.Fatal(err)
 }
