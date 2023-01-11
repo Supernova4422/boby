@@ -11,13 +11,6 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/service/demoservice"
 )
 
-// htmlGetRemembered returns a HTMLGetter that returns content on any input.
-func jsonGetRemembered(content string) JSONGetter {
-	reader := strings.NewReader(content)
-	return func(url string) (io.ReadCloser, error) {
-		return ioutil.NopCloser(reader), nil
-	}
-}
 func jsonExamplesPerc(name string) (io.ReadCloser, error) {
 	const example1 = `{
 	"Key1": "Value1",

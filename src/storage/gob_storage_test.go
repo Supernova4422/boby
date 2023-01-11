@@ -92,17 +92,17 @@ func TestGobSetGetGuildValue(t *testing.T) {
 	}
 
 	valueOut, ok := storage.GetGuildValue(guild, k0)
-	if ok == false || valueOut != v0 {
+	if !ok || valueOut != v0 {
 		t.Fail()
 	}
 
 	valueOut, ok = storage.GetGuildValue(guild, k1)
-	if ok == false || valueOut != v1 {
+	if !ok || valueOut != v1 {
 		t.Fail()
 	}
 
 	valueOut, ok = storage.GetGuildValue(guild, k2)
-	if ok == false || valueOut != v2 {
+	if !ok || valueOut != v2 {
 		t.Fail()
 	}
 }
@@ -197,7 +197,7 @@ func TestGobSetGetDefaultGuildValue(t *testing.T) {
 		service.Guild{ServiceID: "0", GuildID: "0"},
 		k0,
 	)
-	if ok == false || valueOut != v0 {
+	if !ok || valueOut != v0 {
 		t.Fail()
 	}
 }

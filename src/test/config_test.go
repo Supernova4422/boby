@@ -127,7 +127,7 @@ func TestConfig(t *testing.T) {
 						}
 
 					}
-					if demoSender.IsEmpty() == false {
+					if !demoSender.IsEmpty() {
 						t.Errorf("Too many responses from: %s", input.Input)
 						t.Fail()
 					}

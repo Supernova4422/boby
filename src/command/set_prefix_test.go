@@ -26,7 +26,7 @@ func TestSetPrefix(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	SetPrefix(testConversation, testSender, []interface{}{newPrefix}, &_storage, demoSender.SendMessage)
 	prefixResult, ok := _storage.GetGuildValue(guild, "prefix")
-	if ok != true || prefixResult != newPrefix {
+	if !ok || prefixResult != newPrefix {
 		t.Fail()
 	}
 }

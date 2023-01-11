@@ -52,7 +52,7 @@ func (o *OxfordDictionaryConfig) Command() (Command, Command, error) {
 		url := fmt.Sprintf("https://od-api.oxforddictionaries.com/api/v2/translations/%s/%s/%s?strictMatch=false", sourceLang, targetLang, url.PathEscape(msg[0].(string)))
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
-			log.Println(fmt.Sprintf("Oxford API error 1: %s", err))
+			log.Printf("Oxford API error 1: %s", err)
 			sink(
 				sender,
 				service.Message{
@@ -67,7 +67,7 @@ func (o *OxfordDictionaryConfig) Command() (Command, Command, error) {
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			log.Println(fmt.Sprintf("Oxford API error 2: %s", err))
+			log.Printf("Oxford API error 2: %s", err)
 			sink(
 				sender,
 				service.Message{

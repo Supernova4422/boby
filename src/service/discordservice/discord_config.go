@@ -53,8 +53,12 @@ func getConfig(filepath string) (*DiscordConfig, error) {
 		return nil, err
 	}
 
-	var config DiscordConfig
-	json.Unmarshal(bytes, &config)
+	err := json.Unmarshal(bytes, &config)
+	if err != nil {
+		log.Printf("Unable to unmarshal file: %s", filepath)
+		return nil, err
+	}
+
 	if config.Token == tokenDefault {
 		log.Printf("Demo JSON has not been updated to have a valid token! A user should edit: %s", filepath)
 		return nil, errors.New("default file used")

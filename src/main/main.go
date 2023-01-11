@@ -55,7 +55,12 @@ func main() {
 	if err != nil {
 		log.Panicf("An error occurred when loading discord: %s", err)
 	}
-	discord.UpdateGameStatus(0, "Bot is reloading...")
+
+	err := discord.UpdateGameStatus(0, "Bot is reloading...")
+	if err != nil {
+		log.Println("Unable to set the game status", err)
+	}
+	
 	defer discordSubject.Close() // Cleanly close down the Discord session.
 	discordSubject.SetStorage(&storage)
 
@@ -66,7 +71,11 @@ func main() {
 	discordSubject.Load()
 	discordSubject.UnloadUselessCommands()
 
-	discord.UpdateGameStatus(0, "/help")
+	err := discord.UpdateGameStatus(0, "/help")
+	if err != nil {
+		log.Println("Unable to set the game status", err)
+	}
+
 	log.Println("bot has loaded")
 
 	sc := make(chan os.Signal, 1)
@@ -96,9 +105,13 @@ func loadGobStorage(filepath string) (storage.Storage, error) {
 
 		example.SetWriter(file)
 		writer := bufio.NewWriter(file)
-		example.SaveToFile()
-		writer.WriteString(buffer.String())
-		if writer.Flush() != nil {
+		err := example.SaveToFile()
+		if err != nil {
+			return nil, err
+		}
+
+		err := writer.WriteString(buffer.String())
+		if err != nil || writer.Flush() != nil {
 			return nil, err
 		}
 	}
