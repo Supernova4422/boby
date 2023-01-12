@@ -261,14 +261,9 @@ func TestSetAdminDisaster(t *testing.T) {
 	}
 
 	storage.GuildValues[guild.ServiceID][guild.GuildID][AdminKey] = 0
-	defer func() {
-		if r := recover(); r == nil {
-			t.Fail()
-		}
-	}()
 
 	err = storage.SetAdmin(guild, "Test")
-	if err != nil {
+	if err == nil {
 		t.Fail()
 	}
 }
