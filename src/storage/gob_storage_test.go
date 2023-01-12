@@ -597,6 +597,10 @@ func TestGobGetGlobalValueSetandGet(t *testing.T) {
 	key := "key"
 	value := "value"
 	err := storage.SetGlobalValue(key, value)
+	if err != nil {
+		t.Fail()
+	}
+
 	result, ok := storage.GetGlobalValue(key)
 	if !ok || value != result {
 		t.Fail()
