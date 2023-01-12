@@ -70,7 +70,7 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 	}
 
 	rateLimitedCommand := command
-	rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
 		now, history := r.GetRateLimitHistory(storage, user)
 		if r.rateLimited(now, history) {
 			remaining := r.timeRemaining(now, history)
@@ -106,7 +106,7 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 func (r RateLimitConfig) GetRateLimitedCommandInfo(command Command) Command {
 	if r.SecondsPerInterval == 0 && r.TimesPerInterval == 0 {
 		rateLimitedCommand := command
-		rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+		rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
 			sink(
 				sender,
 				service.Message{
@@ -122,7 +122,7 @@ func (r RateLimitConfig) GetRateLimitedCommandInfo(command Command) Command {
 	command.Help = "Get info about this command"
 
 	rateLimitedCommand := command
-	rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
 		now, history := r.GetRateLimitHistory(storage, user)
 		durationAsStr, _ := time.ParseDuration(strconv.FormatInt(r.SecondsPerInterval, 10) + "s")
 		history = r.cleanHistory(now, history)

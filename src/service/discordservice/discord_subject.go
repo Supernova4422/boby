@@ -234,7 +234,7 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 
 		_, err := s.InteractionResponseEdit(i.Interaction, &response)
 		if err != nil {
-			return fmt.Errorf("Error when editing interaction", err)
+			return fmt.Errorf("Error when editing interaction %s", err)
 		}
 
 		if msg.Image != nil {
@@ -450,7 +450,7 @@ func (d *DiscordSubject) isAdmin(s *discordgo.Session, authorID string, guildID 
 	return false
 }
 
-func (d *DiscordSubject) helpExec(conversation service.Conversation, user service.User, _ []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+func (d *DiscordSubject) helpExec(conversation service.Conversation, user service.User, _ []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
 	fields := make([]service.MessageField, 0)
 	prefix, ok := (*storage).GetGuildValue(conversation.Guild(), "prefix")
 

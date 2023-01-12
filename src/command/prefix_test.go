@@ -9,7 +9,7 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
-func Repeater2(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+func Repeater2(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
 	sink(sender, service.Message{Description: msg[0].(string)})
 }
 

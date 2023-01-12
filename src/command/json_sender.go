@@ -139,7 +139,7 @@ type JSONGetter = func(string) (out io.ReadCloser, err error)
 
 // Command uses the config to make a Command that processes messages.
 func (j JSONGetterConfig) Command(jsonGetter JSONGetter) (Command, error) {
-	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
 		j.jsonGetterFunc(
 			sender,
 			user,
@@ -160,7 +160,7 @@ func (j JSONGetterConfig) Command(jsonGetter JSONGetter) (Command, error) {
 }
 
 // jsonGetterFunc processes a message.
-func (j JSONGetterConfig) jsonGetterFunc(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message), jsonGetter JSONGetter) {
+func (j JSONGetterConfig) jsonGetterFunc(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error, jsonGetter JSONGetter) {
 	substitutions := strings.Count(j.URL, "%s")
 	noCapture := len(msg) == 0
 

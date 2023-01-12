@@ -30,10 +30,14 @@ func (c *Command) AddSender(sender service.Sender) {
 
 // RouteByID routes a message to an observer of this Bot with the same ID() as
 // conversation.ServiceID.
-func (c *Command) RouteByID(conversation service.Conversation, msg service.Message) {
+func (c *Command) RouteByID(conversation service.Conversation, msg service.Message) error {
 	for _, observer := range c.observers {
 		if observer.ID() == conversation.ServiceID {
-			observer.SendMessage(conversation, msg)
+			err := observer.SendMessage(conversation, msg)
+			if err != nil {
+				return err
+			}
 		}
 	}
+	return nil
 }

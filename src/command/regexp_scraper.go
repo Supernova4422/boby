@@ -51,7 +51,7 @@ func (r RegexpScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Comma
 	webpageCapture := regexp.MustCompile(r.ReplyCapture)
 	titleCapture := regexp.MustCompile(r.TitleCapture)
 
-	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
 		scraper(r.URL,
 			webpageCapture,
 			r.TitleTemplate,
@@ -75,7 +75,7 @@ func (r RegexpScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Comma
 }
 
 // scraper returns the received message
-func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate string, titleCapture *regexp.Regexp, sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message), htmlGetter HTMLGetter) {
+func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate string, titleCapture *regexp.Regexp, sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error, htmlGetter HTMLGetter) {
 	substitutions := strings.Count(urlTemplate, "%s")
 	urlPage := urlTemplate
 	if substitutions > 0 {

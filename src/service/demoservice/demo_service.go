@@ -16,17 +16,17 @@ type DemoService struct {
 	users         []service.User
 	conversations []service.Conversation
 
-	commands       map[string]func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message))
+	commands       map[string]func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message) error)
 	commandTypes   map[string][]string
-	commandRouters map[string]func(service.Conversation, service.Message)
+	commandRouters map[string]func(service.Conversation, service.Message) error
 }
 
 // Register will register an observer that will receive messages.
-func (d *DemoService) Register(trigger string, commandTypes []string, exec func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message)), sink func(service.Conversation, service.Message)) {
+func (d *DemoService) Register(trigger string, commandTypes []string, exec func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message) error), sink func(service.Conversation, service.Message) error) {
 	if d.commands == nil {
-		d.commands = make(map[string]func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message)))
+		d.commands = make(map[string]func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message) error))
 		d.commandTypes = make(map[string][]string)
-		d.commandRouters = make(map[string]func(service.Conversation, service.Message))
+		d.commandRouters = make(map[string]func(service.Conversation, service.Message) error)
 	}
 
 	d.commands[trigger] = exec
