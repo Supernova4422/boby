@@ -585,7 +585,7 @@ func TestGobGetGlobalValueBeforeSet(t *testing.T) {
 	}
 }
 
-func TestGobGetGlobalValueSetandGet(t *testing.T) error {
+func TestGobGetGlobalValueSetandGet(t *testing.T) {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
 	storage := GobStorage{
@@ -597,9 +597,6 @@ func TestGobGetGlobalValueSetandGet(t *testing.T) error {
 	key := "key"
 	value := "value"
 	err := storage.SetGlobalValue(key, value)
-	if err != nil {
-		return err
-	}
 	result, ok := storage.GetGlobalValue(key)
 	if !ok || value != result {
 		t.Fail()
@@ -613,5 +610,4 @@ func TestGobGetGlobalValueSetandGet(t *testing.T) error {
 	if !ok || value != result {
 		t.Fail()
 	}
-	return nil
 }
