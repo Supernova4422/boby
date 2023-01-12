@@ -139,8 +139,8 @@ type JSONGetter = func(string) (out io.ReadCloser, err error)
 
 // Command uses the config to make a Command that processes messages.
 func (j JSONGetterConfig) Command(jsonGetter JSONGetter) (Command, error) {
-	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
-		j.jsonGetterFunc(
+	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) error {
+		return j.jsonGetterFunc(
 			sender,
 			user,
 			msg,
@@ -160,13 +160,12 @@ func (j JSONGetterConfig) Command(jsonGetter JSONGetter) (Command, error) {
 }
 
 // jsonGetterFunc processes a message.
-func (j JSONGetterConfig) jsonGetterFunc(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error, jsonGetter JSONGetter) {
+func (j JSONGetterConfig) jsonGetterFunc(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error, jsonGetter JSONGetter) error {
 	substitutions := strings.Count(j.URL, "%s")
 	noCapture := len(msg) == 0
 
 	if (substitutions > 0) && (noCapture || len(msg) < substitutions) {
-		sink(sender, service.Message{Description: "An error occurred when building the url."})
-		return
+		return sink(sender, service.Message{Description: "An error occurred when building the url."})
 	}
 
 	if noCapture {
@@ -200,12 +199,16 @@ func (j JSONGetterConfig) jsonGetterFunc(sender service.Conversation, user servi
 			dict := make(map[string]interface{})
 			if err := json.Unmarshal(buf, &dict); err == nil {
 				for _, msg := range j.MessagesFromJSON(dict) {
-					sink(sender, msg)
+					err := sink(sender, msg)
+					if err != nil {
+						return err
+					}
 					time.Sleep(time.Duration(j.Delay) * time.Second)
 				}
 			}
 		}
 	}
+	return nil
 }
 
 // A TokenMaker is useful for creating a token that may be part of an API request.

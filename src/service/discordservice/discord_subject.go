@@ -79,7 +79,7 @@ func (d *DiscordSubject) guildCreate(s *discordgo.Session, event *discordgo.Guil
 }
 
 // Load prepares this object for usage.
-func (d *DiscordSubject) Load() {
+func (d *DiscordSubject) Load() error {
 	d.discord.AddHandler(d.guildCreate)
 	d.discord.AddHandler(d.onSlashCommand)
 
@@ -93,6 +93,7 @@ func (d *DiscordSubject) Load() {
 
 	d.updateGuildCommandsForAll()
 	d.updateGuildCommands("") // Global slash commands.
+	return nil
 }
 
 // UnloadUselessCommands will unload slash commands that aren't present in the bot currently.
@@ -254,7 +255,10 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 				d.handleError("Error when responding to interaction", err)
 			}
 
-			d.observers[j].Exec(conversation, user, input, d.storage, sink)
+			err = d.observers[j].Exec(conversation, user, input, d.storage, sink)
+			if err != nil {
+				d.handleError("Error when responding to interaction", err)
+			}
 
 			if len(*embeds) == 0 {
 				err = s.InteractionResponseDelete(i.Interaction)
@@ -387,7 +391,10 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 				return
 			}
 
-			d.observers[j].Exec(conversation, user, input, d.storage, sink)
+			err = d.observers[j].Exec(conversation, user, input, d.storage, sink)
+			if err != nil {
+				log.Printf("Error when executing message")
+			}
 		}
 	}
 }
@@ -450,7 +457,7 @@ func (d *DiscordSubject) isAdmin(s *discordgo.Session, authorID string, guildID 
 	return false
 }
 
-func (d *DiscordSubject) helpExec(conversation service.Conversation, user service.User, _ []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
+func (d *DiscordSubject) helpExec(conversation service.Conversation, user service.User, _ []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) error {
 	fields := make([]service.MessageField, 0)
 	prefix, ok := (*storage).GetGuildValue(conversation.Guild(), "prefix")
 
@@ -476,7 +483,7 @@ func (d *DiscordSubject) helpExec(conversation service.Conversation, user servic
 		Value: command.Repo,
 	})
 
-	sink(
+	return sink(
 		conversation,
 		service.Message{
 			Title:  "Help",

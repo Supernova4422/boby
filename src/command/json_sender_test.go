@@ -95,13 +95,16 @@ func TestSimple(t *testing.T) {
 		t.Fail()
 	}
 
-	getter.Exec(
+	err = getter.Exec(
 		testConversation,
 		testSender,
 		[]interface{}{"example1"},
 		nil,
 		demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Fields[0].Value != "Value2" {
@@ -150,13 +153,16 @@ func TestSimpleSkip(t *testing.T) {
 		t.Fail()
 	}
 
-	getter.Exec(
+	err = getter.Exec(
 		testConversation,
 		testSender,
 		[]interface{}{"example1"},
 		nil,
 		demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if len(resultMessage.Fields) != 0 {
@@ -205,13 +211,16 @@ func TestErrorMsgReplacementPerc(t *testing.T) {
 		t.Fail()
 	}
 
-	getter.Exec(
+	err = getter.Exec(
 		testConversation,
 		testSender,
 		[]interface{}{"example1"},
 		nil,
 		demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Fields[0].Value != "%string" {
@@ -258,13 +267,16 @@ func TestErrorMsgReplacement(t *testing.T) {
 		t.Fail()
 	}
 
-	getter.Exec(
+	err = getter.Exec(
 		testConversation,
 		testSender,
 		[]interface{}{"example1"},
 		nil,
 		demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Fields[0].Value != "Error Message" {
@@ -320,13 +332,16 @@ func TestExtraPercentages(t *testing.T) {
 	}
 	url := "example1"
 
-	getter.Exec(
+	err = getter.Exec(
 		testConversation,
 		testSender,
 		[]interface{}{url},
 		nil,
 		demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Fields[0].Value != "Value1" {
@@ -381,13 +396,16 @@ func TestEmptyMsg(t *testing.T) {
 		t.Fail()
 	}
 
-	getter.Exec(
+	err = getter.Exec(
 		testConversation,
 		testSender,
 		[]interface{}{},
 		nil,
 		demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Description != "An error occurred when building the url." {
@@ -447,13 +465,16 @@ func TestUngrouped(t *testing.T) {
 	}
 
 	url := "example1"
-	getter.Exec(
+	err = getter.Exec(
 		testConversation,
 		testSender,
 		[]interface{}{url},
 		nil,
 		demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage1, _ := demoSender.PopMessage()
 	if resultMessage1.Description != "Value1" {
@@ -512,13 +533,16 @@ func TestUngroupedNoMain(t *testing.T) {
 	}
 
 	url := "example1"
-	getter.Exec(
+	err = getter.Exec(
 		testConversation,
 		testSender,
 		[]interface{}{url},
 		nil,
 		demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage1, _ := demoSender.PopMessage()
 	if resultMessage1.Title != "Title" {
@@ -580,13 +604,16 @@ func TestToken(t *testing.T) {
 		t.Fail()
 	}
 
-	getter.Exec(
+	err = getter.Exec(
 		testConversation,
 		testSender,
 		[]interface{}{"Hello World"},
 		nil,
 		demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Description != "2d1105" {
@@ -640,13 +667,16 @@ func TestTokenWithSuffix(t *testing.T) {
 		t.Fail()
 	}
 
-	getter.Exec(
+	err = getter.Exec(
 		testConversation,
 		testSender,
 		[]interface{}{"Hello World"},
 		nil,
 		demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Description != "PREURL2d1105?Z" {
@@ -694,13 +724,16 @@ func TestSpacesInMessage(t *testing.T) {
 		t.Fail()
 	}
 
-	getter.Exec(
+	err = getter.Exec(
 		testConversation,
 		testSender,
 		[]interface{}{"Hello World Here"},
 		nil,
 		demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Description != "Hello%20World%20Here" {

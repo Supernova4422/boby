@@ -70,22 +70,26 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 	}
 
 	rateLimitedCommand := command
-	rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
+	rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) error {
 		now, history := r.GetRateLimitHistory(storage, user)
 		if r.rateLimited(now, history) {
 			remaining := r.timeRemaining(now, history)
 			remainingAsString := r.timeRemainingToString(remaining) + " remaining"
-			sink(
+			return sink(
 				sender,
 				service.Message{
 					Title:       "Please try again later.",
 					Description: r.Body + " " + remainingAsString,
 				},
 			)
-		} else {
-			r.SetRateLimitHistory(append(history, now), storage, user)
-			command.Exec(sender, user, msg, storage, sink)
 		}
+
+		err := r.SetRateLimitHistory(append(history, now), storage, user)
+		if err != nil {
+			return err
+		}
+
+		return command.Exec(sender, user, msg, storage, sink)
 	}
 
 	durationAsStr, _ := time.ParseDuration(strconv.FormatInt(r.SecondsPerInterval, 10) + "s")
@@ -106,8 +110,8 @@ func (r RateLimitConfig) GetRateLimitedCommand(command Command) Command {
 func (r RateLimitConfig) GetRateLimitedCommandInfo(command Command) Command {
 	if r.SecondsPerInterval == 0 && r.TimesPerInterval == 0 {
 		rateLimitedCommand := command
-		rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
-			sink(
+		rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) error {
+			return sink(
 				sender,
 				service.Message{
 					Title: "This command has unlimited usage.",
@@ -122,28 +126,28 @@ func (r RateLimitConfig) GetRateLimitedCommandInfo(command Command) Command {
 	command.Help = "Get info about this command"
 
 	rateLimitedCommand := command
-	rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
+	rateLimitedCommand.Exec = func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) error {
 		now, history := r.GetRateLimitHistory(storage, user)
 		durationAsStr, _ := time.ParseDuration(strconv.FormatInt(r.SecondsPerInterval, 10) + "s")
 		history = r.cleanHistory(now, history)
 		interval := r.timeRemainingToString(durationAsStr)
 		if r.rateLimited(now, history) {
-			sink(
+			return sink(
 				sender,
 				service.Message{
 					Title:       "Command is currently rate limited",
 					Description: fmt.Sprintf("%d/%d per %s", len(history), r.TimesPerInterval, interval) + " remaining.",
 				},
 			)
-		} else {
-			sink(
-				sender,
-				service.Message{
-					Title:       "Currently not rate limited",
-					Description: fmt.Sprintf("%d/%d per %s", len(history), r.TimesPerInterval, interval) + " remaining.",
-				},
-			)
 		}
+
+		return sink(
+			sender,
+			service.Message{
+				Title:       "Currently not rate limited",
+				Description: fmt.Sprintf("%d/%d per %s", len(history), r.TimesPerInterval, interval) + " remaining.",
+			},
+		)
 	}
 
 	return rateLimitedCommand
@@ -170,18 +174,21 @@ func (r RateLimitConfig) GetRateLimitHistory(storage *storage.Storage, user serv
 
 	now = time.Now().Unix()
 	history = r.cleanHistory(now, history)
-	r.SetRateLimitHistory(history, storage, user)
+	err := r.SetRateLimitHistory(history, storage, user)
+	if err != nil {
+		panic(err)
+	}
 
 	return now, history
 }
 
 // SetRateLimitHistory sets the history.
-func (r RateLimitConfig) SetRateLimitHistory(history []int64, storage *storage.Storage, user service.User) {
+func (r RateLimitConfig) SetRateLimitHistory(history []int64, storage *storage.Storage, user service.User) error {
 	if r.Global {
-		(*storage).SetGlobalValue(r.ID, history)
-	} else {
-		(*storage).SetUserValue(user, r.ID, history)
+		return (*storage).SetGlobalValue(r.ID, history)
 	}
+
+	return (*storage).SetUserValue(user, r.ID, history)
 }
 
 func (r RateLimitConfig) timeRemainingToString(remaining time.Duration) string {

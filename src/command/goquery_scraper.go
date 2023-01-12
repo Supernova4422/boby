@@ -120,8 +120,8 @@ func (g GoQueryScraperConfig) Command() (Command, error) {
 
 // CommandWithHTMLGetter makes a scraper Command from a config, retrieving HTML pages using HTMLGetter.
 func (g GoQueryScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Command, error) {
-	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
-		g.onMessage(
+	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) error {
+		return g.onMessage(
 			sender,
 			user,
 			msg,
@@ -141,15 +141,14 @@ func (g GoQueryScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Comm
 }
 
 // onMessage processes the request, and sends out messages.
-func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error, htmlGetter HTMLGetter) {
+func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error, htmlGetter HTMLGetter) error {
 	substitutions := strings.Count(g.URL, "%s")
 	if (substitutions > 0) && (len(msg) == 0 || len(msg) < substitutions) {
-		sink(
+		return sink(
 			sender,
 			service.Message{
 				Description: "An error occurred when building the url.",
 			})
-		return
 	}
 
 	fields := make([]service.MessageField, 0)
@@ -163,7 +162,7 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 	if err == nil {
 		defer htmlReader.Close()
 	} else {
-		sink(
+		return sink(
 			sender,
 			service.Message{
 				Title:       "Error",
@@ -171,12 +170,11 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 				URL:         msgURL,
 			},
 		)
-		return
 	}
 
 	doc, err := goquery.NewDocumentFromReader(htmlReader)
 	if err != nil {
-		sink(
+		return sink(
 			sender,
 			service.Message{
 				Title:       msgURL,
@@ -184,7 +182,6 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 				URL:         g.ErrorURL,
 			},
 		)
-		return
 	}
 
 	if doc.Text() == "" {
@@ -193,7 +190,7 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 			captures = append(captures, item.(string))
 		}
 
-		sink(
+		return sink(
 			sender,
 			service.Message{
 				Title:       "Error",
@@ -201,7 +198,6 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 				URL:         g.ErrorURL,
 			},
 		)
-		return
 	}
 
 	title, err1 := g.TitleSelector.selectorCaptureToString(*doc)
@@ -250,7 +246,7 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 		replyMsg.Fields = fields[1:]
 	}
 
-	sink(sender, replyMsg)
+	return sink(sender, replyMsg)
 }
 
 // GetGoqueryScraperConfigs retrieves an array of GoQueryScraperConfig by parsing JSON from a buffer.

@@ -9,8 +9,8 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
-func Repeater2(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) {
-	sink(sender, service.Message{Description: msg[0].(string)})
+func Repeater2(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) error {
+	return sink(sender, service.Message{Description: msg[0].(string)})
 }
 
 func TestSetPrefix2(t *testing.T) {
@@ -18,7 +18,10 @@ func TestSetPrefix2(t *testing.T) {
 	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
 	prefix0 := "!"
-	_storage.SetDefaultGuildValue("prefix", prefix0)
+	err := _storage.SetDefaultGuildValue("prefix", prefix0)
+	if err != nil {
+		t.Fail()
+	}
 
 	demoServiceSubject := demoservice.DemoService{ServiceID: demoservice.ServiceID, Storage: &_storage}
 	demoSender := demoservice.DemoSender{ServiceID: demoservice.ServiceID}
@@ -36,7 +39,10 @@ func TestSetPrefix2(t *testing.T) {
 	for _, commandParameter := range cmd1.Parameters {
 		types = append(types, commandParameter.Type)
 	}
-	demoServiceSubject.Register(cmd1.Trigger, types, cmd1.Exec, cmd1.RouteByID)
+	err = demoServiceSubject.Register(cmd1.Trigger, types, cmd1.Exec, cmd1.RouteByID)
+	if err != nil {
+		t.Fail()
+	}
 
 	prefixCmd := "setprefix"
 
@@ -52,7 +58,10 @@ func TestSetPrefix2(t *testing.T) {
 	for _, commandParameter := range cmd2.Parameters {
 		types = append(types, commandParameter.Type)
 	}
-	demoServiceSubject.Register(cmd2.Trigger, types, cmd2.Exec, cmd2.RouteByID)
+	err = demoServiceSubject.Register(cmd2.Trigger, types, cmd2.Exec, cmd2.RouteByID)
+	if err != nil {
+		t.Fail()
+	}
 
 	// Message to repeat.
 	testConversation := service.Conversation{
@@ -115,7 +124,10 @@ func TestIgnoreSetPrefix(t *testing.T) {
 	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
 	prefix0 := "!"
-	_storage.SetDefaultGuildValue("prefix", prefix0)
+	err := _storage.SetDefaultGuildValue("prefix", prefix0)
+	if err != nil {
+		t.Fail()
+	}
 
 	demoServiceSubject := demoservice.DemoService{Storage: &_storage, ServiceID: demoservice.ServiceID}
 	// demoServiceSubject.Register(&bot)
@@ -134,7 +146,10 @@ func TestIgnoreSetPrefix(t *testing.T) {
 	for _, commandParameter := range cmd1.Parameters {
 		types = append(types, commandParameter.Type)
 	}
-	demoServiceSubject.Register(cmd1.Trigger, types, cmd1.Exec, cmd1.RouteByID)
+	err = demoServiceSubject.Register(cmd1.Trigger, types, cmd1.Exec, cmd1.RouteByID)
+	if err != nil {
+		t.Fail()
+	}
 
 	prefixCmd := "setprefix"
 	cmd2 := Command{
@@ -149,7 +164,10 @@ func TestIgnoreSetPrefix(t *testing.T) {
 	for _, commandParameter := range cmd2.Parameters {
 		types = append(types, commandParameter.Type)
 	}
-	demoServiceSubject.Register(cmd2.Trigger, types, cmd2.Exec, cmd2.RouteByID)
+	err = demoServiceSubject.Register(cmd2.Trigger, types, cmd2.Exec, cmd2.RouteByID)
+	if err != nil {
+		t.Fail()
+	}
 
 	// Message to repeat.
 	testConversation := service.Conversation{

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
@@ -52,7 +53,7 @@ func (t *TempStorage) GetGuildValue(guild service.Guild, key string) (interface{
 }
 
 // SetGuildValue sets the value for key, for a Guild.
-func (t *TempStorage) SetGuildValue(guild service.Guild, key string, val interface{}) {
+func (t *TempStorage) SetGuildValue(guild service.Guild, key string, val interface{}) error {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
@@ -69,10 +70,11 @@ func (t *TempStorage) SetGuildValue(guild service.Guild, key string, val interfa
 	}
 
 	t.GuildValues[guild.ServiceID][guild.GuildID][key] = val
+	return nil
 }
 
 // SetDefaultGuildValue sets the default value for key, for all Guilds.
-func (t *TempStorage) SetDefaultGuildValue(key string, val interface{}) {
+func (t *TempStorage) SetDefaultGuildValue(key string, val interface{}) error {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
@@ -81,10 +83,11 @@ func (t *TempStorage) SetDefaultGuildValue(key string, val interface{}) {
 	}
 
 	t.DefaultGuildValues[key] = val
+	return nil
 }
 
 // SetDefaultUserValue sets the default value for key, for all Users.
-func (t *TempStorage) SetDefaultUserValue(key string, val interface{}) {
+func (t *TempStorage) SetDefaultUserValue(key string, val interface{}) error {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
@@ -93,6 +96,7 @@ func (t *TempStorage) SetDefaultUserValue(key string, val interface{}) {
 	}
 
 	t.DefaultUserValues[key] = val
+	return nil
 }
 
 // GetUserValue retrieves the value for key, for a User.
@@ -123,7 +127,7 @@ func (t *TempStorage) GetUserValue(user service.User, key string) (interface{}, 
 }
 
 // SetUserValue sets the value for key, for a Guild.
-func (t *TempStorage) SetUserValue(user service.User, key string, val interface{}) {
+func (t *TempStorage) SetUserValue(user service.User, key string, val interface{}) error {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
@@ -140,6 +144,7 @@ func (t *TempStorage) SetUserValue(user service.User, key string, val interface{
 	}
 
 	t.UserValues[user.ServiceID][user.Name][key] = val
+	return nil
 }
 
 // IsAdmin returns true if ID is an admin.
@@ -157,21 +162,21 @@ func (t *TempStorage) IsAdmin(guild service.Guild, ID string) bool {
 }
 
 // SetAdmin sets a userID as an admin for a guild.
-func (t *TempStorage) SetAdmin(guild service.Guild, ID string) {
+func (t *TempStorage) SetAdmin(guild service.Guild, ID string) error {
 	if val, ok := t.GetGuildValue(guild, AdminKey); ok {
 		currentAdmins, ok := val.([]string)
 		if ok {
-			t.SetGuildValue(guild, AdminKey, append(currentAdmins, ID))
-		} else {
-			panic(ok)
+			return t.SetGuildValue(guild, AdminKey, append(currentAdmins, ID))
 		}
-	} else {
-		t.SetGuildValue(guild, AdminKey, []string{ID})
+
+		return fmt.Errorf("Error encountered for guild %s and ID %s", guild, ID)
 	}
+
+	return t.SetGuildValue(guild, AdminKey, []string{ID})
 }
 
 // UnsetAdmin removes userID as an admin for a guild.
-func (t *TempStorage) UnsetAdmin(guild service.Guild, ID string) {
+func (t *TempStorage) UnsetAdmin(guild service.Guild, ID string) error {
 	newAdmins := []string{}
 	if val, ok := t.GetGuildValue(guild, AdminKey); ok {
 		currentAdmins, ok := val.([]string)
@@ -184,11 +189,16 @@ func (t *TempStorage) UnsetAdmin(guild service.Guild, ID string) {
 			}
 		}
 	}
-	t.SetGuildValue(guild, AdminKey, newAdmins)
+	err := t.SetGuildValue(guild, AdminKey, newAdmins)
+	if err != nil {
+		panic(err)
+	}
+
+	return nil
 }
 
 // SetGlobalValue sets a value that applies to globally.
-func (t *TempStorage) SetGlobalValue(key string, value interface{}) {
+func (t *TempStorage) SetGlobalValue(key string, value interface{}) error {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
@@ -197,6 +207,7 @@ func (t *TempStorage) SetGlobalValue(key string, value interface{}) {
 	}
 
 	t.GlobalValues[key] = value
+	return nil
 }
 
 // GetGlobalValue sets a value that applies to globally.

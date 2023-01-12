@@ -83,10 +83,19 @@ func TestGobSetGetGuildValue(t *testing.T) {
 	k2 := "k2"
 	v2 := "v2"
 
-	storage.SetGuildValue(guild, k0, v0)
-	storage.SetGuildValue(guild, k1, v1)
-	storage.SetGuildValue(guild, k2, v2)
-	storage, err := LoadFromBuffer(writer)
+	err := storage.SetGuildValue(guild, k0, v0)
+	if err != nil {
+		t.Fail()
+	}
+	err = storage.SetGuildValue(guild, k1, v1)
+	if err != nil {
+		t.Fail()
+	}
+	err = storage.SetGuildValue(guild, k2, v2)
+	if err != nil {
+		t.Fail()
+	}
+	storage, err = LoadFromBuffer(writer)
 	if err != nil {
 		t.Fail()
 	}
@@ -124,10 +133,19 @@ func TestGobSetGetUserValue(t *testing.T) {
 	k2 := "k2"
 	v2 := "v2"
 
-	storage.SetUserValue(user, k0, v0)
-	storage.SetUserValue(user, k1, v1)
-	storage.SetUserValue(user, k2, v2)
-	storage, err := LoadFromBuffer(writer)
+	err := storage.SetUserValue(user, k0, v0)
+	if err != nil {
+		t.Fail()
+	}
+	err = storage.SetUserValue(user, k1, v1)
+	if err != nil {
+		t.Fail()
+	}
+	err = storage.SetUserValue(user, k2, v2)
+	if err != nil {
+		t.Fail()
+	}
+	storage, err = LoadFromBuffer(writer)
 	if err != nil {
 		t.Fail()
 	}
@@ -160,8 +178,12 @@ func TestGobSetGetDefaultUserValue(t *testing.T) {
 	k0 := "k0"
 	v0 := "v0"
 
-	storage.SetDefaultUserValue(k0, v0)
-	storage, err := LoadFromBuffer(writer)
+	err := storage.SetDefaultUserValue(k0, v0)
+	if err != nil {
+		t.Fail()
+	}
+
+	storage, err = LoadFromBuffer(writer)
 	if err != nil {
 		t.Fail()
 	}
@@ -186,8 +208,12 @@ func TestGobSetGetDefaultGuildValue(t *testing.T) {
 
 	k0 := "k0"
 	v0 := "v0"
-	storage.SetDefaultGuildValue(k0, v0)
-	storage, err := LoadFromBuffer(writer)
+	err := storage.SetDefaultGuildValue(k0, v0)
+	if err != nil {
+		t.Fail()
+	}
+
+	storage, err = LoadFromBuffer(writer)
 
 	if err != nil {
 		t.Fail()
@@ -232,8 +258,12 @@ func TestCantEncode(t *testing.T) {
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
 	key1 := "key1"
 	value := []*string{nil}
-	storage.SetGuildValue(guild, key1, value)
-	err := storage.SaveToFile()
+	err := storage.SetGuildValue(guild, key1, value)
+	if err == nil {
+		t.Fail()
+	}
+
+	err = storage.SaveToFile()
 	if err == nil {
 		t.Fail()
 	}
@@ -251,7 +281,11 @@ func TestGobGetValueMissingButHasService(t *testing.T) {
 	key1 := "key1"
 	key2 := "key2"
 	value := "value"
-	storage.SetGuildValue(guild, key1, value)
+	err := storage.SetGuildValue(guild, key1, value)
+	if err != nil {
+		t.Error(err)
+	}
+
 	_, ok := storage.GetGuildValue(guild, key2)
 	if ok {
 		t.Fail()
@@ -272,7 +306,11 @@ func TestGobGetValueDifferentGuilds(t *testing.T) {
 	key1 := "key1"
 	key2 := "key2"
 	value := "value"
-	storage.SetGuildValue(guild1, key1, value)
+	err := storage.SetGuildValue(guild1, key1, value)
+	if err != nil {
+		t.Fail()
+	}
+
 	guild2 := service.Guild{ServiceID: serviceID, GuildID: "1"}
 	_, ok := storage.GetGuildValue(guild2, key2)
 	if ok {
@@ -291,7 +329,10 @@ func TestGobSetAdmin(t *testing.T) {
 
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
 	user := "20"
-	storage.SetAdmin(guild, user)
+	err := storage.SetAdmin(guild, user)
+	if err != nil {
+		t.Fail()
+	}
 	if storage.IsAdmin(guild, user) == false {
 		t.Fail()
 	}
@@ -308,12 +349,20 @@ func TestGobUnsetAdmin(t *testing.T) {
 
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
 	user := "20"
-	storage.SetAdmin(guild, user)
+	err := storage.SetAdmin(guild, user)
+	if err != nil {
+		t.Error(err)
+	}
+
 	if storage.IsAdmin(guild, user) == false {
 		t.Fail()
 	}
 
-	storage.UnsetAdmin(guild, user)
+	err = storage.UnsetAdmin(guild, user)
+	if err != nil {
+		t.Error(err)
+	}
+
 	if storage.IsAdmin(guild, user) {
 		t.Fail()
 	}
@@ -331,13 +380,22 @@ func TestGobUnsetAdminWhenMultipleAdmins(t *testing.T) {
 	guild := service.Guild{ServiceID: "0", GuildID: "0"}
 	user1 := "20"
 	user2 := "21"
-	storage.SetAdmin(guild, user1)
-	storage.SetAdmin(guild, user2)
+	err := storage.SetAdmin(guild, user1)
+	if err != nil {
+		t.Error(err)
+	}
+	err = storage.SetAdmin(guild, user2)
+	if err != nil {
+		t.Error(err)
+	}
 	if storage.IsAdmin(guild, user1) == false || storage.IsAdmin(guild, user2) == false {
 		t.Fail()
 	}
 
-	storage.UnsetAdmin(guild, user1)
+	err = storage.UnsetAdmin(guild, user1)
+	if err != nil {
+		t.Fail()
+	}
 
 	if storage.IsAdmin(guild, user1) {
 		t.Fail()
@@ -361,7 +419,11 @@ func TestGobSetAdminDifferentGuilds(t *testing.T) {
 	guild2 := service.Guild{ServiceID: serviceID, GuildID: "1"}
 	user := "20"
 
-	storage.SetAdmin(guild1, user)
+	err := storage.SetAdmin(guild1, user)
+	if err != nil {
+		t.Error(err)
+	}
+
 	if storage.IsAdmin(guild1, user) == false {
 		t.Fail()
 	}
@@ -370,7 +432,11 @@ func TestGobSetAdminDifferentGuilds(t *testing.T) {
 		t.Fail()
 	}
 
-	storage.SetAdmin(guild2, user)
+	err = storage.SetAdmin(guild2, user)
+	if err != nil {
+		t.Error(err)
+	}
+
 	if storage.IsAdmin(guild2, user) == false {
 		t.Fail()
 	}
@@ -478,8 +544,12 @@ func TestGobTypeChange(t *testing.T) {
 	user := service.User{ServiceID: "0", Name: "0"}
 	k0 := "k0"
 	var v0 int64 = 1000000000000000000
-	storage.SetUserValue(user, k0, v0)
-	storage, err := LoadFromBuffer(writer)
+	err := storage.SetUserValue(user, k0, v0)
+	if err != nil {
+		t.Error(err)
+	}
+
+	storage, err = LoadFromBuffer(writer)
 	if err != nil {
 		t.Fail()
 	}
@@ -515,7 +585,7 @@ func TestGobGetGlobalValueBeforeSet(t *testing.T) {
 	}
 }
 
-func TestGobGetGlobalValueSetandGet(t *testing.T) {
+func TestGobGetGlobalValueSetandGet(t *testing.T) error {
 	bytesOut := bytes.NewBuffer([]byte{})
 	writer := TruncatableBuffer{bytesOut}
 	storage := GobStorage{
@@ -526,13 +596,16 @@ func TestGobGetGlobalValueSetandGet(t *testing.T) {
 
 	key := "key"
 	value := "value"
-	storage.SetGlobalValue(key, value)
+	err := storage.SetGlobalValue(key, value)
+	if err != nil {
+		return err
+	}
 	result, ok := storage.GetGlobalValue(key)
 	if !ok || value != result {
 		t.Fail()
 	}
 
-	storage, err := LoadFromBuffer(writer)
+	storage, err = LoadFromBuffer(writer)
 	if err != nil {
 		t.Fail()
 	}
@@ -540,4 +613,5 @@ func TestGobGetGlobalValueSetandGet(t *testing.T) {
 	if !ok || value != result {
 		t.Fail()
 	}
+	return nil
 }

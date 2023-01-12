@@ -27,7 +27,6 @@ func main() {
 
 	exampleDir := "example"
 	if len(os.Args) == 1 {
-		config.MakeExampleDir(exampleDir)
 		log.Panicf("missing argument")
 	}
 
@@ -42,11 +41,17 @@ func main() {
 		panic(err)
 	}
 	prefix := "!"
-	storage.SetDefaultGuildValue("prefix", prefix)
+	err = storage.SetDefaultGuildValue("prefix", prefix)
+	if err != nil {
+		log.Panicf("An error occurred when setting the default guild value prefix. %s", err)
+	}
 
 	commands, err := config.ConfiguredBot(folder, &storage)
 	if err != nil {
-		config.MakeExampleDir(exampleDir)
+		err = config.MakeExampleDir(exampleDir)
+		if err != nil {
+			log.Panicf("An error occurred when loading the configuration files, and also when creating an example: %s", err)
+		}
 		log.Panicf("An error occurred when loading the configuration files: %s", err)
 	}
 
@@ -68,7 +73,11 @@ func main() {
 		discordSubject.Register(commands[i])
 	}
 
-	discordSubject.Load()
+	err = discordSubject.Load()
+	if err != nil {
+		log.Fatalf("Unable to load DiscordSubject, exiting. Err: %s", err)
+	}
+
 	discordSubject.UnloadUselessCommands()
 
 	err = discord.UpdateGameStatus(0, "/help")
@@ -79,7 +88,7 @@ func main() {
 	log.Println("bot has loaded")
 
 	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, syscall.SIGTERM)
 	<-sc
 }
 
