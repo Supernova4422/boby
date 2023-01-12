@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/gob"
+	"io"
 	"os"
 	"os/signal"
 	"path"
@@ -23,7 +24,7 @@ func main() {
 		log.Fatalf("error opening file: %v", err)
 	}
 	defer f.Close()
-	log.SetOutput(io.MultiWriter(os.Stdout, logFile))
+	log.SetOutput(io.MultiWriter(os.Stdout, f))
 
 	exampleDir := "example"
 	if len(os.Args) == 1 {
