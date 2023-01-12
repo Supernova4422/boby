@@ -59,8 +59,8 @@ func GetTestInputs(filepath string) ([]ConfigTest, error) {
 		return configTests, nil
 	}
 
-	json.Unmarshal(bytes, &configTests)
-	return configTests, nil
+	err = json.Unmarshal(bytes, &configTests)
+	return configTests, err
 }
 
 func TestConfig(t *testing.T) {
@@ -76,7 +76,13 @@ func TestConfig(t *testing.T) {
 			tempStorage := storage.GetTempStorage()
 			var _storage storage.Storage = &tempStorage
 			commands, err := config.ConfiguredBot(configDir, &_storage)
-			_storage.SetDefaultGuildValue("prefix", "!")
+			if err != nil {
+				t.Fail()
+			}
+			err = _storage.SetDefaultGuildValue("prefix", "!")
+			if err != nil {
+				t.Fail()
+			}
 
 			if err == nil {
 				demoService := demoservice.DemoService{
@@ -94,7 +100,10 @@ func TestConfig(t *testing.T) {
 					for _, commandParameter := range commands[i].Parameters {
 						types = append(types, commandParameter.Type)
 					}
-					demoService.Register(commands[i].Trigger, types, commands[i].Exec, commands[i].RouteByID)
+					err := demoService.Register(commands[i].Trigger, types, commands[i].Exec, commands[i].RouteByID)
+					if err != nil {
+						t.Fail()
+					}
 				}
 
 				inputTest, _ := GetTestInputs(inputFp)
@@ -105,7 +114,6 @@ func TestConfig(t *testing.T) {
 				}
 
 				testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
-				results := make([]service.Message, 0)
 				for _, input := range inputTest {
 					demoService.AddMessage(testConversation, testSender, input.Input)
 					demoService.Run()
@@ -115,7 +123,6 @@ func TestConfig(t *testing.T) {
 							t.Fail()
 						} else {
 							resultMessage, _ := demoSender.PopMessage()
-							results = append(results, resultMessage)
 							if !MessageInList(resultMessage, expect) {
 								t.Errorf("Failed on msg: %s", input.Input)
 								msg, _ := json.Marshal(resultMessage)

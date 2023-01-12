@@ -76,31 +76,30 @@ func cropImage(img image.Image) image.Image {
 }
 
 // RenderText renders a message as an image then replies with the image.
-func RenderText(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+func RenderText(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) error {
 	if len(msg) == 0 {
-		return
+		return nil
 	}
 
 	png, err := renderText(msg[0].(string))
 	if err != nil {
-		return
+		return err
 	}
 
 	img, _, err := image.Decode(png)
 	if err != nil {
-		return
+		return err
 	}
 
 	img = cropImage(img)
 
 	if err != nil {
-		sink(sender, service.Message{Title: "An error has occured"})
-	} else {
-		sink(
-			sender, service.Message{
-				Title: "Rendered text.",
-				Image: img,
-			},
-		)
+		return sink(sender, service.Message{Title: "An error has occured"})
 	}
+	return sink(
+		sender, service.Message{
+			Title: "Rendered text.",
+			Image: img,
+		},
+	)
 }

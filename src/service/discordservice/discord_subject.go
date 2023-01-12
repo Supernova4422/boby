@@ -79,7 +79,7 @@ func (d *DiscordSubject) guildCreate(s *discordgo.Session, event *discordgo.Guil
 }
 
 // Load prepares this object for usage.
-func (d *DiscordSubject) Load() {
+func (d *DiscordSubject) Load() error {
 	d.discord.AddHandler(d.guildCreate)
 	d.discord.AddHandler(d.onSlashCommand)
 
@@ -93,6 +93,7 @@ func (d *DiscordSubject) Load() {
 
 	d.updateGuildCommandsForAll()
 	d.updateGuildCommands("") // Global slash commands.
+	return nil
 }
 
 // UnloadUselessCommands will unload slash commands that aren't present in the bot currently.
@@ -100,7 +101,7 @@ func (d *DiscordSubject) UnloadUselessCommands() {
 	appID := d.discord.State.User.ID
 	cmds, err := d.discord.ApplicationCommands(appID, "")
 	if err != nil {
-		panic(err)
+		d.handleError("Error when retrieving application commands", err)
 	}
 
 	for _, cmd := range cmds {
@@ -115,7 +116,7 @@ func (d *DiscordSubject) UnloadUselessCommands() {
 		if !found {
 			err := d.discord.ApplicationCommandDelete(cmd.ApplicationID, "", cmd.ID)
 			if err != nil {
-				panic(err)
+				d.handleError("Error when deleting application command", err)
 			}
 		}
 	}
@@ -221,7 +222,7 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 
 	embeds := &([]*discordgo.MessageEmbed{})
 
-	sink := func(conversation service.Conversation, msg service.Message) {
+	sink := func(conversation service.Conversation, msg service.Message) error {
 		embed := MsgToEmbed(msg)
 		embed.Footer = &discordgo.MessageEmbedFooter{Text: footerText}
 		currEmbeds := append(*embeds, &embed)
@@ -231,22 +232,39 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 			Content: &whitespace,
 			Embeds:  embeds,
 		}
-		s.InteractionResponseEdit(i.Interaction, &response)
-		if msg.Image != nil {
-			d.SendImage(msg.Image, i.ChannelID, s, &discordgo.MessageEmbed{})
+
+		_, err := s.InteractionResponseEdit(i.Interaction, &response)
+		if err != nil {
+			return fmt.Errorf("Error when editing interaction %s", err)
 		}
+
+		if msg.Image != nil {
+			return d.SendImage(msg.Image, i.ChannelID, s, &discordgo.MessageEmbed{})
+		}
+
+		return nil
 	}
 
 	for j := range d.observers {
 		if d.observers[j].Trigger == target {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 			})
 
-			d.observers[j].Exec(conversation, user, input, d.storage, sink)
+			if err != nil {
+				d.handleError("Error when responding to interaction", err)
+			}
+
+			err = d.observers[j].Exec(conversation, user, input, d.storage, sink)
+			if err != nil {
+				d.handleError("Error when responding to interaction", err)
+			}
 
 			if len(*embeds) == 0 {
-				s.InteractionResponseDelete(i.Interaction)
+				err = s.InteractionResponseDelete(i.Interaction)
+				if err != nil {
+					d.handleError("Error when deleting interaction", err)
+				}
 			}
 			break
 		}
@@ -254,11 +272,11 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 }
 
 // SendImage sends an embed with an image to channelID.“
-func (d *DiscordSubject) SendImage(image image.Image, channelID string, s *discordgo.Session, embed *discordgo.MessageEmbed) {
+func (d *DiscordSubject) SendImage(image image.Image, channelID string, s *discordgo.Session, embed *discordgo.MessageEmbed) error {
 	var buffer bytes.Buffer
 	err := png.Encode(&buffer, image)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("Error when encoding png: %s", err)
 	}
 
 	filename := "filename.png"
@@ -266,7 +284,7 @@ func (d *DiscordSubject) SendImage(image image.Image, channelID string, s *disco
 		URL: "attachment://" + filename,
 	}
 
-	s.ChannelMessageSendComplex(
+	_, err = s.ChannelMessageSendComplex(
 		channelID,
 		&discordgo.MessageSend{
 			Embed: embed,
@@ -279,6 +297,12 @@ func (d *DiscordSubject) SendImage(image image.Image, channelID string, s *disco
 			},
 		},
 	)
+
+	if err != nil {
+		return fmt.Errorf("Error when sending message with image: %s", err)
+	}
+
+	return nil
 }
 
 func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
@@ -303,7 +327,7 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 		ServiceID: d.ID(),
 	}
 
-	sink := func(destination service.Conversation, msg service.Message) {
+	sink := func(destination service.Conversation, msg service.Message) error {
 		fields := make([]*discordgo.MessageEmbedField, 0)
 		for _, field := range msg.Fields {
 			value := field.Value
@@ -336,10 +360,11 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 		}
 
 		if msg.Image != nil {
-			d.SendImage(msg.Image, destination.ConversationID, s, &embed)
-		} else {
-			d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
+			return d.SendImage(msg.Image, destination.ConversationID, s, &embed)
 		}
+
+		_, err := d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
+		return fmt.Errorf("Error when sending message response: %s", err)
 	}
 
 	inputSplit := strings.Split(m.Content, " ")
@@ -366,7 +391,10 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 				return
 			}
 
-			d.observers[j].Exec(conversation, user, input, d.storage, sink)
+			err = d.observers[j].Exec(conversation, user, input, d.storage, sink)
+			if err != nil {
+				log.Printf("Error when executing message")
+			}
 		}
 	}
 }
@@ -429,7 +457,7 @@ func (d *DiscordSubject) isAdmin(s *discordgo.Session, authorID string, guildID 
 	return false
 }
 
-func (d *DiscordSubject) helpExec(conversation service.Conversation, user service.User, _ []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+func (d *DiscordSubject) helpExec(conversation service.Conversation, user service.User, _ []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) error {
 	fields := make([]service.MessageField, 0)
 	prefix, ok := (*storage).GetGuildValue(conversation.Guild(), "prefix")
 
@@ -455,11 +483,16 @@ func (d *DiscordSubject) helpExec(conversation service.Conversation, user servic
 		Value: command.Repo,
 	})
 
-	sink(
+	return sink(
 		conversation,
 		service.Message{
 			Title:  "Help",
 			Fields: fields,
 		},
 	)
+}
+
+func (d *DiscordSubject) handleError(message string, err error) {
+	log.Println(message)
+	log.Fatal(err)
 }

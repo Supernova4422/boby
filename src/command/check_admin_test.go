@@ -16,7 +16,11 @@ func TestCheckAdmin(t *testing.T) {
 	testSender := service.User{Name: "Test_User", ServiceID: demoSender.ID()}
 	guild := service.Guild{ServiceID: demoSender.ID(), GuildID: "0"}
 	userID := "0"
-	tempStorage.SetAdmin(guild, userID)
+	err := tempStorage.SetAdmin(guild, userID)
+	if err != nil {
+		t.Fail()
+	}
+
 	testConversation := service.Conversation{
 		ServiceID:      demoSender.ID(),
 		ConversationID: "0",
@@ -24,7 +28,10 @@ func TestCheckAdmin(t *testing.T) {
 		Admin:          true,
 	}
 
-	CheckAdmin(testConversation, testSender, []interface{}{userID}, &_storage, demoSender.SendMessage)
+	err = CheckAdmin(testConversation, testSender, []interface{}{userID}, &_storage, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Description != userID+" is an admin." {
@@ -47,7 +54,10 @@ func TestCheckNotAdmin(t *testing.T) {
 		Admin:          true,
 	}
 
-	CheckAdmin(testConversation, testSender, []interface{}{userID}, &_storage, demoSender.SendMessage)
+	err := CheckAdmin(testConversation, testSender, []interface{}{userID}, &_storage, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Description != userID+" is not an admin." {
 		t.Errorf("Admin should be able to unset admins")

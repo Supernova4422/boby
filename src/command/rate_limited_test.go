@@ -11,8 +11,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func Repeater(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
-	sink(sender, service.Message{Description: msg[0].(string)})
+func Repeater(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) error {
+	return sink(sender, service.Message{Description: msg[0].(string)})
 }
 
 func TestCleanHistory(t *testing.T) {
@@ -131,10 +131,13 @@ func TestRateLimitedCommand(t *testing.T) {
 	replyMsg := "Hello"
 	msg := []interface{}{replyMsg}
 
-	rateLimitedCommand.Exec(
+	err := rateLimitedCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Description != replyMsg {
@@ -142,10 +145,13 @@ func TestRateLimitedCommand(t *testing.T) {
 	}
 
 	for i := 0; i < 20; i++ {
-		rateLimitedCommand.Exec(
+		err = rateLimitedCommand.Exec(
 			testConversation, testSender,
 			msg, &_storage, demoSender.SendMessage,
 		)
+		if err != nil {
+			t.Fail()
+		}
 	}
 
 	resultMessage, _ = demoSender.PopMessage()
@@ -182,7 +188,10 @@ func TestRateLimitedCommandDisaster(t *testing.T) {
 
 	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
-	_storage.SetUserValue(testSender, rateLimitID, 0)
+	err := _storage.SetUserValue(testSender, rateLimitID, 0)
+	if err != nil {
+		t.Fail()
+	}
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
 	replyMsg := "Hello"
@@ -195,10 +204,13 @@ func TestRateLimitedCommandDisaster(t *testing.T) {
 	}()
 
 	// If this doesn't panic, the test fails.
-	rateLimitedCommand.Exec(
+	err = rateLimitedCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 }
 
 func TestRateLimitedCommandDisasterGlobal(t *testing.T) {
@@ -230,7 +242,10 @@ func TestRateLimitedCommandDisasterGlobal(t *testing.T) {
 
 	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
-	_storage.SetGlobalValue(rateLimitID, 0)
+	err := _storage.SetGlobalValue(rateLimitID, 0)
+	if err != nil {
+		t.Fail()
+	}
 
 	rateLimitedCommand := rateLimitConfig.GetRateLimitedCommand(replyCommand)
 	replyMsg := "Hello"
@@ -243,10 +258,14 @@ func TestRateLimitedCommandDisasterGlobal(t *testing.T) {
 	}()
 
 	// If this doesn't panic, the test fails.
-	rateLimitedCommand.Exec(
+	err = rateLimitedCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+
+	if err != nil {
+		t.Fail()
+	}
 }
 
 func TestRateLimitedCommandWithGobStorage(t *testing.T) {
@@ -281,10 +300,13 @@ func TestRateLimitedCommandWithGobStorage(t *testing.T) {
 	replyMsg := "Hello"
 	msg := []interface{}{replyMsg}
 
-	rateLimitedCommand.Exec(
+	err := rateLimitedCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Description != replyMsg {
@@ -292,10 +314,13 @@ func TestRateLimitedCommandWithGobStorage(t *testing.T) {
 	}
 
 	for i := 0; i < 20; i++ {
-		rateLimitedCommand.Exec(
+		err = rateLimitedCommand.Exec(
 			testConversation, testSender,
 			msg, &_storage, demoSender.SendMessage,
 		)
+		if err != nil {
+			t.Fail()
+		}
 	}
 
 	resultMessage, _ = demoSender.PopMessage()
@@ -336,10 +361,13 @@ func TestRateLimitedCommandMinute(t *testing.T) {
 	replyMsg := "Hello"
 	msg := []interface{}{replyMsg}
 
-	rateLimitedCommand.Exec(
+	err := rateLimitedCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, replyMsg) {
@@ -347,10 +375,13 @@ func TestRateLimitedCommandMinute(t *testing.T) {
 	}
 
 	for i := 0; i < 3; i++ {
-		rateLimitedCommand.Exec(
+		err = rateLimitedCommand.Exec(
 			testConversation, testSender,
 			msg, &_storage, demoSender.SendMessage,
 		)
+		if err != nil {
+			t.Fail()
+		}
 	}
 
 	resultMessage, _ = demoSender.PopMessage()
@@ -391,10 +422,13 @@ func TestRateLimitedCommandHour(t *testing.T) {
 	replyMsg := "Hello"
 	msg := []interface{}{replyMsg}
 
-	rateLimitedCommand.Exec(
+	err := rateLimitedCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Description != replyMsg {
@@ -402,10 +436,13 @@ func TestRateLimitedCommandHour(t *testing.T) {
 	}
 
 	for i := 0; i < 3; i++ {
-		rateLimitedCommand.Exec(
+		err = rateLimitedCommand.Exec(
 			testConversation, testSender,
 			msg, &_storage, demoSender.SendMessage,
 		)
+		if err != nil {
+			t.Fail()
+		}
 	}
 
 	resultMessage, _ = demoSender.PopMessage()
@@ -441,10 +478,13 @@ func TestRateLimitedUseless(t *testing.T) {
 	demoSender := demoservice.DemoSender{}
 	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
-	rateLimitedCommandInfo.Exec(
+	err := rateLimitedCommandInfo.Exec(
 		service.Conversation{}, service.User{},
 		[]interface{}{"string"}, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Title != "This command has unlimited usage." {
@@ -509,10 +549,13 @@ func TestRateLimitedCommandMultiUser(t *testing.T) {
 	replyMsg := "Hello"
 	msg := []interface{}{replyMsg}
 
-	rateLimitedCommand.Exec(
+	err := rateLimitedCommand.Exec(
 		testConversation, badSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, replyMsg) {
@@ -520,16 +563,22 @@ func TestRateLimitedCommandMultiUser(t *testing.T) {
 	}
 
 	// Hit the limit
-	rateLimitedCommand.Exec(
+	err = rateLimitedCommand.Exec(
 		testConversation, badSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	// Not limited
-	rateLimitedCommand.Exec(
+	err = rateLimitedCommand.Exec(
 		testConversation, goodSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	// Ensure spamming user fails
 	resultMessage, _ = demoSender.PopMessage()
@@ -579,10 +628,13 @@ func TestRateLimitedCommandGlobal(t *testing.T) {
 	msg := []interface{}{replyMsg}
 
 	// First message should be fine
-	rateLimitedCommand.Exec(
+	err := rateLimitedCommand.Exec(
 		testConversation, badSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, replyMsg) {
@@ -590,16 +642,22 @@ func TestRateLimitedCommandGlobal(t *testing.T) {
 	}
 
 	// Hit the limit
-	rateLimitedCommand.Exec(
+	err = rateLimitedCommand.Exec(
 		testConversation, badSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	// Not limited
-	rateLimitedCommand.Exec(
+	err = rateLimitedCommand.Exec(
 		testConversation, goodSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	// Ensure spamming user fails
 	resultMessage, _ = demoSender.PopMessage()
@@ -647,27 +705,37 @@ func TestRateLimitedInfoCommandSecond(t *testing.T) {
 	replyMsg := "Hello"
 	msg := []interface{}{replyMsg}
 
-	rateLimitedInfoCommand.Exec(
+	err := rateLimitedInfoCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
+
 	resultMessage, _ := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "0/1 per 1.00 Seconds remaining.") {
 		t.Fail()
 	}
 
 	for i := 0; i < 3; i++ {
-		rateLimitedCommand.Exec(
+		err := rateLimitedCommand.Exec(
 			testConversation, testSender,
 			msg, &_storage, demoSender.SendMessage,
 		)
+		if err != nil {
+			t.Fail()
+		}
 		demoSender.PopMessage()
 	}
 
-	rateLimitedInfoCommand.Exec(
+	err = rateLimitedInfoCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "1/1 per 1.00 Seconds remaining.") {
@@ -708,27 +776,36 @@ func TestRateLimitedInfoCommandMinute(t *testing.T) {
 	replyMsg := "Hello"
 	msg := []interface{}{replyMsg}
 
-	rateLimitedInfoCommand.Exec(
+	err := rateLimitedInfoCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 	resultMessage, _ := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "0/1 per 1.00 Minutes remaining.") {
 		t.Fail()
 	}
 
 	for i := 0; i < 3; i++ {
-		rateLimitedCommand.Exec(
+		err := rateLimitedCommand.Exec(
 			testConversation, testSender,
 			msg, &_storage, demoSender.SendMessage,
 		)
+		if err != nil {
+			t.Fail()
+		}
 		demoSender.PopMessage()
 	}
 
-	rateLimitedInfoCommand.Exec(
+	err = rateLimitedInfoCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "1/1 per 1.00 Minutes remaining.") {
@@ -769,27 +846,37 @@ func TestRateLimitedInfoCommandHour(t *testing.T) {
 	replyMsg := "Hello"
 	msg := []interface{}{replyMsg}
 
-	rateLimitedInfoCommand.Exec(
+	err := rateLimitedInfoCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
+
 	resultMessage, _ := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "0/1 per 1.00 Hours remaining.") {
 		t.Fail()
 	}
 
 	for i := 0; i < 3; i++ {
-		rateLimitedCommand.Exec(
+		err := rateLimitedCommand.Exec(
 			testConversation, testSender,
 			msg, &_storage, demoSender.SendMessage,
 		)
+		if err != nil {
+			t.Fail()
+		}
 		demoSender.PopMessage()
 	}
 
-	rateLimitedInfoCommand.Exec(
+	err = rateLimitedInfoCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "1/1 per 1.00 Hours remaining.") {
@@ -830,27 +917,36 @@ func TestRateLimitedInfoCommandDays(t *testing.T) {
 	replyMsg := "Hello"
 	msg := []interface{}{replyMsg}
 
-	rateLimitedInfoCommand.Exec(
+	err := rateLimitedInfoCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 	resultMessage, _ := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "0/1 per 1.00 Days remaining.") {
 		t.Fail()
 	}
 
 	for i := 0; i < 3; i++ {
-		rateLimitedCommand.Exec(
+		err := rateLimitedCommand.Exec(
 			testConversation, testSender,
 			msg, &_storage, demoSender.SendMessage,
 		)
+		if err != nil {
+			t.Fail()
+		}
 		demoSender.PopMessage()
 	}
 
-	rateLimitedInfoCommand.Exec(
+	err = rateLimitedInfoCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "1/1 per 1.00 Days remaining.") {
@@ -891,27 +987,37 @@ func TestRateLimitedInfoCommandSecondOld(t *testing.T) {
 	replyMsg := "Hello"
 	msg := []interface{}{replyMsg}
 
-	rateLimitedInfoCommand.Exec(
+	err := rateLimitedInfoCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
+
 	resultMessage, _ := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "0/1 per 1.00 Seconds remaining.") {
 		t.Fail()
 	}
 
 	for i := 0; i < 3; i++ {
-		rateLimitedCommand.Exec(
+		err := rateLimitedCommand.Exec(
 			testConversation, testSender,
 			msg, &_storage, demoSender.SendMessage,
 		)
+		if err != nil {
+			t.Fail()
+		}
 		demoSender.PopMessage()
 	}
 
-	rateLimitedInfoCommand.Exec(
+	err = rateLimitedInfoCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "1/1 per 1.00 Seconds remaining.") {
@@ -920,10 +1026,13 @@ func TestRateLimitedInfoCommandSecondOld(t *testing.T) {
 
 	time.Sleep(2 * time.Second)
 
-	rateLimitedInfoCommand.Exec(
+	err = rateLimitedInfoCommand.Exec(
 		testConversation, testSender,
 		msg, &_storage, demoSender.SendMessage,
 	)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, _ = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "0/1 per 1.00 Seconds remaining.") {

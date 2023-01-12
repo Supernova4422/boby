@@ -48,18 +48,17 @@ func (o *OxfordDictionaryConfig) Command() (Command, Command, error) {
 	appID := o.AppID
 	appKey := o.AppKey
 
-	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
+	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) error {
 		url := fmt.Sprintf("https://od-api.oxforddictionaries.com/api/v2/translations/%s/%s/%s?strictMatch=false", sourceLang, targetLang, url.PathEscape(msg[0].(string)))
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
 			log.Printf("Oxford API error 1: %s", err)
-			sink(
+			return sink(
 				sender,
 				service.Message{
 					Title: "An error occured processing your request",
 				},
 			)
-			return
 		}
 
 		req.Header.Set("app_id", appID)
@@ -68,32 +67,30 @@ func (o *OxfordDictionaryConfig) Command() (Command, Command, error) {
 		resp, err := client.Do(req)
 		if err != nil {
 			log.Printf("Oxford API error 2: %s", err)
-			sink(
+			return sink(
 				sender,
 				service.Message{
 					Title: "An error occured processing your request",
 				},
 			)
-			return
 		}
 
 		buf, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return
+			return err
 		}
 
 		var dict OxfordTranslateResponseStruct
 		err = json.Unmarshal(buf, &dict)
 		if err != nil {
-			return
+			return err
 		}
 		if len(dict.Results) == 0 || len(dict.Results[0].LexicalEntries) == 0 {
-			sink(sender, service.Message{
+			return sink(sender, service.Message{
 				Title:       "Unable to find word",
 				Description: "Please check the spelling, and try again.",
 				URL:         "https://languages.oup.com/",
 			})
-			return
 		}
 
 		results := []string{}
@@ -125,7 +122,7 @@ func (o *OxfordDictionaryConfig) Command() (Command, Command, error) {
 			val += resultsEntry + "; "
 		}
 
-		sink(sender, service.Message{
+		return sink(sender, service.Message{
 			Title:       "Translation: " + msg[0].(string),
 			Description: val,
 			URL:         "https://languages.oup.com/",

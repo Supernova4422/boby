@@ -114,7 +114,10 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
@@ -130,7 +133,11 @@ func TestGoQueryScraperWithCapture(t *testing.T) {
 		t.Errorf("Sender was different!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"tables"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"tables"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
+
 	resultMessage, resultConversation = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Tables Heading One") {
 		t.Errorf("Message was different!")
@@ -181,7 +188,10 @@ func TestGoQueryScraperWithMissingCapture(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
@@ -236,7 +246,10 @@ func TestGoQueryScraperWithMissingCaptureAndErrorURL(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
@@ -294,7 +307,10 @@ func TestGoQueryScraperWithSuffix(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
@@ -314,7 +330,11 @@ func TestGoQueryScraperWithSuffix(t *testing.T) {
 		t.Errorf("Sender was different!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"tables"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"tables"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
+
 	resultMessage, resultConversation = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Tables Heading One") {
 		t.Errorf("Message was different!")
@@ -366,7 +386,10 @@ func TestGoQueryScraperWithReplacement(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
@@ -382,7 +405,11 @@ func TestGoQueryScraperWithReplacement(t *testing.T) {
 		t.Errorf("Sender was different!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"tables"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"tables"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
+
 	resultMessage, resultConversation = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Tables Heading One") {
 		t.Errorf("Message was different!")
@@ -436,7 +463,10 @@ func TestGoQueryScraperWithFullReplacementOnMissing(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
@@ -452,7 +482,11 @@ func TestGoQueryScraperWithFullReplacementOnMissing(t *testing.T) {
 		t.Errorf("Sender was different!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"tables"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"tables"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
+
 	resultMessage, resultConversation = demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Tables Heading One") {
 		t.Errorf("Message was different!")
@@ -503,7 +537,10 @@ func TestGoQueryScraperWithOneCapture(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
@@ -574,7 +611,10 @@ func TestGoQueryScraperFieldsExtraHideURL(t *testing.T) {
 		t.Fail()
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
@@ -678,7 +718,10 @@ func TestGoQueryScraperFields(t *testing.T) {
 		t.Fail()
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
@@ -756,7 +799,10 @@ func TestGoQueryScraperWithCaptureAndNoTitleCapture(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Title != config.TitleSelector.Template {
@@ -807,7 +853,10 @@ func TestGoQueryScraperNoCaptureMissingSub(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Title != "Title: " {
@@ -858,7 +907,10 @@ func TestGoQueryScrapeEscapeUrl(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"example space"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"example space"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.URL != "example%20space" {
@@ -907,7 +959,10 @@ func TestGoQueryScraperNoCapture(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Heading One") {
@@ -956,7 +1011,10 @@ func TestLast(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Last Heading One") {
@@ -1005,7 +1063,10 @@ func TestHtml(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "Last Heading One") {
@@ -1055,7 +1116,10 @@ func TestGoQueryScraperUnusedCapture(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{""}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{""}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if resultMessage.Description != "An error occurred retrieving the webpage." {
@@ -1135,7 +1199,10 @@ func TestGoqueryScraperNoSubstitutions(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "An error occurred when building the url.") {
@@ -1167,7 +1234,10 @@ func TestEmptyPage(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{""}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{""}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "No result was found for") {
@@ -1204,7 +1274,10 @@ func TestEmptyPageTestSuffixWhenEmptyURL(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{""}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{""}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
@@ -1257,7 +1330,10 @@ func TestInvalidReader(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{""}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{""}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 	if !strings.HasPrefix(resultMessage.Description, "An error occurred when processing") {
@@ -1306,7 +1382,10 @@ func TestGoQueryScraperWithCaptureHideUrl(t *testing.T) {
 		t.Errorf("An error occurred when making a reasonable scraper!")
 	}
 
-	scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	err = scraper.Exec(testConversation, testSender, []interface{}{"usual"}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 
 	resultMessage, resultConversation := demoSender.PopMessage()
 
