@@ -8,11 +8,11 @@ import (
 
 // A Command is how a User interacts with a bot.
 type Command struct {
-	Trigger    string                                                                                                                 // Messages starting with Trigger are processed by this Command.
-	Parameters []Parameter                                                                                                            // What text to capture following a trigger.
-	Help       string                                                                                                                 // What this command does.
-	HelpInput  string                                                                                                                 // Arguments following the trigger.
-	Exec       func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message)) // The command's processing. The last parameter sends a reply, and is expected to be used at least once (if the command is unsuccessful, report an error).
+	Trigger    string                                                                                                                             // Messages starting with Trigger are processed by this Command.
+	Parameters []Parameter                                                                                                                        // What text to capture following a trigger.
+	Help       string                                                                                                                             // What this command does.
+	HelpInput  string                                                                                                                             // Arguments following the trigger.
+	Exec       func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message) error) error // The command's processing. The last parameter sends a reply, and is expected to be used at least once (if the command is unsuccessful, report an error).
 	observers  []service.Sender
 }
 
@@ -30,10 +30,14 @@ func (c *Command) AddSender(sender service.Sender) {
 
 // RouteByID routes a message to an observer of this Bot with the same ID() as
 // conversation.ServiceID.
-func (c *Command) RouteByID(conversation service.Conversation, msg service.Message) {
+func (c *Command) RouteByID(conversation service.Conversation, msg service.Message) error {
 	for _, observer := range c.observers {
 		if observer.ID() == conversation.ServiceID {
-			observer.SendMessage(conversation, msg)
+			err := observer.SendMessage(conversation, msg)
+			if err != nil {
+				return err
+			}
 		}
 	}
+	return nil
 }

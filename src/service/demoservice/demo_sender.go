@@ -17,11 +17,12 @@ type DemoSender struct {
 }
 
 // SendMessage saves messages to this object that can be retrieved using PopMessage.
-func (d *DemoSender) SendMessage(destination service.Conversation, message service.Message) {
+func (d *DemoSender) SendMessage(destination service.Conversation, message service.Message) error {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 	d.messages = append(d.messages, message)
 	d.conversations = append(d.conversations, destination)
+	return nil
 }
 
 // IsEmpty returns true if there are no more messages to receive.

@@ -30,7 +30,11 @@ func MakeExampleDir(dir string) error {
 		command.Repo)
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		os.Mkdir(dir, 0755)
+		err = os.Mkdir(dir, 0755)
+		if err != nil {
+			log.Printf("There was an error creating the folder. Example configuration files will not be created.")
+			return err
+		}
 	} else {
 		log.Printf("\nThe folder \"%s\" already exists, example configuration files will not be created.", dir)
 		return err
@@ -112,7 +116,10 @@ func MakeExampleDir(dir string) error {
 
 	if file, err := os.Create(path.Join(dir, jsonFilepath)); err == nil {
 		if bytes, err := json.MarshalIndent(jsonGetters, "", "    "); err == nil {
-			file.Write(bytes)
+			_, err = file.Write(bytes)
+			if err != nil {
+				return err
+			}
 		} else {
 			return err
 		}
@@ -122,7 +129,10 @@ func MakeExampleDir(dir string) error {
 
 	if file, err := os.Create(path.Join(dir, regexpFilepath)); err == nil {
 		if bytes, err := json.MarshalIndent(regexpGetters, "", "    "); err == nil {
-			file.Write(bytes)
+			_, err = file.Write(bytes)
+			if err != nil {
+				return err
+			}
 		} else {
 			return err
 		}
@@ -132,7 +142,10 @@ func MakeExampleDir(dir string) error {
 
 	if file, err := os.Create(path.Join(dir, goqueryFilepath)); err == nil {
 		if bytes, err := json.MarshalIndent(goqueryGetters, "", "    "); err == nil {
-			file.Write(bytes)
+			_, err = file.Write(bytes)
+			if err != nil {
+				return err
+			}
 		} else {
 			return err
 		}

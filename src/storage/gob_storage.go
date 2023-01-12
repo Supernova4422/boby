@@ -68,19 +68,26 @@ func (g *GobStorage) GetGuildValue(guild service.Guild, key string) (interface{}
 }
 
 // SetGuildValue sets the value for key, for a Guild.
-func (g *GobStorage) SetGuildValue(guild service.Guild, key string, value interface{}) {
+func (g *GobStorage) SetGuildValue(guild service.Guild, key string, value interface{}) error {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
-	g.TempStorage.SetGuildValue(guild, key, value)
-	g.SaveToFile()
+	err := g.TempStorage.SetGuildValue(guild, key, value)
+	if err != nil {
+		return err
+	}
+	return g.SaveToFile()
 }
 
 // SetDefaultGuildValue sets the default value for key, for all Guilds.
-func (g *GobStorage) SetDefaultGuildValue(key string, value interface{}) {
+func (g *GobStorage) SetDefaultGuildValue(key string, value interface{}) error {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
-	g.TempStorage.SetDefaultGuildValue(key, value)
-	g.SaveToFile()
+	err := g.TempStorage.SetDefaultGuildValue(key, value)
+	if err != nil {
+		return err
+	}
+
+	return g.SaveToFile()
 }
 
 // GetUserValue retrieves the value for key, for a User.
@@ -92,19 +99,27 @@ func (g *GobStorage) GetUserValue(user service.User, key string) (interface{}, b
 }
 
 // SetUserValue sets the value for key, for a User.
-func (g *GobStorage) SetUserValue(user service.User, key string, val interface{}) {
+func (g *GobStorage) SetUserValue(user service.User, key string, val interface{}) error {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
-	g.TempStorage.SetUserValue(user, key, val)
-	g.SaveToFile()
+	err := g.TempStorage.SetUserValue(user, key, val)
+	if err != nil {
+		return err
+	}
+
+	return g.SaveToFile()
 }
 
 // SetDefaultUserValue sets the default value for key, for all Users.
-func (g *GobStorage) SetDefaultUserValue(key string, val interface{}) {
+func (g *GobStorage) SetDefaultUserValue(key string, val interface{}) error {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
-	g.TempStorage.SetDefaultUserValue(key, val)
-	g.SaveToFile()
+	err := g.TempStorage.SetDefaultUserValue(key, val)
+	if err != nil {
+		return err
+	}
+
+	return g.SaveToFile()
 }
 
 // IsAdmin returns true if userID has been set using SetAdmin.
@@ -115,27 +130,38 @@ func (g *GobStorage) IsAdmin(guild service.Guild, userID string) bool {
 }
 
 // SetAdmin sets a userID as an admin for a guild.
-func (g *GobStorage) SetAdmin(guild service.Guild, userID string) {
+func (g *GobStorage) SetAdmin(guild service.Guild, userID string) error {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
-	g.TempStorage.SetAdmin(guild, userID)
-	g.SaveToFile()
+	err := g.TempStorage.SetAdmin(guild, userID)
+	if err != nil {
+		return err
+	}
+	return g.SaveToFile()
 }
 
 // UnsetAdmin removes userID as an admin for a guild.
-func (g *GobStorage) UnsetAdmin(guild service.Guild, userID string) {
+func (g *GobStorage) UnsetAdmin(guild service.Guild, userID string) error {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
-	g.TempStorage.UnsetAdmin(guild, userID)
-	g.SaveToFile()
+	err := g.TempStorage.UnsetAdmin(guild, userID)
+	if err != nil {
+		return err
+	}
+
+	return g.SaveToFile()
 }
 
 // SetGlobalValue sets a value that applies to globally.
-func (g *GobStorage) SetGlobalValue(key string, value interface{}) {
+func (g *GobStorage) SetGlobalValue(key string, value interface{}) error {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
-	g.TempStorage.SetGlobalValue(key, value)
-	g.SaveToFile()
+	err := g.TempStorage.SetGlobalValue(key, value)
+	if err != nil {
+		return err
+	}
+
+	return g.SaveToFile()
 }
 
 // GetGlobalValue sets a value that applies to globally.

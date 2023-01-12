@@ -17,7 +17,11 @@ func TestIsAdmin(t *testing.T) {
 		Admin:          true,
 	}
 
-	ImAdmin(testConversation, testSender, []interface{}{}, nil, demoSender.SendMessage)
+	err := ImAdmin(testConversation, testSender, []interface{}{}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
+
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Description != "You are an admin." {
 		t.Errorf("Message was different!")
@@ -34,7 +38,10 @@ func TestIsNotAdmin(t *testing.T) {
 		Admin:          false,
 	}
 
-	ImAdmin(testConversation, testSender, []interface{}{}, nil, demoSender.SendMessage)
+	err := ImAdmin(testConversation, testSender, []interface{}{}, nil, demoSender.SendMessage)
+	if err != nil {
+		t.Fail()
+	}
 	resultMessage, _ := demoSender.PopMessage()
 	if resultMessage.Description != "You are not an admin." {
 		t.Errorf("Message was different!")

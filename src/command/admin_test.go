@@ -15,7 +15,11 @@ const prefix = ""
 func getBot() (*demoservice.DemoService, *demoservice.DemoSender, *storage.TempStorage) {
 	tempStorage := storage.GetTempStorage()
 	var _storage storage.Storage = &tempStorage
-	_storage.SetDefaultGuildValue("prefix", prefix)
+	err := _storage.SetDefaultGuildValue("prefix", prefix)
+	if err != nil {
+		panic(err)
+	}
+
 	commands := AdminCommands()
 
 	demoService := demoservice.DemoService{
@@ -31,7 +35,10 @@ func getBot() (*demoservice.DemoService, *demoservice.DemoSender, *storage.TempS
 		for _, commandParameter := range cmd.Parameters {
 			types = append(types, commandParameter.Type)
 		}
-		demoService.Register(cmd.Trigger, types, cmd.Exec, cmd.RouteByID)
+		err := demoService.Register(cmd.Trigger, types, cmd.Exec, cmd.RouteByID)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	return &demoService, &demoSender, &tempStorage

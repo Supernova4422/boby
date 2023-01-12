@@ -17,11 +17,15 @@ func TestMsgEmpty(t *testing.T) {
 		ConversationID: "0",
 	}
 
-	RenderText(
+	err := RenderText(
 		testConversation,
 		testSender,
 		[]interface{}{},
 		nil,
 		demoSender.SendMessage,
 	)
+
+	if err != nil {
+		t.Fail()
+	}
 }

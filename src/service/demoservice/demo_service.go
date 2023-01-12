@@ -16,22 +16,23 @@ type DemoService struct {
 	users         []service.User
 	conversations []service.Conversation
 
-	commands       map[string]func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message))
+	commands       map[string]func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message) error) error
 	commandTypes   map[string][]string
-	commandRouters map[string]func(service.Conversation, service.Message)
+	commandRouters map[string]func(service.Conversation, service.Message) error
 }
 
 // Register will register an observer that will receive messages.
-func (d *DemoService) Register(trigger string, commandTypes []string, exec func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message)), sink func(service.Conversation, service.Message)) {
+func (d *DemoService) Register(trigger string, commandTypes []string, exec func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message) error) error, sink func(service.Conversation, service.Message) error) error {
 	if d.commands == nil {
-		d.commands = make(map[string]func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message)))
+		d.commands = make(map[string]func(service.Conversation, service.User, []interface{}, *storage.Storage, func(service.Conversation, service.Message) error) error)
 		d.commandTypes = make(map[string][]string)
-		d.commandRouters = make(map[string]func(service.Conversation, service.Message))
+		d.commandRouters = make(map[string]func(service.Conversation, service.Message) error)
 	}
 
 	d.commands[trigger] = exec
 	d.commandTypes[trigger] = commandTypes
 	d.commandRouters[trigger] = sink
+	return nil
 }
 
 // ID returns the ID of a DemoService.
@@ -98,7 +99,10 @@ func (d *DemoService) Run() {
 			panic(err)
 		}
 
-		exec(conversation, user, input, d.Storage, router)
+		err = exec(conversation, user, input, d.Storage, router)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	d.messages = make([]string, 0)

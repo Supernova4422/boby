@@ -51,8 +51,8 @@ func (r RegexpScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Comma
 	webpageCapture := regexp.MustCompile(r.ReplyCapture)
 	titleCapture := regexp.MustCompile(r.TitleCapture)
 
-	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message)) {
-		scraper(r.URL,
+	curry := func(sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error) error {
+		return scraper(r.URL,
 			webpageCapture,
 			r.TitleTemplate,
 			titleCapture,
@@ -75,13 +75,12 @@ func (r RegexpScraperConfig) CommandWithHTMLGetter(htmlGetter HTMLGetter) (Comma
 }
 
 // scraper returns the received message
-func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate string, titleCapture *regexp.Regexp, sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message), htmlGetter HTMLGetter) {
+func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate string, titleCapture *regexp.Regexp, sender service.Conversation, user service.User, msg []interface{}, storage *storage.Storage, sink func(service.Conversation, service.Message) error, htmlGetter HTMLGetter) error {
 	substitutions := strings.Count(urlTemplate, "%s")
 	urlPage := urlTemplate
 	if substitutions > 0 {
 		if len(msg) == 0 || len(msg) < substitutions {
-			sink(sender, service.Message{Description: "An error when building the url."})
-			return
+			return sink(sender, service.Message{Description: "An error when building the url."})
 		}
 		for _, capture := range msg {
 			urlPage = fmt.Sprintf(urlPage, url.PathEscape(capture.(string)))
@@ -90,18 +89,16 @@ func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate st
 
 	_, htmlReader, err := htmlGetter(urlPage)
 	if err != nil {
-		sink(sender, service.Message{
+		return sink(sender, service.Message{
 			Description: "An error occurred retrieving the webpage.",
 			URL:         urlPage,
 		})
-		return
 	}
 
 	defer htmlReader.Close()
 	body, err := ioutil.ReadAll(htmlReader)
 	if err != nil {
-		sink(sender, service.Message{Description: "An error occurred when processing the webpage."})
-		return
+		return sink(sender, service.Message{Description: "An error occurred when processing the webpage."})
 	}
 
 	// Create a regular expression to find comments
@@ -109,8 +106,7 @@ func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate st
 	matches := webpageCapture.FindAllStringSubmatch(bodyS, -1)
 	titleMatches := titleCapture.FindAllStringSubmatch(bodyS, -1)
 	if matches == nil {
-		sink(sender, service.Message{Description: "Could not extract data from the webpage."})
-		return
+		return sink(sender, service.Message{Description: "Could not extract data from the webpage."})
 	}
 	allCaptures := make([]string, len(matches))
 	for i, captures := range matches {
@@ -133,7 +129,7 @@ func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate st
 		replyTitle = fmt.Sprintf(replyTitle, titleCaptures)
 	}
 
-	sink(sender, service.Message{
+	return sink(sender, service.Message{
 		Title:       replyTitle,
 		Description: reply,
 		URL:         urlPage,

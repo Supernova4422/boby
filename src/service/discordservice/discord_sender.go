@@ -11,9 +11,10 @@ type DiscordSender struct {
 }
 
 // SendMessage sends a message using discord.
-func (d *DiscordSender) SendMessage(destination service.Conversation, msg service.Message) {
+func (d *DiscordSender) SendMessage(destination service.Conversation, msg service.Message) error {
 	embed := MsgToEmbed(msg)
-	d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
+	_, err := d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
+	return err
 }
 
 // ID returns the identifier for this sender object.
