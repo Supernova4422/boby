@@ -393,7 +393,7 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 
 			err = d.observers[j].Exec(conversation, user, input, d.storage, sink)
 			if err != nil {
-				log.Printf("Error when executing message")
+				log.Printf("Error when executing message for command %s. Message was: %s. User was: %s in %s. Error was: %s", d.observers[j].Trigger, input, user.Name, user.ServiceID, err)
 			}
 		}
 	}
