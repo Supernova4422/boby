@@ -364,7 +364,11 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 		}
 
 		_, err := d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
-		return fmt.Errorf("Error when sending message response: %s", err)
+		if err != nil {
+			return fmt.Errorf("Error when sending message response: %s", err)
+		}
+
+		return nil
 	}
 
 	inputSplit := strings.Split(m.Content, " ")
