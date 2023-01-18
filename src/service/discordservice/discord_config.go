@@ -15,7 +15,8 @@ const ServiceID = "Discord"
 
 // DiscordConfig has data required for discord to work (e.g. Token).
 type DiscordConfig struct {
-	Token string
+	Token                      string
+	ChannelIDsToReportErrorsTo []string
 }
 
 // getConfig reads a local json file, and returns a configuration object to load discord.
@@ -87,7 +88,8 @@ func NewDiscords(filepath string) (*DiscordSubject, *DiscordSender, *discordgo.S
 	}
 
 	discordSubject := DiscordSubject{
-		discord: discord,
+		discord:                    discord,
+		channelIDsToReportErrorsTo: config.ChannelIDsToReportErrorsTo,
 	}
 
 	// Register the messageCreate func as a callback for MessageCreate events.
