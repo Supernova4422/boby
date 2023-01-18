@@ -507,7 +507,7 @@ func (d *DiscordSubject) helpExec(conversation service.Conversation, user servic
 }
 
 func (d *DiscordSubject) handleMessageError(m *discordgo.Message, event string, err error) {
-	d.handleError(m.Author.ID, m.Content, event, err)
+	d.handleError(m.Author.Username, m.Content, event, err)
 }
 
 func (d *DiscordSubject) handleInteractionError(i *discordgo.InteractionCreate, event string, err error) {
@@ -516,11 +516,11 @@ func (d *DiscordSubject) handleInteractionError(i *discordgo.InteractionCreate, 
 		inputAsString = fmt.Sprintf("%s %s", inputAsString, val.StringValue())
 	}
 
-	d.handleError(i.User.ID, inputAsString, event, err)
+	d.handleError(i.Member.User.Username, inputAsString, event, err)
 }
 
 func (d *DiscordSubject) handleError(username string, fullMessage string, event string, err error) {
-	report := fmt.Sprintf("Error when executing discord message: %s. User was: %s in %s. Error was: %s. Error occured when: ", fullMessage, username, err, event)
+	report := fmt.Sprintf("Error when executing discord message: %s. User was: %s. Error was: %s. Error occured when: %s", fullMessage, username, err, event)
 	log.Println(report)
 
 	for _, channelID := range d.channelIDsToReportErrorsTo {
