@@ -103,7 +103,6 @@ func AdminCommands() []Command {
 			Exec: UnsetAdmin,
 			Help: "Unset a role as an admin, therefore giving them usual permissions.",
 		},
-
 		{
 			Trigger: "setprefix",
 			Parameters: []Parameter{
@@ -116,6 +115,12 @@ func AdminCommands() []Command {
 			Exec:      SetPrefix,
 			Help:      "Set the prefix of all commands of this bot, for this server.",
 			HelpInput: "[word]",
+		},
+		{
+			Trigger:    "error",
+			Parameters: []Parameter{},
+			Exec:       CreateError,
+			Help:       "For testing purposes. Creates an error.",
 		},
 	}
 }

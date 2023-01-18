@@ -18,9 +18,10 @@ import (
 
 // A DiscordSubject receives messages from discord, and passes events to its observers.
 type DiscordSubject struct {
-	discord   *discordgo.Session
-	observers []command.Command
-	storage   *storage.Storage
+	discord                    *discordgo.Session
+	observers                  []command.Command
+	storage                    *storage.Storage
+	channelIDsToReportErrorsTo []string
 }
 
 // SetStorage sets an object to use for storage/retrieval purposes.
@@ -56,7 +57,7 @@ func (d *DiscordSubject) updateGuildCommands(guildID string) {
 				)
 				if err == nil {
 					found = true
-					log.Printf("Skipping already existing slash command for guild '%s': %s", guildID, err)
+					log.Printf("Skipping already existing slash command for guild '%s': %s", guildID, existingCmd.Name)
 					break
 				} else {
 					log.Printf("Error with slash command for guild '%s': %s", guildID, err)
@@ -205,7 +206,6 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 		Name:      discordUser.ID,
 		ServiceID: d.ID(),
 	}
-	input := []interface{}{}
 	nick := ""
 	if i.Member == nil {
 		nick = i.User.Username
@@ -215,6 +215,7 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 
 	target := i.ApplicationCommandData().Name
 	footerText := "Requested by " + nick + ": /" + target
+	input := []interface{}{}
 	for _, val := range i.ApplicationCommandData().Options {
 		input = append(input, val.Value)
 		footerText += " " + val.StringValue()
@@ -247,12 +248,20 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 
 	for j := range d.observers {
 		if d.observers[j].Trigger == target {
+			inputAsString := d.observers[j].Trigger
+			for _, val := range i.ApplicationCommandData().Options {
+				inputAsString = fmt.Sprintf("%s %s", inputAsString, val.StringValue())
+			}
+
+			errorMsg := fmt.Sprintf("Message was: %s. User was: %s in %s.", inputAsString, user.Name, user.ServiceID)
+
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 			})
 
 			if err != nil {
-				d.handleError("Error when responding to interaction", err)
+				fullErrorMsg := fmt.Sprintf("Error when responding to interaction. %s .%s", errorMsg, %s)
+				d.handleError("Error when responding to interaction. %s .%s", errorMsg, err)
 			}
 
 			err = d.observers[j].Exec(conversation, user, input, d.storage, sink)
@@ -496,7 +505,16 @@ func (d *DiscordSubject) helpExec(conversation service.Conversation, user servic
 	)
 }
 
-func (d *DiscordSubject) handleError(message string, err error) {
-	log.Println(message)
-	log.Fatal(err)
+func (d *DiscordSubject) handleError(remotethis string, message string, err error) {
+	report := fmt.Sprintf("%s. %s", message, err)
+	log.Println(report)
+
+	for _, channelID := range d.channelIDsToReportErrorsTo {
+		_, err := d.discord.ChannelMessageSend(channelID, report)
+		if err != nil {
+			log.Printf("Error when reporting error to channel %s: %s", channelID, report)
+		}
+	}
+
+	log.Fatal(report)
 }
