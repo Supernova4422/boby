@@ -18,9 +18,10 @@ import (
 
 // A DiscordSubject receives messages from discord, and passes events to its observers.
 type DiscordSubject struct {
-	discord   *discordgo.Session
-	observers []command.Command
-	storage   *storage.Storage
+	discord                    *discordgo.Session
+	observers                  []command.Command
+	storage                    *storage.Storage
+	channelIDsToReportErrorsTo []string
 }
 
 // SetStorage sets an object to use for storage/retrieval purposes.
@@ -56,7 +57,7 @@ func (d *DiscordSubject) updateGuildCommands(guildID string) {
 				)
 				if err == nil {
 					found = true
-					log.Printf("Skipping already existing slash command for guild '%s': %s", guildID, err)
+					log.Printf("Skipping already existing slash command for guild '%s': %s", guildID, existingCmd.Name)
 					break
 				} else {
 					log.Printf("Error with slash command for guild '%s': %s", guildID, err)
@@ -101,7 +102,7 @@ func (d *DiscordSubject) UnloadUselessCommands() {
 	appID := d.discord.State.User.ID
 	cmds, err := d.discord.ApplicationCommands(appID, "")
 	if err != nil {
-		d.handleError("Error when retrieving application commands", err)
+		log.Fatalf("Error when retrieving application commands: %s", err)
 	}
 
 	for _, cmd := range cmds {
@@ -116,7 +117,7 @@ func (d *DiscordSubject) UnloadUselessCommands() {
 		if !found {
 			err := d.discord.ApplicationCommandDelete(cmd.ApplicationID, "", cmd.ID)
 			if err != nil {
-				d.handleError("Error when deleting application command", err)
+				log.Fatalf("Error when deleting application command. %s", err)
 			}
 		}
 	}
@@ -205,7 +206,6 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 		Name:      discordUser.ID,
 		ServiceID: d.ID(),
 	}
-	input := []interface{}{}
 	nick := ""
 	if i.Member == nil {
 		nick = i.User.Username
@@ -215,6 +215,7 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 
 	target := i.ApplicationCommandData().Name
 	footerText := "Requested by " + nick + ": /" + target
+	input := []interface{}{}
 	for _, val := range i.ApplicationCommandData().Options {
 		input = append(input, val.Value)
 		footerText += " " + val.StringValue()
@@ -235,11 +236,18 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 
 		_, err := s.InteractionResponseEdit(i.Interaction, &response)
 		if err != nil {
-			return fmt.Errorf("Error when editing interaction %s", err)
+			d.handleInteractionError(i, "error when editing", err)
+			return nil
 		}
 
 		if msg.Image != nil {
-			return d.SendImage(msg.Image, i.ChannelID, s, &discordgo.MessageEmbed{})
+			err := d.SendImage(msg.Image, i.ChannelID, s, &discordgo.MessageEmbed{})
+
+			if err != nil {
+				d.handleInteractionError(i, "error when sending image", err)
+			}
+
+			return nil
 		}
 
 		return nil
@@ -252,18 +260,18 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 			})
 
 			if err != nil {
-				d.handleError("Error when responding to interaction", err)
+				d.handleInteractionError(i, "responding to interaction", err)
 			}
 
 			err = d.observers[j].Exec(conversation, user, input, d.storage, sink)
 			if err != nil {
-				d.handleError("Error when responding to interaction", err)
+				d.handleInteractionError(i, "executing command", err)
 			}
 
 			if len(*embeds) == 0 {
 				err = s.InteractionResponseDelete(i.Interaction)
 				if err != nil {
-					d.handleError("Error when deleting interaction", err)
+					d.handleInteractionError(i, "deleting interaction", err)
 				}
 			}
 			break
@@ -360,12 +368,15 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 		}
 
 		if msg.Image != nil {
-			return d.SendImage(msg.Image, destination.ConversationID, s, &embed)
+			err := d.SendImage(msg.Image, destination.ConversationID, s, &embed)
+			if err != nil {
+				d.handleMessageError(m, "error when sending image", err)
+			}
 		}
 
 		_, err := d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
 		if err != nil {
-			return fmt.Errorf("Error when sending message response: %s", err)
+			d.handleMessageError(m, "error when sending message response", err)
 		}
 
 		return nil
@@ -376,7 +387,7 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 
 	prefix, ok := (*d.storage).GetGuildValue(conversation.Guild(), "prefix")
 	if !ok {
-		log.Fatal("guild prefix was not found, nor was a default, exiting")
+		d.handleMessageError(m, "guild prefix was not found, nor was a default, exiting", nil)
 		return
 	}
 
@@ -391,13 +402,12 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 
 			input, err := service.ParseInput(parsers, inputSplit[1:], parameters)
 			if err != nil {
-				log.Printf("error when parsing input: %s", err)
-				return
+				d.handleMessageError(m, "error when parsing input", err)
 			}
 
 			err = d.observers[j].Exec(conversation, user, input, d.storage, sink)
 			if err != nil {
-				log.Printf("Error when executing message for command %s. Message was: %s. User was: %s in %s. Error was: %s", d.observers[j].Trigger, input, user.Name, user.ServiceID, err)
+				d.handleMessageError(m, "error when executing command", err)
 			}
 		}
 	}
@@ -496,7 +506,29 @@ func (d *DiscordSubject) helpExec(conversation service.Conversation, user servic
 	)
 }
 
-func (d *DiscordSubject) handleError(message string, err error) {
-	log.Println(message)
-	log.Fatal(err)
+func (d *DiscordSubject) handleMessageError(m *discordgo.Message, event string, err error) {
+	d.handleError(m.Author.Username, m.Content, event, err)
+}
+
+func (d *DiscordSubject) handleInteractionError(i *discordgo.InteractionCreate, event string, err error) {
+	inputAsString := i.ApplicationCommandData().Name
+	for _, val := range i.ApplicationCommandData().Options {
+		inputAsString = fmt.Sprintf("%s %s", inputAsString, val.StringValue())
+	}
+
+	d.handleError(i.Member.User.Username, inputAsString, event, err)
+}
+
+func (d *DiscordSubject) handleError(username string, fullMessage string, event string, err error) {
+	report := fmt.Sprintf("Error when executing discord message: %s. User was: %s. Error was: %s. Error occured when: %s", fullMessage, username, err, event)
+	log.Println(report)
+
+	for _, channelID := range d.channelIDsToReportErrorsTo {
+		_, err := d.discord.ChannelMessageSend(channelID, report)
+		if err != nil {
+			log.Printf("Error when reporting error to channel %s: %s", channelID, report)
+		}
+	}
+
+	log.Fatal(report)
 }
