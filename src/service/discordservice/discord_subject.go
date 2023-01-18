@@ -236,11 +236,18 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 
 		_, err := s.InteractionResponseEdit(i.Interaction, &response)
 		if err != nil {
-			return fmt.Errorf("Error when editing interaction %s", err)
+			d.handleInteractionError(i, "error when editing", err)
+			return nil
 		}
 
 		if msg.Image != nil {
-			return d.SendImage(msg.Image, i.ChannelID, s, &discordgo.MessageEmbed{})
+			err := d.SendImage(msg.Image, i.ChannelID, s, &discordgo.MessageEmbed{})
+
+			if err != nil {
+				d.handleInteractionError(i, "error when sending image", err)
+			}
+
+			return nil
 		}
 
 		return nil
@@ -248,31 +255,23 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 
 	for j := range d.observers {
 		if d.observers[j].Trigger == target {
-			inputAsString := d.observers[j].Trigger
-			for _, val := range i.ApplicationCommandData().Options {
-				inputAsString = fmt.Sprintf("%s %s", inputAsString, val.StringValue())
-			}
-
-			errorMsg := fmt.Sprintf("Message was: %s. User was: %s in %s.", inputAsString, user.Name, user.ServiceID)
-
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 			})
 
 			if err != nil {
-				fullErrorMsg := fmt.Sprintf("Error when responding to interaction. %s .%s", errorMsg, %s)
-				d.handleError("Error when responding to interaction. %s .%s", errorMsg, err)
+				d.handleInteractionError(i, "responding to interaction", err)
 			}
 
 			err = d.observers[j].Exec(conversation, user, input, d.storage, sink)
 			if err != nil {
-				d.handleError("Error when responding to interaction", err)
+				d.handleInteractionError(i, "executing command", err)
 			}
 
 			if len(*embeds) == 0 {
 				err = s.InteractionResponseDelete(i.Interaction)
 				if err != nil {
-					d.handleError("Error when deleting interaction", err)
+					d.handleInteractionError(i, "deleting interaction", err)
 				}
 			}
 			break
@@ -369,12 +368,15 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 		}
 
 		if msg.Image != nil {
-			return d.SendImage(msg.Image, destination.ConversationID, s, &embed)
+			err := d.SendImage(msg.Image, destination.ConversationID, s, &embed)
+			if err != nil {
+				d.handleMessageError(m, "error when sending image", err)
+			}
 		}
 
 		_, err := d.discord.ChannelMessageSendEmbed(destination.ConversationID, &embed)
 		if err != nil {
-			return fmt.Errorf("Error when sending message response: %s", err)
+			d.handleMessageError(m, "error when sending message response", err)
 		}
 
 		return nil
@@ -385,7 +387,7 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 
 	prefix, ok := (*d.storage).GetGuildValue(conversation.Guild(), "prefix")
 	if !ok {
-		log.Fatal("guild prefix was not found, nor was a default, exiting")
+		d.handleMessageError(m, "guild prefix was not found, nor was a default, exiting", nil)
 		return
 	}
 
@@ -400,13 +402,12 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 
 			input, err := service.ParseInput(parsers, inputSplit[1:], parameters)
 			if err != nil {
-				log.Printf("error when parsing input: %s", err)
-				return
+				d.handleMessageError(m, "error when parsing input", err)
 			}
 
 			err = d.observers[j].Exec(conversation, user, input, d.storage, sink)
 			if err != nil {
-				log.Printf("Error when executing message for command %s. Message was: %s. User was: %s in %s. Error was: %s", d.observers[j].Trigger, input, user.Name, user.ServiceID, err)
+				d.handleMessageError(m, "error when executing command", err)
 			}
 		}
 	}
@@ -505,8 +506,21 @@ func (d *DiscordSubject) helpExec(conversation service.Conversation, user servic
 	)
 }
 
-func (d *DiscordSubject) handleError(remotethis string, message string, err error) {
-	report := fmt.Sprintf("%s. %s", message, err)
+func (d *DiscordSubject) handleMessageError(m *discordgo.Message, event string, err error) {
+	d.handleError(m.Author.ID, m.Content, event, err)
+}
+
+func (d *DiscordSubject) handleInteractionError(i *discordgo.InteractionCreate, event string, err error) {
+	inputAsString := i.ApplicationCommandData().Name
+	for _, val := range i.ApplicationCommandData().Options {
+		inputAsString = fmt.Sprintf("%s %s", inputAsString, val.StringValue())
+	}
+
+	d.handleError(i.User.ID, inputAsString, event, err)
+}
+
+func (d *DiscordSubject) handleError(username string, fullMessage string, event string, err error) {
+	report := fmt.Sprintf("Error when executing discord message: %s. User was: %s in %s. Error was: %s. Error occured when: ", fullMessage, username, err, event)
 	log.Println(report)
 
 	for _, channelID := range d.channelIDsToReportErrorsTo {
