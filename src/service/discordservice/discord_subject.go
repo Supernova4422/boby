@@ -102,7 +102,7 @@ func (d *DiscordSubject) UnloadUselessCommands() {
 	appID := d.discord.State.User.ID
 	cmds, err := d.discord.ApplicationCommands(appID, "")
 	if err != nil {
-		d.handleError("Error when retrieving application commands", err)
+		log.Fatalf("Error when retrieving application commands: %s", err)
 	}
 
 	for _, cmd := range cmds {
@@ -117,7 +117,7 @@ func (d *DiscordSubject) UnloadUselessCommands() {
 		if !found {
 			err := d.discord.ApplicationCommandDelete(cmd.ApplicationID, "", cmd.ID)
 			if err != nil {
-				d.handleError("Error when deleting application command", err)
+				log.Fatalf("Error when deleting application command. %s", err)
 			}
 		}
 	}
