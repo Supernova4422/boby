@@ -1,4 +1,4 @@
-FROM golang:1.15
+FROM golang:1.23
 
 
 ARG binary_filename=bot
