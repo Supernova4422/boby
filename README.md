@@ -1,5 +1,5 @@
 ![Build](https://github.com/BKrajancic/boby/workflows/Build/badge.svg)
-![Coverage](https://img.shields.io/badge/Coverage-80.5%25-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-80.4%25-brightgreen)
 ![Test](https://github.com/BKrajancic/boby/workflows/Test/badge.svg)
 ![Lint](https://github.com/BKrajancic/boby/workflows/golangci-lint/badge.svg)
 ![Vet](https://github.com/BKrajancic/boby/workflows/Vet/badge.svg)
