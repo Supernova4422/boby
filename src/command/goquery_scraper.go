@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"strings"
-	"time"
 
 	"math"
 	"net/url"
