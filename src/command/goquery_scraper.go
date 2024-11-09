@@ -79,7 +79,6 @@ func (s SelectorCapture) selectorCaptureToString(doc goquery.Document) (string, 
 	var index int = 0
 	if maxLength > 0 {
 		if s.HandleMultiple == "Random" {
-			rand.Seed(time.Now().UnixNano())
 			index = int(rand.Int63n(maxLength))
 		} else if s.HandleMultiple == "Last" {
 			index = int(maxLength)
