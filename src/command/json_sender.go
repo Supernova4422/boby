@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/url"
 	"strings"
 	"time"
@@ -195,7 +194,7 @@ func (j JSONGetterConfig) jsonGetterFunc(sender service.Conversation, user servi
 
 	if jsonReader, err := jsonGetter(msgURL); err == nil {
 		defer jsonReader.Close()
-		if buf, err := ioutil.ReadAll(jsonReader); err == nil {
+		if buf, err := io.ReadAll(jsonReader); err == nil {
 			dict := make(map[string]interface{})
 			if err := json.Unmarshal(buf, &dict); err == nil {
 				for _, msg := range j.MessagesFromJSON(dict) {

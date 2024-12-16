@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"strings"
 	"testing"
 
@@ -19,7 +18,7 @@ import (
 func htmlGetRemembered(content string) HTMLGetter {
 	reader := strings.NewReader(content)
 	return func(url string) (string, io.ReadCloser, error) {
-		return url, ioutil.NopCloser(reader), nil
+		return url, io.NopCloser(reader), nil
 	}
 }
 
@@ -42,10 +41,10 @@ func htmlTestPage(name string) (string, io.ReadCloser, error) {
 </html>
 `
 	if name == "usual" {
-		return name, ioutil.NopCloser(strings.NewReader(demoWebpage)), nil
+		return name, io.NopCloser(strings.NewReader(demoWebpage)), nil
 	}
 	if name == "tables" {
-		return name, ioutil.NopCloser(strings.NewReader(demoWebpageTable)), nil
+		return name, io.NopCloser(strings.NewReader(demoWebpageTable)), nil
 	}
 	return "", nil, fmt.Errorf("error")
 }

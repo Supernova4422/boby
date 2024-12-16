@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/url"
 	"strings"
 
@@ -32,7 +31,7 @@ type RegexpScraperConfig struct {
 // If a file doesn't exist at the given filepath, an example is made in its place,
 // and an error is returned.
 func GetRegexpScraperConfigs(reader io.Reader) ([]RegexpScraperConfig, error) {
-	bytes, err := ioutil.ReadAll(reader)
+	bytes, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +95,7 @@ func scraper(urlTemplate string, webpageCapture *regexp.Regexp, titleTemplate st
 	}
 
 	defer htmlReader.Close()
-	body, err := ioutil.ReadAll(htmlReader)
+	body, err := io.ReadAll(htmlReader)
 	if err != nil {
 		return sink(sender, service.Message{Description: "An error occurred when processing the webpage."})
 	}

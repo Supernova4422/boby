@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -23,7 +22,7 @@ func loadConfig() (Config, error) {
 		return Config{}, errors.New("path to key file must be given as an argument")
 	}
 
-	content, err := ioutil.ReadFile(os.Args[1])
+	content, err := os.ReadFile(os.Args[1])
 	if err != nil {
 		return Config{}, err
 	}
@@ -96,7 +95,7 @@ func urlToString(url string) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusOK {
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
 			log.Fatal(err)
 		}

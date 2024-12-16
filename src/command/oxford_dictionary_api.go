@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -31,7 +30,7 @@ type OxfordDictionaryConfig struct {
 // GetOxfordConfigs retrieves an array of OxfordDictionaryConfig by parsing JSON from a buffer.
 // If a file doesn't exist, an example is made in its place, and an error is returned.
 func GetOxfordConfigs(reader io.Reader) ([]OxfordDictionaryConfig, error) {
-	bytes, err := ioutil.ReadAll(reader)
+	bytes, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +74,7 @@ func (o *OxfordDictionaryConfig) Command() (Command, Command, error) {
 			)
 		}
 
-		buf, err := ioutil.ReadAll(resp.Body)
+		buf, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}
