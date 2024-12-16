@@ -3,8 +3,8 @@ package config
 import (
 	"bufio"
 	"encoding/json"
-	"log"
 	"io"
+	"log"
 	"os"
 	"path"
 
