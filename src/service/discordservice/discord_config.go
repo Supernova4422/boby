@@ -3,7 +3,6 @@ package discordservice
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -48,7 +47,7 @@ func getConfig(filepath string) (*DiscordConfig, error) {
 		return nil, errors.New("did not exist")
 	}
 
-	bytes, err := ioutil.ReadFile(filepath)
+	bytes, err := os.ReadFile(filepath)
 	if err != nil {
 		log.Printf("Unable to read file: %s", filepath)
 		return nil, err

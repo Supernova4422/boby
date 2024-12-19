@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math/rand"
 	"strings"
-	"time"
 
 	"math"
 	"net/url"
@@ -79,7 +77,6 @@ func (s SelectorCapture) selectorCaptureToString(doc goquery.Document) (string, 
 	var index int = 0
 	if maxLength > 0 {
 		if s.HandleMultiple == "Random" {
-			rand.Seed(time.Now().UnixNano())
 			index = int(rand.Int63n(maxLength))
 		} else if s.HandleMultiple == "Last" {
 			index = int(maxLength)
@@ -252,7 +249,7 @@ func (g GoQueryScraperConfig) onMessage(sender service.Conversation, user servic
 // GetGoqueryScraperConfigs retrieves an array of GoQueryScraperConfig by parsing JSON from a buffer.
 // If a file doesn't exist, an example is made in its place, and an error is returned.
 func GetGoqueryScraperConfigs(reader io.Reader) ([]GoQueryScraperConfig, error) {
-	bytes, err := ioutil.ReadAll(reader)
+	bytes, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}

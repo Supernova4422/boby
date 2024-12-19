@@ -4,7 +4,6 @@ package test
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -53,7 +52,7 @@ func MessageInList(msg service.Message, list []service.Message) bool {
 
 func GetTestInputs(filepath string) ([]ConfigTest, error) {
 	var configTests []ConfigTest
-	bytes, err := ioutil.ReadFile(filepath)
+	bytes, err := os.ReadFile(filepath)
 	if err != nil {
 		log.Printf("Unable to read file: %s", filepath)
 		return configTests, nil

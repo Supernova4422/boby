@@ -3,7 +3,7 @@ package config
 import (
 	"bufio"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"path"
@@ -166,7 +166,7 @@ func ConfiguredBot(configDir string, storage *storage.Storage) ([]command.Comman
 		return commands, err
 	}
 
-	bytes, err := ioutil.ReadAll(file)
+	bytes, err := io.ReadAll(file)
 	if err != nil {
 		return commands, err
 	}

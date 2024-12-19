@@ -3,7 +3,6 @@ package command
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"strings"
 	"testing"
 
@@ -23,10 +22,10 @@ func jsonExamplesPerc(name string) (io.ReadCloser, error) {
 }`
 
 	if name == "example1" {
-		return ioutil.NopCloser(strings.NewReader(example1)), nil
+		return io.NopCloser(strings.NewReader(example1)), nil
 	}
 	if name == "example2" {
-		return ioutil.NopCloser(strings.NewReader(example2)), nil
+		return io.NopCloser(strings.NewReader(example2)), nil
 	}
 	return nil, fmt.Errorf("error")
 }
@@ -43,10 +42,10 @@ func jsonExamples(name string) (io.ReadCloser, error) {
 }`
 
 	if name == "example1" {
-		return ioutil.NopCloser(strings.NewReader(example1)), nil
+		return io.NopCloser(strings.NewReader(example1)), nil
 	}
 	if name == "example2" {
-		return ioutil.NopCloser(strings.NewReader(example2)), nil
+		return io.NopCloser(strings.NewReader(example2)), nil
 	}
 	return nil, fmt.Errorf("error")
 }
@@ -54,7 +53,7 @@ func jsonExamples(name string) (io.ReadCloser, error) {
 // Just returns the URL.
 func jsonURLReturn(url string) (io.ReadCloser, error) {
 	json := "{ \"URL\": \"" + url + "\"}"
-	return ioutil.NopCloser(strings.NewReader(json)), nil
+	return io.NopCloser(strings.NewReader(json)), nil
 }
 
 func TestSimple(t *testing.T) {
