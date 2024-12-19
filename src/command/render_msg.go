@@ -21,7 +21,7 @@ func renderText(input string) (io.Reader, error) {
 <text x="0" y="15">%s</text>
 </svg>`
 	svg := fmt.Sprintf(template, html.EscapeString(input))
-	cmd := exec.Command("/usr/bin/inkscape", "--file=-", "--export-png=-", "--export-background=white", "--export-dpi=300")
+	cmd := exec.Command("/usr/bin/inkscape", "--pipe", "--export-type=png", "--export-background=white", "--export-dpi=300")
 	buf := new(bytes.Buffer)
 	cmd.Stdin = strings.NewReader(svg)
 	cmd.Stdout = buf

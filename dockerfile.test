@@ -1,14 +1,14 @@
-FROM golang:1.23
+FROM golang:1.23-alpine
 
 ARG project_path=/src
 
 COPY . ${project_path}
 WORKDIR ${project_path}
 
-RUN go get -d -v ./...
+RUN go get -v ./...
 RUN go install -v ./...
 
-RUN apt-get -y update
-RUN apt-get -y install inkscape
+RUN apk update
+RUN apk add inkscape
 
 CMD "go" "test" "-v" "./..." "-args" "$config_path"
