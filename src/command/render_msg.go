@@ -17,9 +17,7 @@ import (
 
 // Use inkscape to render text as an image.
 func renderText(input string) (io.Reader, error) {
-	template := `<svg height="500" width="500">
-<text x="0" y="15">%s</text>
-</svg>`
+	template := `<svg height="500" width="500"><text x="0" y="15">%s</text></svg>`
 	svg := fmt.Sprintf(template, html.EscapeString(input))
 	cmd := exec.Command("/usr/bin/inkscape", "--pipe", "--export-type=png", "--export-background=white", "--export-dpi=300")
 	buf := new(bytes.Buffer)
