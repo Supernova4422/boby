@@ -13,6 +13,7 @@ import (
 
 	"github.com/BKrajancic/boby/m/v2/src/service"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
+	"github.com/forPelevin/gomoji"
 )
 
 // Use inkscape to render text as an image.
@@ -79,6 +80,9 @@ func RenderText(sender service.Conversation, user service.User, msg []interface{
 		return nil
 	}
 
+	if gomoji.ContainsEmoji(msg[0].(string)) {
+		return sink(sender, service.Message{Title: "Sorry, emoji can't be rendered"})
+	}
 	png, err := renderText(msg[0].(string))
 	if err != nil {
 		return err
