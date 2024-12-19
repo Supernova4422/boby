@@ -1,4 +1,4 @@
-FROM golang:1.23
+FROM golang:1.23-alpine
 
 
 ARG binary_filename=bot
@@ -19,8 +19,8 @@ ENV binary_filepath ${binary_dir}/${binary_filename}
 
 RUN go build -o ${binary_filepath} ${binary_dir}
 
-RUN apt-get -y update
-RUN apt-get -y install inkscape
+RUN apk update
+RUN apk add install inkscape
 
 
 CMD $binary_filepath "$config_path"
