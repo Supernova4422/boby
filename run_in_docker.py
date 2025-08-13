@@ -17,6 +17,9 @@ if __name__ == "__main__":
         " and storage to be used by the bot. This becomes the argument that"
         " is passed to the bot when running it.")
 
+    parser.add_argument('-s', '--skipdelete',
+                    action='store_true')
+
     args = parser.parse_args()
     mount_src = args.mount.absolute()
     mount_dest = "/config"
@@ -25,11 +28,12 @@ if __name__ == "__main__":
 
     print("Deleting")
 
-    subprocess.run(
-        args=["docker", "compose", "--env-file", env_file, "down", "--rmi", "all"],
-        check=True,
-        cwd=project_path
-    )
+    if not args.skipdelete:
+        subprocess.run(
+            args=["docker", "compose", "--env-file", env_file, "down", "--rmi", "all"],
+            check=True,
+            cwd=project_path
+        )
 
     print("Running")
 

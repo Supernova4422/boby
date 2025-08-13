@@ -61,7 +61,6 @@ func (d *DiscordSubject) updateGuildCommands(guildID string) {
 				)
 				if err == nil {
 					found = true
-					log.Printf("Skipping already existing slash command for guild '%s': %s", guildID, existingCmd.Name)
 					break
 				} else {
 					log.Printf("Error with slash command for guild '%s': %s", guildID, err)
