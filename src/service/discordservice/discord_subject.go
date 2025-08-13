@@ -350,17 +350,6 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 	}
 
 	tracer := otel.Tracer("boby/discordservice")
-	ctx, span := tracer.Start(context.Background(), "MessageReceived",
-		trace.WithAttributes(
-			attribute.String("author.id", m.Author.ID),
-			attribute.String("author.username", m.Author.Username),
-			attribute.String("channel.id", m.ChannelID),
-			attribute.String("guild.id", m.GuildID),
-			attribute.String("content", m.Content),
-		),
-	)
-	defer span.End()
-
 	memberRoles := []string{}
 	if m.Member != nil {
 		memberRoles = m.Member.Roles
@@ -379,7 +368,7 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 	}
 
 	sink := func(destination service.Conversation, msg service.Message) error {
-		_, spanSend := tracer.Start(ctx, "SendMessage",
+		_, spanSend := tracer.Start(context.Background(), "SendMessage",
 			trace.WithAttributes(
 				attribute.String("destination.conversation_id", destination.ConversationID),
 				attribute.String("msg.title", msg.Title),
@@ -446,7 +435,7 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 	for j := range d.observers {
 		trigger := fmt.Sprintf("%s%s", prefix, d.observers[j].Trigger)
 		if trigger == target {
-			_, spanCmd := tracer.Start(ctx, "CommandExec",
+			_, spanCmd := tracer.Start(context.Background(), "CommandExec",
 				trace.WithAttributes(
 					attribute.String("command", d.observers[j].Trigger),
 				),
