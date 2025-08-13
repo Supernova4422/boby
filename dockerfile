@@ -22,4 +22,4 @@ RUN apk update
 RUN apk add inkscape
 
 
-CMD $binary_filepath "${CONFIG_PATH}"
+CMD $binary_filepath /config
