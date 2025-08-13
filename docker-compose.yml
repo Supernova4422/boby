@@ -15,6 +15,7 @@ services:
       - ${CONFIG_PATH}:/config
 
   logger:
+    container_name: boby-${NAME}-logger
     image: grafana/grafana
     restart: unless-stopped
     logging:
