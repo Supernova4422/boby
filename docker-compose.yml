@@ -1,0 +1,22 @@
+services:
+  boby:
+    container_name: boby-${NAME}
+    build: .
+    restart: unless-stopped
+    environment:
+      - NAME=${NAME}
+      - CONFIG_PATH=${CONFIG_PATH}
+      - OTEL_EXPORTER_OTLP_INSECURE=${OTEL_EXPORTER_OTLP_INSECURE}
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_EXPORTER_OTLP_PROTOCOL=${OTEL_EXPORTER_OTLP_PROTOCOL}
+
+    volumes:
+      - ${CONFIG_PATH}:/config
+
+  logger:
+    image: grafana/grafana
+    logging:
+      driver: loki
+      options:
+        loki-url: ${LOKI_URL}

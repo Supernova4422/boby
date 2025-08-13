@@ -4,6 +4,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/gob"
 	"io"
 	"os"
@@ -13,12 +14,28 @@ import (
 	"log"
 	"syscall"
 
+	"go.opentelemetry.io/otel"
+
 	"github.com/BKrajancic/boby/m/v2/src/config"
 	"github.com/BKrajancic/boby/m/v2/src/service/discordservice"
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 )
 
 func main() {
+	// Initialize OpenTelemetry tracing
+	ctx := context.Background()
+	shutdown, err := InitTracer(ctx, "boby")
+	if err != nil {
+		log.Fatalf("failed to initialize OpenTelemetry: %v", err)
+	}
+	defer func() {
+		if err := shutdown(ctx); err != nil {
+			log.Printf("failed to shutdown OpenTelemetry: %v", err)
+		}
+	}()
+
+	tracer := otel.Tracer("boby/main")
+	ctx, startupSpan := tracer.Start(ctx, "Startup")
 	f, err := os.OpenFile("logging.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
@@ -37,7 +54,10 @@ func main() {
 		panic(err)
 	}
 
+	// Trace storage loading
+	_, storageSpan := tracer.Start(ctx, "LoadStorage")
 	storage, err := loadGobStorage(path.Join(folder, "storage.gob"))
+	storageSpan.End()
 	if err != nil {
 		panic(err)
 	}
@@ -47,7 +67,10 @@ func main() {
 		log.Panicf("An error occurred when setting the default guild value prefix. %s", err)
 	}
 
+	// Trace config loading
+	_, configSpan := tracer.Start(ctx, "LoadConfig")
 	commands, err := config.ConfiguredBot(folder, &storage)
+	configSpan.End()
 	if err != nil {
 		err = config.MakeExampleDir(exampleDir)
 		if err != nil {
@@ -56,8 +79,11 @@ func main() {
 		log.Panicf("An error occurred when loading the configuration files: %s", err)
 	}
 
+	// Trace Discord service startup
+	_, discordSpan := tracer.Start(ctx, "StartDiscordService")
 	discordConfig := path.Join(folder, "config.json")
 	discordSubject, _, discord, err := discordservice.NewDiscords(discordConfig)
+	discordSpan.End()
 	if err != nil {
 		log.Panicf("An error occurred when loading discord: %s", err)
 	}
@@ -87,6 +113,8 @@ func main() {
 	}
 
 	log.Println("bot has loaded")
+
+	startupSpan.End()
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, syscall.SIGTERM)

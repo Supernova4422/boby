@@ -2,6 +2,7 @@ package discordservice
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"image"
 	"image/png"
@@ -9,9 +10,12 @@ import (
 	"strconv"
 	"strings"
 
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/BKrajancic/boby/m/v2/src/command"
 	"github.com/BKrajancic/boby/m/v2/src/service"
-
 	"github.com/BKrajancic/boby/m/v2/src/storage"
 	"github.com/bwmarrin/discordgo"
 )
@@ -195,6 +199,16 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 		discordUser = i.Member.User
 	}
 
+	tracer := otel.Tracer("boby/discordservice")
+	ctx, span := tracer.Start(context.Background(), "onSlashCommand",
+		trace.WithAttributes(
+			attribute.String("user.id", discordUser.ID),
+			attribute.String("guild.id", i.GuildID),
+			attribute.String("command", i.ApplicationCommandData().Name),
+		),
+	)
+	defer span.End()
+
 	conversation := service.Conversation{
 		ServiceID:      d.ID(),
 		ConversationID: i.ChannelID,
@@ -224,6 +238,15 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 	embeds := &([]*discordgo.MessageEmbed{})
 
 	sink := func(conversation service.Conversation, msg service.Message) error {
+		_, spanSend := tracer.Start(ctx, "SendMessage",
+			trace.WithAttributes(
+				attribute.String("conversation.id", conversation.ConversationID),
+				attribute.String("msg.title", msg.Title),
+				attribute.String("msg.description", msg.Description),
+			),
+		)
+		defer spanSend.End()
+
 		embed := MsgToEmbed(msg)
 		embed.Footer = &discordgo.MessageEmbedFooter{Text: footerText}
 		currEmbeds := append(*embeds, &embed)
@@ -255,10 +278,18 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 
 	for j := range d.observers {
 		if d.observers[j].Trigger == target {
+			_, spanCmd := tracer.Start(ctx, "SlashCommandExec",
+				trace.WithAttributes(
+					attribute.String("command", d.observers[j].Trigger),
+					attribute.String("user.id", user.Name),
+					attribute.String("guild.id", conversation.GuildID),
+				),
+			)
+		 	defer spanCmd.End()
+
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 			})
-
 			if err != nil {
 				d.handleInteractionError(i, "responding to interaction", err)
 			}
@@ -318,6 +349,18 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 		return
 	}
 
+	tracer := otel.Tracer("boby/discordservice")
+	ctx, span := tracer.Start(context.Background(), "MessageReceived",
+		trace.WithAttributes(
+			attribute.String("author.id", m.Author.ID),
+			attribute.String("author.username", m.Author.Username),
+			attribute.String("channel.id", m.ChannelID),
+			attribute.String("guild.id", m.GuildID),
+			attribute.String("content", m.Content),
+		),
+	)
+	defer span.End()
+
 	memberRoles := []string{}
 	if m.Member != nil {
 		memberRoles = m.Member.Roles
@@ -336,6 +379,15 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 	}
 
 	sink := func(destination service.Conversation, msg service.Message) error {
+		_, spanSend := tracer.Start(ctx, "SendMessage",
+			trace.WithAttributes(
+				attribute.String("destination.conversation_id", destination.ConversationID),
+				attribute.String("msg.title", msg.Title),
+				attribute.String("msg.description", msg.Description),
+			),
+		)
+		defer spanSend.End()
+
 		fields := make([]*discordgo.MessageEmbedField, 0)
 		for _, field := range msg.Fields {
 			value := field.Value
@@ -394,6 +446,11 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 	for j := range d.observers {
 		trigger := fmt.Sprintf("%s%s", prefix, d.observers[j].Trigger)
 		if trigger == target {
+			_, spanCmd := tracer.Start(ctx, "CommandExec",
+				trace.WithAttributes(
+					attribute.String("command", d.observers[j].Trigger),
+				),
+			)
 			parsers := parserDiscord()
 			parameters := []string{}
 			for _, parameter := range d.observers[j].Parameters {
@@ -409,6 +466,7 @@ func (d *DiscordSubject) onMessage(s *discordgo.Session, m *discordgo.Message) {
 			if err != nil {
 				d.handleMessageError(m, "error when executing command", err)
 			}
+			spanCmd.End()
 		}
 	}
 }
