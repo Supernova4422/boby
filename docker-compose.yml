@@ -16,6 +16,7 @@ services:
 
   logger:
     image: grafana/grafana
+    restart: unless-stopped
     logging:
       driver: loki
       options:
