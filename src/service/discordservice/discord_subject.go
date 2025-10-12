@@ -284,7 +284,7 @@ func (d *DiscordSubject) onSlashCommand(s *discordgo.Session, i *discordgo.Inter
 					attribute.String("guild.id", conversation.GuildID),
 				),
 			)
-		 	defer spanCmd.End()
+			defer spanCmd.End()
 
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,

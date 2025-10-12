@@ -75,8 +75,8 @@ func (j JSONGetterConfig) MessagesFromJSON(dict map[string]interface{}) (message
 
 // JSONCapture is a pair of FieldCapture to represent a title, body pair in a message.
 type JSONCapture struct {
-	Title 	    FieldCapture
-	Body  	    FieldCapture
+	Title       FieldCapture
+	Body        FieldCapture
 	URLSelector string
 }
 
@@ -97,13 +97,13 @@ func (j JSONCapture) MessageField(dict map[string]interface{}) (field service.Me
 
 	if val, ok := dict[j.URLSelector]; ok && val != "" {
 		url = val.(string)
-	} 
-	
+	}
+
 	// TODO: Temporary work around for interpreting "'", a better solution is needed.
 	field = service.MessageField{
-		Field: strings.ReplaceAll(title, "&#39;", "'"),
-		Value: strings.ReplaceAll(body, "&#39;", "'"),
-		URL: url,
+		Field:  strings.ReplaceAll(title, "&#39;", "'"),
+		Value:  strings.ReplaceAll(body, "&#39;", "'"),
+		URL:    url,
 		Inline: true,
 	}
 
