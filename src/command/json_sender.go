@@ -15,17 +15,18 @@ import (
 
 // JSONGetterConfig can be used to extract from JSON into a message.
 type JSONGetterConfig struct {
-	Trigger    string          // What a message must begin with to trigger this command.
-	Parameters []Parameter     // Capture is a regexp, that is used to capture everything following 'trigger.'
-	Message    JSONCapture     // The primary title and body of a message.
-	Fields     []JSONCapture   // A message is composed of several fields. Captures is used to make fields of a message.
-	Grouped    bool            // If true, only a single message is sent, if false each entry in .
-	URL        string          // URL to retrieve a JSON from.
-	Help       string          // Message shown when help command is used.
-	HelpInput  string          // Message shown used to explain what expected user input is following trigger.
-	Delay      int             // If grouped is false, what is the delay between each message sent.
-	Token      TokenMaker      // Often an API requires a calculated API, Token is used to help create a token and append to a URL prior to requests.
-	RateLimit  RateLimitConfig // RateLimit places a limit on how frequently a user can send messages.
+	Trigger     string          // What a message must begin with to trigger this command.
+	Parameters  []Parameter     // Capture is a regexp, that is used to capture everything following 'trigger.'
+	Message     JSONCapture     // The primary title and body of a message.
+	Fields      []JSONCapture   // A message is composed of several fields. Captures is used to make fields of a message.
+	Grouped     bool            // If true, only a single message is sent, if false each entry in .
+	URL         string          // URL to retrieve a JSON from.
+	URLSelector string          // Selector to make into the URL for the title.
+	Help        string          // Message shown when help command is used.
+	HelpInput   string          // Message shown used to explain what expected user input is following trigger.
+	Delay       int             // If grouped is false, what is the delay between each message sent.
+	Token       TokenMaker      // Often an API requires a calculated API, Token is used to help create a token and append to a URL prior to requests.
+	RateLimit   RateLimitConfig // RateLimit places a limit on how frequently a user can send messages.
 }
 
 // MessagesFromJSON accepts a dict (which usually represents a JSON) and returns a sequence of messages based on the configuration.
@@ -46,6 +47,7 @@ func (j JSONGetterConfig) MessagesFromJSON(dict map[string]interface{}) (message
 			messages = append(messages, service.Message{
 				Title:       body.Field,
 				Description: body.Value,
+				URL:         body.URL,
 				Fields:      fields,
 			})
 		}
@@ -55,6 +57,7 @@ func (j JSONGetterConfig) MessagesFromJSON(dict map[string]interface{}) (message
 				messages = append(messages, service.Message{
 					Title:       body.Field,
 					Description: body.Value,
+					URL:         body.URL,
 				})
 			}
 		}
@@ -63,6 +66,7 @@ func (j JSONGetterConfig) MessagesFromJSON(dict map[string]interface{}) (message
 			messages = append(messages, service.Message{
 				Title:       field.Field,
 				Description: field.Value,
+				URL:         field.URL,
 			})
 		}
 	}
@@ -71,8 +75,9 @@ func (j JSONGetterConfig) MessagesFromJSON(dict map[string]interface{}) (message
 
 // JSONCapture is a pair of FieldCapture to represent a title, body pair in a message.
 type JSONCapture struct {
-	Title FieldCapture
-	Body  FieldCapture
+	Title       FieldCapture
+	Body        FieldCapture
+	URLSelector string
 }
 
 // MessageField uses a dict (which is a usually a reading of a JSON file), to create a MessageField.
@@ -88,10 +93,18 @@ func (j JSONCapture) MessageField(dict map[string]interface{}) (field service.Me
 		title = j.Title.ErrorMsg
 	}
 
+	url := ""
+
+	if val, ok := dict[j.URLSelector]; ok && val != "" {
+		url = val.(string)
+	}
+
 	// TODO: Temporary work around for interpreting "'", a better solution is needed.
 	field = service.MessageField{
-		Field: strings.ReplaceAll(title, "&#39;", "'"),
-		Value: strings.ReplaceAll(body, "&#39;", "'"),
+		Field:  strings.ReplaceAll(title, "&#39;", "'"),
+		Value:  strings.ReplaceAll(body, "&#39;", "'"),
+		URL:    url,
+		Inline: true,
 	}
 
 	return field, nil
