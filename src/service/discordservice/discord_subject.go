@@ -543,13 +543,23 @@ func (d *DiscordSubject) helpExec(conversation service.Conversation, user servic
 		Value: command.Repo,
 	})
 
-	return sink(
-		conversation,
-		service.Message{
-			Title:  "Help",
-			Fields: fields,
-		},
-	)
+	const batchSize = 25
+	for i := 0; i < len(fields); i += batchSize {
+		batch := fields[i:min(i + batchSize, len(fields))]
+		err := sink(
+			conversation,
+			service.Message{
+				Title:  "Help",
+				Fields: batch,
+			},
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (d *DiscordSubject) handleMessageError(m *discordgo.Message, event string, err error) {
