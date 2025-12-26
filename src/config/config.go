@@ -13,6 +13,7 @@ import (
 	"github.com/BKrajancic/boby/m/v2/src/utils"
 )
 
+const adminConfigFilepath = "admin_config.json"
 const jsonFilepath = "json_getter_config.json"
 const regexpFilepath = "regexp_scraper_config.json"
 const goqueryFilepath = "goquery_scraper_config.json"
@@ -159,7 +160,7 @@ func MakeExampleDir(dir string) error {
 // ConfiguredBot uses files in configDir to return a bot ready for usage.
 // This bot is not attached to any storage or services.
 func ConfiguredBot(configDir string, storage *storage.Storage) ([]command.Command, error) {
-	commands := command.AdminCommands()
+	commands := []command.Command{}
 
 	file, err := os.Open(path.Join(configDir, jsonFilepath))
 	if err != nil {
@@ -241,6 +242,21 @@ func ConfiguredBot(configDir string, storage *storage.Storage) ([]command.Comman
 		}
 		commands = append(commands, oxfordCommand)
 		commands = append(commands, oxfordCommandInfo)
+	}
+
+
+
+	file, err = os.Open(path.Join(configDir, adminConfigFilepath))
+	if err != nil {
+		return commands, err
+	}
+
+	adminConfig, err := command.GetAdminConfigs(bufio.NewReader(file))
+	if err != nil {
+		return commands, err
+	}
+	if adminConfig.Enabled { 
+		commands = append(commands, command.AdminCommands()...)
 	}
 
 	// TODO: Helptext is hardcoded for discord, and is therefore a leaky abstraction.
