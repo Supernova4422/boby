@@ -545,7 +545,7 @@ func (d *DiscordSubject) helpExec(conversation service.Conversation, user servic
 
 	const batchSize = 25
 	for i := 0; i < len(fields); i += batchSize {
-		batch := fields[i:min(i + batchSize, len(fields))]
+		batch := fields[i:min(i+batchSize, len(fields))]
 		err := sink(
 			conversation,
 			service.Message{
