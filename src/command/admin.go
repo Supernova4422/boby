@@ -1,5 +1,15 @@
 package command
 
+import (
+	"encoding/json"
+	"io"
+)
+
+// Config for admin commands.
+type AdminConfig struct {
+	Enabled bool // Whether admin commands are enabled.
+}
+
 // ImAdminTrigger is a trigger to use for an ImAdmin command.
 const ImAdminTrigger = "imadmin"
 
@@ -14,6 +24,15 @@ const IsAdminTrigger = "isadmin"
 
 // Repo is a URL to this project's repository. Useful for showing with help information.
 const Repo = "https://github.com/BKrajancic/boby"
+
+func GetAdminConfigs(reader io.Reader) (AdminConfig, error) {
+	bytes, err := io.ReadAll(reader)
+	if err != nil {
+		return AdminConfig{}, err
+	}
+	var config AdminConfig
+	return config, json.Unmarshal(bytes, &config)
+}
 
 // AdminCommands returns an array of commands for handling admins.
 func AdminCommands() []Command {
