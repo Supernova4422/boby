@@ -244,8 +244,6 @@ func ConfiguredBot(configDir string, storage *storage.Storage) ([]command.Comman
 		commands = append(commands, oxfordCommandInfo)
 	}
 
-
-
 	file, err = os.Open(path.Join(configDir, adminConfigFilepath))
 	if err != nil {
 		return commands, err
@@ -255,7 +253,7 @@ func ConfiguredBot(configDir string, storage *storage.Storage) ([]command.Comman
 	if err != nil {
 		return commands, err
 	}
-	if adminConfig.Enabled { 
+	if adminConfig.Enabled {
 		commands = append(commands, command.AdminCommands()...)
 	}
 

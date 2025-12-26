@@ -27,7 +27,7 @@ const Repo = "https://github.com/BKrajancic/boby"
 
 func GetAdminConfigs(reader io.Reader) (AdminConfig, error) {
 	bytes, err := io.ReadAll(reader)
-	if err != nil { 
+	if err != nil {
 		return AdminConfig{}, err
 	}
 	var config AdminConfig
