@@ -4,3 +4,4 @@ src/main/config/**
 .devcontainer/devcontainer.json
 .vscode/launch.json
 src/main/logging.log
+.env
